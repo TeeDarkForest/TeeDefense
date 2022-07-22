@@ -1027,7 +1027,6 @@ void IGameController::CheckZombie()
 			if(Random == -1)
 				break;;
 			GameServer()->OnZombie(i, Random+1);//Create a Zombie Finally
-			GameServer()->Console()->Print(0, "game", "a zombie spawned");
 			m_Zombie[Random]--;
 		}
 	}

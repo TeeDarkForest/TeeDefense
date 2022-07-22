@@ -299,9 +299,12 @@ void CGameContext::SendEmoticon(int ClientID, int Emoticon)
 
 void CGameContext::SendWeaponPickup(int ClientID, int Weapon)
 {
-	CNetMsg_Sv_WeaponPickup Msg;
-	Msg.m_Weapon = Weapon;
-	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
+	if(!m_apPlayers[ClientID]->GetZomb())//Zombies don't pickup weapons
+    {
+        CNetMsg_Sv_WeaponPickup Msg;
+        Msg.m_Weapon = Weapon;
+        Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
+    }
 }
 
 
@@ -458,8 +461,6 @@ void CGameContext::OnTick()
 	// check tuning
 	CheckPureTuning();
 
-	m_Collision.SetTime(m_pController->GetTime());
-
 	// copy tuning
 	m_World.m_Core.m_Tuning = m_Tuning;
 	m_World.Tick();
@@ -475,7 +476,15 @@ void CGameContext::OnTick()
 			m_apPlayers[i]->PostTick();
 		}
 	}
-
+	//Zomb2 - fixing a very little bug
+	if(m_MessageReturn)
+		m_MessageReturn--;
+	if(m_MessageReturn == 1)
+	{
+		CNetMsg_Sv_Motd Msg;
+		Msg.m_pMessage = g_Config.m_SvMotd;
+		Server()->SendPackMsg(&Msg, MSGFLAG_FLUSH, -1);
+	}
 	// update voting
 	if(m_VoteCloseTime)
 	{
@@ -601,7 +610,7 @@ void CGameContext::OnClientConnected(int ClientID)
 	// Check which team the player should be on
 	const int StartTeam = g_Config.m_SvTournamentMode ? TEAM_SPECTATORS : m_pController->GetAutoTeam(ClientID);
 
-	m_apPlayers[ClientID] = new(ClientID) CPlayer(this, ClientID, StartTeam);
+	m_apPlayers[ClientID] = new(ClientID) CPlayer(this, ClientID, StartTeam, 0);
 	//players[client_id].init(client_id);
 	//players[client_id].client_id = client_id;
 
@@ -1707,33 +1716,13 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 
 	m_Layers.Init(Kernel());
 	m_Collision.Init(&m_Layers);
-
-	//Get zones
-	m_ZoneHandle_TeeWorlds = m_Collision.GetZoneHandle("teeworlds");
-
-	// reset everything here
-	//world = new GAMEWORLD;
-	//players = new CPlayer[MAX_CLIENTS];
-
-	// select gametype
-	m_pController = new CGameControllerMOD(this);
-
-	// setup core world
-	//for(int i = 0; i < MAX_CLIENTS; i++)
-	//	game.players[i].core.world = &game.world.core;
+	
+	// fly
+	m_pController = new CGameControllerMOD(this); 
 
 	// create all entities from the game layer
 	CMapItemLayerTilemap *pTileMap = m_Layers.GameLayer();
 	CTile *pTiles = (CTile *)Kernel()->RequestInterface<IMap>()->GetData(pTileMap->m_Data);
-
-
-
-
-	/*
-	num_spawn_points[0] = 0;
-	num_spawn_points[1] = 0;
-	num_spawn_points[2] = 0;
-	*/
 
 	for(int y = 0; y < pTileMap->m_Height; y++)
 	{
@@ -1743,78 +1732,8 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 
 			if(Index >= ENTITY_OFFSET)
 			{
-				vec2 Pivot(x*32.0f+16.0f, y*32.0f+16.0f);
-				vec2 P0(x*32.0f, y*32.0f);
-				vec2 P1((x+1)*32.0f, y*32.0f);
-				vec2 P2(x*32.0f, (y+1)*32.0f);
-				vec2 P3((x+1)*32.0f, (y+1)*32.0f);
-				switch(Index - ENTITY_OFFSET)
-				{
-					case ENTITY_SPAWN:
-						m_pController->OnEntity("twSpawn", Pivot, P0, P1, P2, P3, -1);
-						break;
-					case ENTITY_SPAWN_RED:
-						m_pController->OnEntity("twSpawnRed", Pivot, P0, P1, P2, P3, -1);
-						break;
-					case ENTITY_SPAWN_BLUE:
-						m_pController->OnEntity("twSpawnBlue", Pivot, P0, P1, P2, P3, -1);
-						break;
-					case ENTITY_FLAGSTAND_RED:
-						m_pController->OnEntity("twFlagStandRed", Pivot, P0, P1, P2, P3, -1);
-						break;
-					case ENTITY_FLAGSTAND_BLUE:
-						m_pController->OnEntity("twFlagStandBlue", Pivot, P0, P1, P2, P3, -1);
-						break;
-					case ENTITY_ARMOR_1:
-						m_pController->OnEntity("twArmor", Pivot, P0, P1, P2, P3, -1);
-						break;
-					case ENTITY_HEALTH_1:
-						m_pController->OnEntity("twHealth", Pivot, P0, P1, P2, P3, -1);
-						break;
-					case ENTITY_WEAPON_SHOTGUN:
-						m_pController->OnEntity("twShotgun", Pivot, P0, P1, P2, P3, -1);
-						break;
-					case ENTITY_WEAPON_GRENADE:
-						m_pController->OnEntity("twGrenade", Pivot, P0, P1, P2, P3, -1);
-						break;
-					case ENTITY_POWERUP_NINJA:
-						m_pController->OnEntity("twNinja", Pivot, P0, P1, P2, P3, -1);
-						break;
-					case ENTITY_WEAPON_RIFLE:
-						m_pController->OnEntity("twRifle", Pivot, P0, P1, P2, P3, -1);
-						break;
-				}
-			}
-		}
-	}
-
-	// create all entities from entity layers
-	if(m_Layers.EntityGroup())
-	{
-		char aLayerName[12];
-
-		const CMapItemGroup* pGroup = m_Layers.EntityGroup();
-		for(int l = 0; l < pGroup->m_NumLayers; l++)
-		{
-			CMapItemLayer *pLayer = m_Layers.GetLayer(pGroup->m_StartLayer+l);
-			if(pLayer->m_Type == LAYERTYPE_QUADS)
-			{
-				CMapItemLayerQuads *pQLayer = (CMapItemLayerQuads *)pLayer;
-
-				IntsToStr(pQLayer->m_aName, sizeof(aLayerName)/sizeof(int), aLayerName);
-
-				const CQuad *pQuads = (const CQuad *) Kernel()->RequestInterface<IMap>()->GetDataSwapped(pQLayer->m_Data);
-
-				for(int q = 0; q < pQLayer->m_NumQuads; q++)
-				{
-					vec2 P0(fx2f(pQuads[q].m_aPoints[0].x), fx2f(pQuads[q].m_aPoints[0].y));
-					vec2 P1(fx2f(pQuads[q].m_aPoints[1].x), fx2f(pQuads[q].m_aPoints[1].y));
-					vec2 P2(fx2f(pQuads[q].m_aPoints[2].x), fx2f(pQuads[q].m_aPoints[2].y));
-					vec2 P3(fx2f(pQuads[q].m_aPoints[3].x), fx2f(pQuads[q].m_aPoints[3].y));
-					vec2 Pivot(fx2f(pQuads[q].m_aPoints[4].x), fx2f(pQuads[q].m_aPoints[4].y));
-
-					m_pController->OnEntity(aLayerName, Pivot, P0, P1, P2, P3, pQuads[q].m_PosEnv);
-				}
+				vec2 Pos(x*32.0f+16.0f, y*32.0f+16.0f);
+				m_pController->OnEntity(Index-ENTITY_OFFSET, Pos);
 			}
 		}
 	}
@@ -1831,6 +1750,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	}
 #endif
 }
+
 
 void CGameContext::OnShutdown()
 {
@@ -1883,3 +1803,29 @@ const char *CGameContext::Version() { return GAME_VERSION; }
 const char *CGameContext::NetVersion() { return GAME_NETVERSION; }
 
 IGameServer *CreateGameServer() { return new CGameContext; }
+
+void CGameContext::OnZombie(int ClientID, int Zomb)
+{
+	if(ClientID >= MAX_CLIENTS) //|| //m_apPlayers[ClientID])
+			return;
+
+	m_apPlayers[ClientID] = new(ClientID) CPlayer(this, ClientID, 1, Zomb);
+	
+	m_apPlayers[ClientID]->Respawn();
+}
+
+void CGameContext::OnZombieKill(int ClientID)
+{
+	if(m_apPlayers[ClientID] && m_apPlayers[ClientID]->GetCharacter())
+		m_apPlayers[ClientID]->DeleteCharacter();
+	if(m_apPlayers[ClientID])
+		delete m_apPlayers[ClientID];
+	m_apPlayers[ClientID] = 0;
+
+	// update spectator modes
+	for(int i = 0; i < MAX_CLIENTS; ++i)
+	{
+		if(m_apPlayers[i] && m_apPlayers[i]->m_SpectatorID == ClientID)
+			m_apPlayers[i]->m_SpectatorID = SPEC_FREEVIEW;
+	}
+}

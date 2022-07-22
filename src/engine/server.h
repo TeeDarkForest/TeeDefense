@@ -17,6 +17,7 @@ protected:
 
 public:
 	class CLocalization* m_pLocalization;
+	class IStorage *m_pStorage;
 	enum
 	{
 		AUTHED_NO=0,
@@ -35,6 +36,8 @@ public:
 	};
 
 	inline class CLocalization* Localization() { return m_pLocalization; }
+
+	class IStorage *Storage() { return m_pStorage; }
 
 	int Tick() const { return m_CurrentGameTick; }
 	int TickSpeed() const { return m_TickSpeed; }

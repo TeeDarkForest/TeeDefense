@@ -113,7 +113,7 @@ public:
 		Returns:
 			bool?
 	*/
-	virtual bool OnEntity(const char* pName, vec2 Pivot, vec2 P0, vec2 P1, vec2 P2, vec2 P3, int PosEnv);
+	virtual bool OnEntity(int Index, vec2 Pos);
 
 	/*
 		Function: on_CCharacter_spawn
@@ -154,7 +154,20 @@ public:
 
 	virtual void PostReset();
 
-	double GetTime();
+	//Zomb2
+	int m_Wave;
+	int m_Zombie[13];//not sure about the amount of zombies
+	int m_ZombLeft;
+
+	void StartWave(int Wave);
+	void CheckZombie();
+	int RandZomb();
+	bool EndWave();
+	void DoZombMessage(int Which);
+	void DoLifeMessage(int Life);
+	void HandleTop();
+	void SetWaveAlg(int modulus, int wavedrittel);
+	int GetZombieReihenfolge(int wavedrittel);
 };
 
 #endif

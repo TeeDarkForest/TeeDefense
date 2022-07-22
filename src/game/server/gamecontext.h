@@ -85,12 +85,11 @@ class CGameContext : public IGameServer
 
 	bool m_Resetting;
 
+	//Zomb2
+	int m_MessageReturn;
 public:
 	int m_ChatResponseTargetID;
 	int m_ChatPrintCBIndex;
-public:
-	int m_ZoneHandle_TeeWorlds;
-
 public:
 	IServer *Server() const { return m_pServer; }
 	class IConsole *Console() { return m_pConsole; }
@@ -202,6 +201,10 @@ public:
 	virtual const char *GameType();
 	virtual const char *Version();
 	virtual const char *NetVersion();
+
+	//Zomb2
+	void OnZombie(int ClientID, int Zomb);
+	void OnZombieKill(int ClientID);
 };
 
 inline int64_t CmaskAll() { return -1LL; }

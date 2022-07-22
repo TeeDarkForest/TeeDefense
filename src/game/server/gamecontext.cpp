@@ -607,10 +607,7 @@ void CGameContext::OnClientEnter(int ClientID)
 
 void CGameContext::OnClientConnected(int ClientID)
 {
-	// Check which team the player should be on
-	const int StartTeam = g_Config.m_SvTournamentMode ? TEAM_SPECTATORS : m_pController->GetAutoTeam(ClientID);
-
-	m_apPlayers[ClientID] = new(ClientID) CPlayer(this, ClientID, StartTeam, 0);
+	m_apPlayers[ClientID] = new(ClientID) CPlayer(this, ClientID, 0, 0);
 	//players[client_id].init(client_id);
 	//players[client_id].client_id = client_id;
 
@@ -1811,7 +1808,7 @@ void CGameContext::OnZombie(int ClientID, int Zomb)
 
 	m_apPlayers[ClientID] = new(ClientID) CPlayer(this, ClientID, 1, Zomb);
 	
-	m_apPlayers[ClientID]->Respawn();
+	m_apPlayers[ClientID]->TryRespawn();
 }
 
 void CGameContext::OnZombieKill(int ClientID)

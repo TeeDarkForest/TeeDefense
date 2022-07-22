@@ -6,6 +6,7 @@ class CGameControllerMOD : public IGameController
 {
 public:
 	vec2 *m_pTeleporter;
+	int m_LastActivePlayers;
 
 	CGameControllerMOD(class CGameContext *pGameServer);
 	

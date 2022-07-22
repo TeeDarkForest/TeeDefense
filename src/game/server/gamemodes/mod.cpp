@@ -11,8 +11,10 @@ CGameControllerMOD::CGameControllerMOD(class CGameContext *pGameServer)
 {
 	m_pGameType = "TeeDefense";
 	m_GameFlags = GAMEFLAG_TEAMS;
-	
+	m_LastActivePlayers = 0;
 }
+
+
 
 int CGameControllerMOD::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon)
 {
@@ -39,5 +41,24 @@ void CGameControllerMOD::Snap(int SnappingClient)
 
 void CGameControllerMOD::Tick()
 {
+	int Players = 0;
+	for(int i = 0;i < VANILLA_MAX_CLIENTS - 1; i++)
+	{
+		if(GameServer()->m_apPlayers[Players])
+		{
+			if(GameServer()->m_apPlayers[Players]->GetTeam() == TEAM_RED)
+			{
+				Players++;
+			}
+		}
+	}
+
+	if(Players && (m_LastActivePlayers == 0))
+	{
+		StartRound();
+	}
+
+	m_LastActivePlayers = Players;
+
 	IGameController::Tick();
 }

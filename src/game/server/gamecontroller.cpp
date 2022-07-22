@@ -105,24 +105,14 @@ bool IGameController::CanSpawn(int Team, vec2 *pOutPos)
 	if(Team == TEAM_SPECTATORS)
 		return false;
 
-	if(IsTeamplay())
+	if(Team == TEAM_RED)
 	{
-		Eval.m_FriendlyTeam = Team;
-
-		// first try own team spawn, then normal spawn and then enemy
-		EvaluateSpawnType(&Eval, 1+(Team&1));
-		if(!Eval.m_Got)
-		{
-			EvaluateSpawnType(&Eval, 0);
-			// BITCH PLEASE DONT USE ENEMY SPAWN!
-			if(!Eval.m_Got)
-				EvaluateSpawnType(&Eval, 1+((Team+1)&1));
-		}
+		EvaluateSpawnType(&Eval, 0);
+		EvaluateSpawnType(&Eval, 1);
 	}
 	else
 	{
 		EvaluateSpawnType(&Eval, 0);
-		EvaluateSpawnType(&Eval, 1);
 		EvaluateSpawnType(&Eval, 2);
 	}
 
@@ -487,7 +477,7 @@ void IGameController::Tick()
 		if(!m_Warmup)
 			StartRound();
 	}
-	CheckZombie();
+	
 	if(m_GameOverTick != -1)
 	{
 		// game over.. wait for restart
@@ -515,6 +505,11 @@ void IGameController::Tick()
 		--m_UnpauseTimer;
 		if(!m_UnpauseTimer)
 			GameServer()->m_World.m_Paused = false;
+	}
+
+	if(m_GameOverTick == -1)
+	{
+		CheckZombie();
 	}
 
 	// game is Paused
@@ -1030,8 +1025,9 @@ void IGameController::CheckZombie()
 		{
 			int Random = RandZomb();
 			if(Random == -1)
-				break;
+				break;;
 			GameServer()->OnZombie(i, Random+1);//Create a Zombie Finally
+			GameServer()->Console()->Print(0, "game", "a zombie spawned");
 			m_Zombie[Random]--;
 		}
 	}

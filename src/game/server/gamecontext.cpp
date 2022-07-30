@@ -1629,6 +1629,27 @@ void CGameContext::ConLanguage(IConsole::IResult *pResult, void *pUserData)
 	return;
 }
 
+void CGameContext::ConClassPassword(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext* pThis = (CGameContext*) pUserData;
+	int ClientID = pResult->GetClientID();
+	const char *pMessage = pResult->GetString(0);
+	CPlayer *Player = pThis->m_apPlayers[ClientID];
+
+	if(str_comp(pMessage, g_Config.m_FFS) == 0)
+		Player->m_Knapsack.m_FFS = 1;
+	if(str_comp(pMessage, g_Config.m_Ninecloud) == 0)
+		Player->m_Knapsack.m_Ninecloud = 1;
+	if(str_comp(pMessage, g_Config.m_EDreemurr) == 0)
+		Player->m_Knapsack.m_EDreemurr = 1;
+	if(str_comp(pMessage, g_Config.m_Shengyan) == 0)
+		Player->m_Knapsack.m_Shengyan = 1;
+	if(str_comp(pMessage, g_Config.m_XyCloud) == 0)
+		Player->m_Knapsack.m_XyCloud = 1;
+	if(str_comp(pMessage, g_Config.m_HGDio) == 0)
+		Player->m_Knapsack.m_HGDio = 1;
+}
+
 void CGameContext::SetClientLanguage(int ClientID, const char *pLanguage)
 {
 	Server()->SetClientLanguage(ClientID, pLanguage);
@@ -1694,7 +1715,8 @@ void CGameContext::OnConsoleInit()
 	
 	Console()->Register("about", "", CFGFLAG_CHAT, ConAbout, this, "Show information about the mod");
 	Console()->Register("language", "?s", CFGFLAG_CHAT, ConLanguage, this, "change language");
-	
+	Console()->Register("classpassword", "?s", CFGFLAG_CHAT, ConClassPassword, this, "Show information about the mod");
+
 	Console()->Chain("sv_motd", ConchainSpecialMotdupdate, this);
 }
 

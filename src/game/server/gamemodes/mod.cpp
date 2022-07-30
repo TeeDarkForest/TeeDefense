@@ -9,7 +9,7 @@
 CGameControllerMOD::CGameControllerMOD(class CGameContext *pGameServer)
 : IGameController(pGameServer)
 {
-	m_pGameType = "TeeDefense";
+	m_pGameType = "TeeDefense Time";
 	m_GameFlags = GAMEFLAG_TEAMS;
 	m_LastActivePlayers = 0;
 }

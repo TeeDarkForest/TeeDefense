@@ -72,6 +72,7 @@ void CCharacterCore::Reset()
 	m_HookedPlayer = -1;
 	m_Jumped = 0;
 	m_TriggeredEvents = 0;
+	m_NowUChangeToBeBigShot = false;
 
 	//Zomb2
 	m_Zooker = false;

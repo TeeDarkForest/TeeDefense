@@ -35,6 +35,8 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team, int Zomb)
 	}
 	idMap[0] = ClientID;
 
+	if(!Zomb)
+		ResetKnapsack();
 	//Zomb2
 	m_Zomb = Zomb;
 	mem_zero(m_SubZomb, sizeof(m_SubZomb));
@@ -483,3 +485,18 @@ bool CPlayer::GetZomb(int Type)
 	return false;
 }
 
+void CPlayer::ResetKnapsack()
+{
+	m_Knapsack.m_Coal = 0;
+	m_Knapsack.m_Copper = 0;
+	m_Knapsack.m_Diamond = 0;
+	m_Knapsack.m_Gold = 0;
+	m_Knapsack.m_Iron = 0;
+	m_Knapsack.m_Log = 0;
+	for(int i = 0; i < SWORD_TYPES; i++)
+		m_Knapsack.m_Sword[i] = 0;
+	for(int i = 0; i < PICKAXE_TYPES; i++)
+		m_Knapsack.m_Pickaxe[i] = 0;
+	for(int i = 0; i < AXE_TYPES; i++)
+		m_Knapsack.m_Axe[i] = 0;
+}

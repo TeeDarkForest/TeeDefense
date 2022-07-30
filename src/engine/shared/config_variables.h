@@ -112,4 +112,14 @@ MACRO_CONFIG_INT(DbgGraphs, dbg_graphs, 0, 0, 1, CFGFLAG_CLIENT, "Performance gr
 MACRO_CONFIG_INT(DbgHitch, dbg_hitch, 0, 0, 0, CFGFLAG_SERVER, "Hitch warnings")
 MACRO_CONFIG_STR(DbgStressServer, dbg_stress_server, 32, "localhost", CFGFLAG_CLIENT, "Server to stress")
 MACRO_CONFIG_INT(DbgResizable, dbg_resizable, 0, 0, 0, CFGFLAG_CLIENT, "Enables window resizing")
+
+MACRO_CONFIG_STR(FFS, ffs_password, 32, "", CFGFLAG_SERVER, "FFS!!!!")
+MACRO_CONFIG_STR(Shengyan, sy_password, 32, "", CFGFLAG_SERVER, "SLUG!!! LMAO")
+MACRO_CONFIG_STR(Ninecloud, nc_password, 32, "", CFGFLAG_SERVER, "mean \"Ninecloud\"")
+MACRO_CONFIG_STR(EDreemurr, ed_password, 32, "", CFGFLAG_SERVER, "ED.")
+MACRO_CONFIG_STR(XyCloud, xc_password, 32, "", CFGFLAG_SERVER, "xy_cloud is a developer")
+MACRO_CONFIG_STR(HGDio, dio_password, 32, "", CFGFLAG_SERVER, "DIO!!!!!")
+
+MACRO_CONFIG_INT(SvServerInfoPerSecond, sv_server_info_per_second, 10, 1, 1000, CFGFLAG_SERVER, "Maximum number of complete server info responses that are sent out per second")
+
 #endif

@@ -212,6 +212,7 @@ public:
 	void Quantize();
 
 	bool m_Zooker;
+	bool m_NowUChangeToBeBigShot; // MOTHER!! LOOK AT ME!!! I! CAN! FLY!!!!!!!!!!!
 };
 
 #endif

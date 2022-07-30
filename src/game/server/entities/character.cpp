@@ -8,6 +8,9 @@
 #include "character.h"
 #include "laser.h"
 #include "projectile.h"
+#include "lightning.h"
+
+#define RAD 0.017453292519943295769236907684886f
 
 //input count
 struct CInputCount
@@ -346,6 +349,15 @@ void CCharacter::FireWeapon()
 				Hits++;
 			}
 
+			if(GetPlayer() && !GetPlayer()->GetZomb() && GetPlayer()->m_Knapsack.m_FFS)
+			{
+				for (int i = 0; i < 9; i++)
+				{
+					float a = frandom()*360 * RAD;
+					new CLightning(GameWorld(), m_Pos, vec2(cosf(a), sinf(a)), 50, 50, m_pPlayer->GetCID(), 2, i);
+				}
+			}
+
 			// if we Hit anything, we have to wait for the reload
 			if(Hits)
 				m_ReloadTimer = Server()->TickSpeed()/3;
@@ -589,6 +601,14 @@ void CCharacter::Tick()
 			GameServer()->GetPlayerChar(m_Core.m_HookedPlayer)->m_HitTick = Server()->Tick();
 		}
 	}
+
+	if(m_Input.m_Hook && GetPlayer()->m_Knapsack.m_XyCloud)
+	{
+		m_Core.m_NowUChangeToBeBigShot = true;
+		m_Core.m_Vel += ((normalize(vec2(m_LatestInput.m_TargetX, m_LatestInput.m_TargetY))) * max(0.001f, 1.5f));
+	}
+	else
+		m_Core.m_NowUChangeToBeBigShot = false;
 	
 	// handle death-tiles and leaving gamelayer
 	if(GameServer()->Collision()->GetCollisionAt(m_Pos.x+m_ProximityRadius/3.f, m_Pos.y-m_ProximityRadius/3.f)&CCollision::COLFLAG_DEATH ||
@@ -830,8 +850,6 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 	// check for death
 	if(m_Health <= 0)
 	{
-		Die(From, Weapon);
-
 		// set attacker's face to happy (taunt!)
 		if (From >= 0 && From != m_pPlayer->GetCID() && GameServer()->m_apPlayers[From])
 		{
@@ -1234,4 +1252,9 @@ void CCharacter::DoZombieAim(vec2 VictimPos, int VicCID, vec2 NearZombPos, int N
 	
 	if(VictimPos == vec2(0, 0) || VictimPos == m_Pos)//Reset all
 		ResetAiming();
+}
+
+int CCharacter::GetCID()
+{
+	return GetPlayer()->GetCID();
 }

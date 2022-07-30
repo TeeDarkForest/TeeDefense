@@ -7,6 +7,12 @@
 #include "entities/character.h"
 #include "gamecontext.h"
 
+enum
+{
+	SWORD_TYPES=4,
+	PICKAXE_TYPES=5,
+	AXE_TYPES=5
+};
 // player object
 class CPlayer
 {
@@ -127,6 +133,29 @@ public:
 	int GetZomb() { return m_Zomb; };
 	bool GetZomb(int Zomb);
 	
+	struct // knapsack
+	{
+		int m_Log; // Step 1
+		int m_Coal; // Step 2
+		int m_Copper; // Step 3
+		int m_Iron; // Step 4
+		int m_Gold; // Step 5
+		int m_Diamond; // 6
+
+		int m_Sword[SWORD_TYPES];
+		int m_Pickaxe[PICKAXE_TYPES];
+		int m_Axe[AXE_TYPES];
+		// Developers (Special things. XD)
+		int m_Shengyan; // This is special, he is SLUG lmao! hahahahahahah xaxaxaxaxaxaxaxaxa
+		int m_Ninecloud;
+		int m_EDreemurr;
+		int m_XyCloud;
+		int m_HGDio; // This is special one too, he is OOOOOOOOOOOOOOOO.
+		int m_Jiuyuan; // half developer (?)
+		int m_FFS; // it me, FlowerFell-Sans. lmao(why my name is soo long...)
+	} m_Knapsack;
+
+	void ResetKnapsack();
 private:
 	CCharacter *m_pCharacter;
 	CGameContext *m_pGameServer;

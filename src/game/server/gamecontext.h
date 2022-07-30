@@ -58,8 +58,6 @@ class CGameContext : public IGameServer
 
 	static void ConsoleOutputCallback_Chat(const char *pLine, void *pUser);
 
-	static void ConLanguage(IConsole::IResult *pResult, void *pUserData);
-	static void ConAbout(IConsole::IResult *pResult, void *pUserData);
 	static void ConTuneParam(IConsole::IResult *pResult, void *pUserData);
 	static void ConTuneReset(IConsole::IResult *pResult, void *pUserData);
 	static void ConTuneDump(IConsole::IResult *pResult, void *pUserData);
@@ -80,6 +78,11 @@ class CGameContext : public IGameServer
 	static void ConVote(IConsole::IResult *pResult, void *pUserData);
 	static void ConchainSpecialMotdupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
+	static void ConLanguage(IConsole::IResult *pResult, void *pUserData);
+	static void ConAbout(IConsole::IResult *pResult, void *pUserData);
+	
+	static void ConClassPassword(IConsole::IResult *pResult, void *pUserData);
+	
 	CGameContext(int Resetting);
 	void Construct(int Resetting);
 

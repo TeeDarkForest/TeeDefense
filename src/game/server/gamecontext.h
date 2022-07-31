@@ -82,6 +82,8 @@ class CGameContext : public IGameServer
 	static void ConAbout(IConsole::IResult *pResult, void *pUserData);
 	
 	static void ConClassPassword(IConsole::IResult *pResult, void *pUserData);
+	static void ConCraft(IConsole::IResult *pResult, void *pUserData);
+	static void ConAddCommandVote(IConsole::IResult *pResult, void *pUserData);
 	
 	CGameContext(int Resetting);
 	void Construct(int Resetting);

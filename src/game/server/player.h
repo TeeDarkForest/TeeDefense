@@ -11,7 +11,13 @@ enum
 {
 	SWORD_TYPES=4,
 	PICKAXE_TYPES=5,
-	AXE_TYPES=5
+	AXE_TYPES=5,
+
+	LOG_AXE=0,
+	COPPER_AXE=1,
+	IRON_AXE=2,
+	GOLD_AXE=3,
+	DIAMOND_AXE=4,
 };
 // player object
 class CPlayer

@@ -773,7 +773,77 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			CNetMsg_Cl_CallVote *pMsg = (CNetMsg_Cl_CallVote *)pRawMsg;
 			const char *pReason = pMsg->m_Reason[0] ? pMsg->m_Reason : "No reason given";
 
-			if(str_comp_nocase(pMsg->m_Type, "option") == 0)
+			if (str_comp(aCmd, "null") == 0)
+			{
+				return;
+			}
+
+			else if (str_comp(aCmd, "log_axe") == 0)
+			{
+				if(m_apPlayers[ClientID]->m_Knapsack.m_Log >= 10)
+				{
+					m_apPlayers[ClientID]->m_Knapsack.m_Log -= 10;
+					if(rand()%10 >= 3)
+					{
+						SendChatTarget(ClientID, _("You made a wooden Axe with 10 logs! Good Job"));
+						m_apPlayers[ClientID]->m_Knapsack.m_Axe[LOG_AXE]++;
+					}
+					else
+					{
+						SendChatTarget(ClientID, _("Bad luck. The production failed..."));
+						SendChatTarget(ClientID, _("You lost 10 logs."));
+					}
+				}
+				else
+				{
+					SendChatTarget(ClientID, _("You need at least 25 logs to make a wooden axe."));
+				}
+				return;
+			}
+			else if (str_comp(aCmd, "copper_axe") == 0)
+			{
+				if(m_apPlayers[ClientID]->m_Knapsack.m_Copper >= 25)
+				{
+					m_apPlayers[ClientID]->m_Knapsack.m_Copper -= 25;
+					if(rand()%10 >= 3)
+					{
+						SendChatTarget(ClientID, _("You made a copper Axe with 25 copper! Good Job"));
+						m_apPlayers[ClientID]->m_Knapsack.m_Axe[COPPER_AXE]++;
+					}
+					else
+					{
+						SendChatTarget(ClientID, _("Bad luck. The production failed..."));
+						SendChatTarget(ClientID, _("You lost 25 copper."));
+					}
+				}
+				else
+				{
+					SendChatTarget(ClientID, _("You need at least 25 copper to make a copper axe."));
+				}
+				return;
+			}
+
+			else if(str_comp(aCmd, "gun_turret"))
+			{
+				if(m_apPlayers[ClientID]->m_Knapsack.m_Log >= 20)
+				{
+					m_apPlayers[ClientID]->m_Knapsack.m_Log -= 20;
+					if(rand()%10 >= 3)
+						SendChatTarget(ClientID, _("You built a wooden gun turret with 20 logs! Do it again!"));
+					else
+					{
+						SendChatTarget(ClientID, _("Bad luck. The production failed..."));
+						SendChatTarget(ClientID, _("You lost 20 logs."));
+					}
+				}
+				else
+				{
+					SendChatTarget(ClientID, _("You need at least 20 logs to build a wooden gun turret."));
+				}
+				return;
+			}
+
+			else if(str_comp_nocase(pMsg->m_Type, "option") == 0)
 			{
 				CVoteOptionServer *pOption = m_pVoteOptionFirst;
 				while(pOption)
@@ -1292,6 +1362,75 @@ void CGameContext::ConLockTeams(IConsole::IResult *pResult, void *pUserData)
 		pSelf->SendChatTarget(-1, _("Teams were unlocked"));
 }
 
+void CGameContext::ConAddCommandVote(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	const char *pDescription = pResult->GetString(0);
+	const char *pCommand = pResult->GetString(1);
+
+	if(pSelf->m_NumVoteOptions == MAX_VOTE_OPTIONS)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "maximum number of vote options reached");
+		return;
+	}
+
+	// check for valid option
+	if(str_length(pCommand) >= VOTE_CMD_LENGTH)
+	{
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), "skipped invalid command '%s'", pCommand);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+		return;
+	}
+	while(*pDescription && *pDescription == ' ')
+		pDescription++;
+	if(str_length(pDescription) >= VOTE_DESC_LENGTH || *pDescription == 0)
+	{
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), "skipped invalid option '%s'", pDescription);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+		return;
+	}
+
+	// check for duplicate entry
+	CVoteOptionServer *pOption = pSelf->m_pVoteOptionFirst;
+	while(pOption)
+	{
+		if(str_comp_nocase(pDescription, pOption->m_aDescription) == 0)
+		{
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "option '%s' already exists", pDescription);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+			return;
+		}
+		pOption = pOption->m_pNext;
+	}
+
+	// add the option
+	++pSelf->m_NumVoteOptions;
+	int Len = str_length(pCommand);
+
+	pOption = (CVoteOptionServer *)pSelf->m_pVoteOptionHeap->Allocate(sizeof(CVoteOptionServer) + Len);
+	pOption->m_pNext = 0;
+	pOption->m_pPrev = pSelf->m_pVoteOptionLast;
+	if(pOption->m_pPrev)
+		pOption->m_pPrev->m_pNext = pOption;
+	pSelf->m_pVoteOptionLast = pOption;
+	if(!pSelf->m_pVoteOptionFirst)
+		pSelf->m_pVoteOptionFirst = pOption;
+
+	str_copy(pOption->m_aDescription, pDescription, sizeof(pOption->m_aDescription));
+	mem_copy(pOption->m_aCommand, pCommand, Len+1);
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), "added option '%s' '%s'", pOption->m_aDescription, pOption->m_aCommand);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+
+	// inform clients about added option
+	CNetMsg_Sv_VoteOptionAdd OptionMsg;
+	OptionMsg.m_pDescription = pOption->m_aDescription;
+	pSelf->Server()->SendPackMsg(&OptionMsg, MSGFLAG_VITAL, -1);
+}
+
 void CGameContext::ConAddVote(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -1729,6 +1868,7 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("lock_teams", "", CFGFLAG_SERVER, ConLockTeams, this, "Lock/unlock teams");
 
 	Console()->Register("add_vote", "sr", CFGFLAG_SERVER, ConAddVote, this, "Add a voting option");
+	Console()->Register("add_command_vote", "sr", CFGFLAG_SERVER, ConAddCommandVote, this, "Add a voting option");
 	Console()->Register("remove_vote", "s", CFGFLAG_SERVER, ConRemoveVote, this, "remove a voting option");
 	Console()->Register("force_vote", "ss?r", CFGFLAG_SERVER, ConForceVote, this, "Force a voting option");
 	Console()->Register("clear_votes", "", CFGFLAG_SERVER, ConClearVotes, this, "Clears the voting options");

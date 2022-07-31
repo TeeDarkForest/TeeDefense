@@ -60,26 +60,34 @@ void CKs::Tick()
 	CCharacter *pChr = GameServer()->m_World.ClosestCharacter(m_Pos, 20.0f, 0);
 	if(pChr && pChr->IsAlive() && !pChr->GetPlayer()->GetZomb())
 	{
-		// player picked us up, is someone was hooking us, let them go
+		/* NOW U CHANCE TO BE [[BIG SHOT]]!         */
+		/*           --------  Spamton G. Spamton   */
 		int RespawnTime = -1;
-		int BIGSHOT;
-		if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[CK_WOOD])
+		int BIGSHOT = 1;
+		if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[CK_WOOD] && m_Type < CK_IRON)
 			BIGSHOT = 10;
-		else if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[CK_IRON])
+		if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[CK_COPPER] && m_Type < CK_GOLD)
 			BIGSHOT = 20;
-		else if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[CK_GOLD])
-			BIGSHOT = 30;
-		else if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[CK_DIAMONAD])
-			BIGSHOT = 40;
-		else
-			BIGSHOT = 5;
-
-		switch (m_Type)
+		if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[CK_IRON] && m_Type < CK_DIAMONAD)
+			BIGSHOT = 20;
+		if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[CK_GOLD])
 		{
-			case CK_WOOD:
-				pChr->m_InMining = true;
-				if(pChr->m_LatestInput.m_Fire&1 && pChr->m_ActiveWeapon == WEAPON_HAMMER)
-				{
+			if(m_Type < CK_DIAMONAD)
+				BIGSHOT = 10;
+			else
+				BIGSHOT = 30;
+		}
+		if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[CK_DIAMONAD])
+			BIGSHOT = 50;
+
+		if(pChr->m_LatestInput.m_Fire&1 && pChr->m_ActiveWeapon == WEAPON_HAMMER && pChr->GetPlayer()->m_MiningTick <= 0)
+		{
+			pChr->GetPlayer()->m_MiningType = m_Type;
+			int CID = pChr->GetCID();
+			switch (m_Type)
+			{
+				case CK_WOOD:
+					pChr->m_InMining = true;
 					GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP);
 					if(pChr->GetPlayer()->m_Knapsack.m_Axe[CK_DIAMONAD])
 						Picking(50, pChr->GetPlayer());
@@ -93,25 +101,34 @@ void CKs::Tick()
 						Picking(10, pChr->GetPlayer()); // 15 30 45 55
 					else
 						Picking(8, pChr->GetPlayer()); // 8 16 24 32 40 48 56
-					
-					pChr->GetPlayer()->m_MiningType = CK_WOOD;
-				}
-				break;
+					break;
 
-			case CK_COAL:
-				pChr->m_InMining = true;
-				if(pChr->m_LatestInput.m_Fire&1 && pChr->m_ActiveWeapon == WEAPON_HAMMER && pChr->GetPlayer()->m_MiningTick <= 0)
-				{
+				case CK_COAL:
+				case CK_IRON:
+				case CK_COPPER:
+				case CK_GOLD:
+					pChr->m_InMining = true;
 					GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP);
 					Picking(BIGSHOT, pChr->GetPlayer());
+					break;
 
-					pChr->GetPlayer()->m_MiningType = CK_COAL;
-				}
-				break;
+				case CK_DIAMONAD:
+					if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[4] && !pChr->GetPlayer()->m_Knapsack.m_Pickaxe[5])
+					{
+						GameServer()->SendChatTarget(CID, _("You don't have a good pickaxe for Diamond"));
+						GameServer()->SendChatTarget(CID, _("Make a Iron pickaxe or Diamond pickaxe first."));
+						return;
+					}
+					pChr->m_InMining = true;
+					GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP);
+					Picking(BIGSHOT, pChr->GetPlayer());
+					break;
+				
 
-			default:
-				break;
-		};
+				default:
+					break;
+			};
+		}
 	}
 }
 
@@ -143,7 +160,7 @@ void CKs::Picking(int Time, CPlayer *Player)
 			break;
 		case CK_GOLD:
 			Player->m_Knapsack.m_Gold++;
-			GameServer()->SendChatTarget(CID, _("You picked up a useless Gold"));
+			GameServer()->SendChatTarget(CID, _("You picked up a Gold (damn why when I created this mode just make gold important, in Minecraft it just a piece of sXXt!!!!!!!!!)"));
 			break;
 		case CK_DIAMONAD:
 			Player->m_Knapsack.m_Diamond++;

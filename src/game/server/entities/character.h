@@ -66,37 +66,6 @@ public:
 
 	int GetCID();
 
-private:
-	// player controlling this character
-	class CPlayer *m_pPlayer;
-
-	bool m_Alive;
-
-	// weapon info
-	CEntity *m_apHitObjects[10];
-	int m_NumObjectsHit;
-
-	struct WeaponStat
-	{
-		int m_AmmoRegenStart;
-		int m_Ammo;
-		int m_Ammocost;
-		bool m_Got;
-
-	} m_aWeapons[NUM_WEAPONS];
-
-	int m_ActiveWeapon;
-	int m_LastWeapon;
-	int m_QueuedWeapon;
-
-	int m_ReloadTimer;
-	int m_AttackTick;
-
-	int m_DamageTaken;
-
-	int m_EmoteType;
-	int m_EmoteStop;
-
 	// last tick that the player took any action ie some input
 	int m_LastAction;
 	int m_LastNoAmmoSound;
@@ -115,6 +84,39 @@ private:
 
 	int m_Health;
 	int m_Armor;
+
+	struct WeaponStat
+	{
+		int m_AmmoRegenStart;
+		int m_Ammo;
+		int m_Ammocost;
+		bool m_Got;
+
+	} m_aWeapons[NUM_WEAPONS];
+
+	int m_ActiveWeapon;
+	int m_LastWeapon;
+	int m_QueuedWeapon;
+
+	bool m_InMining;
+
+private:
+	// player controlling this character
+	class CPlayer *m_pPlayer;
+
+	bool m_Alive;
+
+	// weapon info
+	CEntity *m_apHitObjects[10];
+	int m_NumObjectsHit;
+
+	int m_ReloadTimer;
+	int m_AttackTick;
+
+	int m_DamageTaken;
+
+	int m_EmoteType;
+	int m_EmoteStop;
 
 	// ninja
 	struct

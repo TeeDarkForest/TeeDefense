@@ -1636,18 +1636,39 @@ void CGameContext::ConClassPassword(IConsole::IResult *pResult, void *pUserData)
 	const char *pMessage = pResult->GetString(0);
 	CPlayer *Player = pThis->m_apPlayers[ClientID];
 
-	if(str_comp(pMessage, g_Config.m_FFS) == 0)
+	bool YES;
+	if(str_comp(pMessage, g_Config.m_FFS) == 0){
 		Player->m_Knapsack.m_FFS = 1;
-	if(str_comp(pMessage, g_Config.m_Ninecloud) == 0)
+		YES = true;
+	}
+	if(str_comp(pMessage, g_Config.m_Ninecloud) == 0){
 		Player->m_Knapsack.m_Ninecloud = 1;
-	if(str_comp(pMessage, g_Config.m_EDreemurr) == 0)
+		YES = true;
+	}
+	if(str_comp(pMessage, g_Config.m_EDreemurr) == 0){
 		Player->m_Knapsack.m_EDreemurr = 1;
-	if(str_comp(pMessage, g_Config.m_Shengyan) == 0)
+		YES = true;
+	}
+	if(str_comp(pMessage, g_Config.m_Shengyan) == 0){
 		Player->m_Knapsack.m_Shengyan = 1;
-	if(str_comp(pMessage, g_Config.m_XyCloud) == 0)
+		YES = true;
+	}
+	if(str_comp(pMessage, g_Config.m_XyCloud) == 0){
 		Player->m_Knapsack.m_XyCloud = 1;
-	if(str_comp(pMessage, g_Config.m_HGDio) == 0)
+		YES = true;
+	}
+	if(str_comp(pMessage, g_Config.m_HGDio) == 0){
 		Player->m_Knapsack.m_HGDio = 1;
+		YES = true;
+	}
+
+	if(YES)
+		pThis->SendChatTarget(ClientID, _("Nice! U entered to DEVELOPER MODE"));
+	else
+	{
+		pThis->SendChatTarget(ClientID, _("Wrong password!"));
+		pThis->SendChatTarget(ClientID, _("If you want get the password, ASK Server hoster"));	
+	}
 }
 
 void CGameContext::SetClientLanguage(int ClientID, const char *pLanguage)

@@ -297,6 +297,9 @@ void CCharacter::FireWeapon()
 	if(!WillFire)
 		return;
 
+	if(m_InMining && m_ActiveWeapon == WEAPON_HAMMER)
+		return;
+
 	// check for ammo
 	if(!m_aWeapons[m_ActiveWeapon].m_Ammo)
 	{
@@ -626,6 +629,9 @@ void CCharacter::Tick()
 	// Previnput
 	//m_PrevInput = m_Input;
 	//m_PrevPos = m_Core.m_Pos;
+
+	if(Server()->Tick()%25 == 0 && m_InMining)
+		m_InMining = false;
 }
 
 void CCharacter::TickDefered()
@@ -1223,6 +1229,28 @@ void CCharacter::DoZombieAim(vec2 VictimPos, int VicCID, vec2 NearZombPos, int N
 				m_Core.m_Zooker = false;
 				m_Core.m_HookedPlayer = -1;
 			}
+		}
+
+		// Zaby UNITY!
+		if(m_pPlayer->GetZomb(1))
+		{
+			if(VicCID != -1 && distance(m_Pos, VictimPos) < 360.0f && GameServer()->GetPlayerChar(VicCID))//Look hooklenght in tuning.h
+			{
+				m_LatestInput.m_TargetX = GameServer()->GetPlayerChar(VicCID)->m_Pos.x;
+				m_LatestInput.m_TargetY = GameServer()->GetPlayerChar(VicCID)->m_Pos.y;
+				m_Input.m_Hook = 1;
+				m_LatestInput.m_Hook = 1;
+			}
+			if(m_Core.m_HookedPlayer == -1 && m_Core.m_HookState != HOOK_IDLE && m_Core.m_HookedPlayer != VicCID)
+			{
+				m_Input.m_Hook = 0;
+				m_LatestInput.m_Hook = 0;
+			}
+		}
+
+		if(m_pPlayer->GetZomb(2))
+		{
+
 		}
 
 		//Zamer

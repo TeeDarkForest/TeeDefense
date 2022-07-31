@@ -67,6 +67,22 @@ public:
 
 const float pi = 3.1415926535897932384626433f;
 
+/* By xy_cloud */
+/***************/
+/* Example:    */
+/*_____________*/
+/* pow(2,6)	   */
+/* output:64   */
+/*-------------*/
+/* unpow(64,2) */
+/* output:6    */
+/***************/
+inline int unpow(int a, int b)
+{
+	double m = log(a)/log(b);	
+	return m;
+}
+
 template <typename T> inline T min(T a, T b) { return a<b?a:b; }
 template <typename T> inline T max(T a, T b) { return a>b?a:b; }
 template <typename T> inline T mt_absolute(T a) { return a<T(0)?-a:a; }

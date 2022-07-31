@@ -6,6 +6,8 @@
 #include <game/generated/protocol.h>
 
 #include "entities/pickup.h"
+#include "entities/CKs.h"
+#include <game/server/entities/tower-main.h>
 #include "gamecontroller.h"
 #include "gamecontext.h"
 
@@ -127,11 +129,11 @@ bool IGameController::OnEntity(int Index, vec2 Pos)
 	int Type = -1;
 	int SubType = 0;
 
-	if(Index == ENTITY_SPAWN)
+	if(Index == ENTITY_SPAWN_ANY)
 		m_aaSpawnPoints[0][m_aNumSpawnPoints[0]++] = Pos;
-	else if(Index == ENTITY_SPAWN_RED)
+	else if(Index == ENTITY_SPAWN_HUMAN)
 		m_aaSpawnPoints[1][m_aNumSpawnPoints[1]++] = Pos;
-	else if(Index == ENTITY_SPAWN_BLUE)
+	else if(Index == ENTITY_SPAWN_ZOMBIE)
 		m_aaSpawnPoints[2][m_aNumSpawnPoints[2]++] = Pos;
 	else if(Index == ENTITY_ARMOR_1)
 		Type = POWERUP_ARMOR;
@@ -157,6 +159,12 @@ bool IGameController::OnEntity(int Index, vec2 Pos)
 		Type = POWERUP_NINJA;
 		SubType = WEAPON_NINJA;
 	}
+	else if(Index == ENTITY_LOG)
+		new CKs(&GameServer()->m_World, CK_WOOD, Pos);
+	else if(Index == ENTITY_COAL)
+		new CKs(&GameServer()->m_World, CK_COAL, Pos);
+	else if(Index == ENTITY_MAIN_TOWER)
+		new CTowerMain(&GameServer()->m_World, Pos);
 
 	if(Type != -1)
 	{

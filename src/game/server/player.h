@@ -133,6 +133,8 @@ public:
 	int GetZomb() { return m_Zomb; };
 	bool GetZomb(int Zomb);
 	
+
+	// Tee Dark Forest.
 	struct // knapsack
 	{
 		int m_Log; // Step 1
@@ -140,7 +142,7 @@ public:
 		int m_Copper; // Step 3
 		int m_Iron; // Step 4
 		int m_Gold; // Step 5
-		int m_Diamond; // 6
+		int m_Diamond; // LAST STEP, DIAMOND!
 
 		int m_Sword[SWORD_TYPES];
 		int m_Pickaxe[PICKAXE_TYPES];
@@ -156,6 +158,10 @@ public:
 	} m_Knapsack;
 
 	void ResetKnapsack();
+	
+	int m_MiningType;
+	int m_MiningTick;
+
 private:
 	CCharacter *m_pCharacter;
 	CGameContext *m_pGameServer;

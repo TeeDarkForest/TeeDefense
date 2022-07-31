@@ -1,8 +1,10 @@
+/* (c) FlowerFell-Sans. See licence.txt in the root of the distribution for more information. */
+/* If you are missing that file, acquire a complete release at teeworlds.com.                 */
 #ifndef GAME_SERVER_ENTITIES_CKS
 #define GAME_SERVER_ENTITIES_CKS
 
 #include <game/server/entity.h>
-
+#include <game/server/player.h>
 const int PhysSize = 14;
 
 enum
@@ -24,7 +26,9 @@ public:
 	virtual void Tick();
 	virtual void TickPaused();
 	virtual void Snap(int SnappingClient);
-
+	virtual void Picking(int Time, CPlayer *Player);
+	
+	int m_Health;
 private:
 	int m_Type;
 	int m_Subtype;

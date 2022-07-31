@@ -132,6 +132,13 @@ void CPlayer::Tick()
 		++m_TeamChangeTick;
  	}
 
+	/*char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), "Log: %d", m_Knapsack.m_Log);
+	GameServer()->SendBroadcast(aBuf, m_ClientID);*/
+
+	if(m_MiningTick > -1)
+		m_MiningTick--;
+
 	HandleTuningParams();
 }
 
@@ -300,6 +307,7 @@ void CPlayer::FakeSnap(int SnappingClient)
 
 void CPlayer::OnDisconnect(const char *pReason)
 {
+	ResetKnapsack();
 	KillCharacter();
 
 	if(Server()->ClientIngame(m_ClientID) && !m_Zomb)
@@ -391,7 +399,7 @@ void CPlayer::Respawn()
 
 void CPlayer::SetTeam(int Team, bool DoChatMsg)
 {
-	// clamp the team
+	/*// clamp the team
 	Team = GameServer()->m_pController->ClampTeam(Team);
 	if(m_Team == Team)
 		return;
@@ -437,7 +445,8 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 			if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->m_SpectatorID == m_ClientID)
 				GameServer()->m_apPlayers[i]->m_SpectatorID = SPEC_FREEVIEW;
 		}
-	}
+	}*/
+	return;
 }
 
 void CPlayer::TryRespawn()

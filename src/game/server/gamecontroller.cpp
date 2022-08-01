@@ -376,9 +376,10 @@ int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 
 	if(!pKiller)
 		return 0;
-
-	if(pKiller && pKiller->GetZomb())
-		return 0;
+	
+	if(pKiller)
+		if(pKiller->GetZomb())
+			return 0;
 
 	if(pVictim->GetPlayer()->GetTeam() == TEAM_ZOMBIE)
 	{

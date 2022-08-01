@@ -488,7 +488,7 @@ void CServer::GetClientAddr(int ClientID, char *pAddrStr, int Size)
 
 const char *CServer::ClientName(int ClientID)
 {
-	if(ClientID > 16 && ClientID < MAX_CLIENTS)
+	if(ClientID > ZOMBIE_START && ClientID < ZOMBIE_END)
 		return "Zombie";//needed
 	if(ClientID < 0|| ClientID >= MAX_CLIENTS || m_aClients[ClientID].m_State == CServer::CClient::STATE_EMPTY)
 		return "(invalid)";

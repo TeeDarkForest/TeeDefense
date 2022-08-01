@@ -377,6 +377,9 @@ int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 	if(!pKiller)
 		return 0;
 
+	if(pKiller && pKiller->GetZomb())
+		return 0;
+
 	if(pVictim->GetPlayer()->GetTeam() == TEAM_ZOMBIE)
 	{
 		int rando = rand()%6 + 1;
@@ -420,6 +423,7 @@ void IGameController::OnCharacterSpawn(class CCharacter *pChr)
 
 	if(pChr->GetPlayer()->GetTeam() == TEAM_HUMAN)
 	{
+		pChr->IncreaseHealth(100);
 		pChr->GiveWeapon(WEAPON_HAMMER, -1);
 		pChr->GiveWeapon(WEAPON_GUN, 10);
 	}

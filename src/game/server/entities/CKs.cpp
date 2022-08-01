@@ -138,11 +138,13 @@ void CKs::Tick()
 				case CK_DIAMONAD:
 					if(!pChr->GetPlayer()->m_Knapsack.m_Pickaxe[4] && !pChr->GetPlayer()->m_Knapsack.m_Pickaxe[5])
 					{
-						GameServer()->SendChatTarget(CID, _("You don't have a good pickaxe for Diamond"));
-						GameServer()->SendChatTarget(CID, _("Make a Iron pickaxe or Diamond pickaxe first."));
+						if(Server()->Tick()%50 == 0)
+						{
+							GameServer()->SendChatTarget(CID, _("You don't have a good pickaxe for Diamond"));
+							GameServer()->SendChatTarget(CID, _("Make a Gold pickaxe or Diamond pickaxe first."));
+						}
 						return;
 					}
-					GameServer()->SendChatTarget(CID, _("Make a Iron pickaxe or Diamond pickaxe first."));
 					pChr->m_InMining = true;
 					GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP);
 					Picking(BIGSHOT, pChr->GetPlayer());

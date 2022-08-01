@@ -1636,7 +1636,8 @@ void CGameContext::ConLockTeams(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConSkipWarmup(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->m_pController->m_Warmup = 1;
+	if(pSelf->m_pController->m_Warmup)
+		pSelf->m_pController->m_Warmup = 1;
 }
 
 void CGameContext::ConAddCommandVote(IConsole::IResult *pResult, void *pUserData)
@@ -1977,13 +1978,9 @@ void CGameContext::ConHelp(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConAbout(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext* pThis = (CGameContext*) pUserData;
-	
-	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "%s %s by %s", MOD_NAME, MOD_VERSION, MOD_AUTHORS);
 	pThis->SendChatTarget(pResult->GetClientID(), _("{str:modname} {str:version} by {str:author}"), "modname", MOD_NAME, "version", MOD_VERSION, "author", MOD_AUTHORS);
-
 	if(MOD_CREDITS[0])
-		pThis->SendChatTarget(pResult->GetClientID(), _("Credits: {str:c}"), MOD_CREDITS);
+		pThis->SendChatTarget(pResult->GetClientID(), _("Credits: {str:c}"), "c", MOD_CREDITS);
 	if(MOD_THANKS[0])
 		pThis->SendChatTarget(pResult->GetClientID(), _("Thanks to: {str:t}"), "t", MOD_THANKS);
 	if(MOD_SOURCES[0])

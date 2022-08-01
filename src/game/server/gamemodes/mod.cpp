@@ -53,9 +53,16 @@ void CGameControllerMOD::Tick()
 		}
 	}
 
-	if(Players && (m_LastActivePlayers == 0))
+	if(Players >= 4 && (m_LastActivePlayers == 0))
 	{
 		StartRound();
+	}
+	else
+	{
+		if(Server()->Tick()%Server()->TickSpeed() == 0)
+		{
+			GameServer()->SendBroadcast_VL(_("At least 4 players are required to start the game."), -1);
+		}
 	}
 
 	m_LastActivePlayers = Players;

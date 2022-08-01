@@ -733,7 +733,7 @@ void CCharacter::TickPaused()
 
 bool CCharacter::IncreaseHealth(int Amount)
 {
-    int maxHealth = m_pPlayer->GetZomb(6) ? 100 : 10;
+    int maxHealth = 100;
 	if(m_Health >= maxHealth)
 		return false;
 	m_Health = clamp(m_Health+Amount, 0, maxHealth);
@@ -1274,12 +1274,9 @@ void CCharacter::DoZombieAim(vec2 VictimPos, int VicCID, vec2 NearZombPos, int N
 		if(m_pPlayer->GetZomb(4))
 		{	
 			m_Aim.m_Explode = true;
-			GameServer()->CreateExplosion(vec2(m_Pos.x + 5, m_Pos.y + 5), m_pPlayer->GetCID(), WEAPON_GAME, false);
-			GameServer()->CreateExplosion(vec2(m_Pos.x - 5, m_Pos.y + 5), m_pPlayer->GetCID(), WEAPON_GAME, false);
-			GameServer()->CreateExplosion(vec2(m_Pos.x - 5, m_Pos.y - 5), m_pPlayer->GetCID(), WEAPON_GAME, false);
-			GameServer()->CreateExplosion(vec2(m_Pos.x + 5, m_Pos.y - 5), m_pPlayer->GetCID(), WEAPON_GAME, false);
+			GameServer()->CreateExplosion(m_Pos, m_pPlayer->GetCID(), WEAPON_GRENADE, false);
 			for(int i = 0; i < 100; i++)
-				GameServer()->CreateSound(vec2(m_Pos.x + 5, m_Pos.y + 5), SOUND_GRENADE_EXPLODE, -1);
+				GameServer()->CreateSound(vec2(m_Pos.x + 5, m_Pos.y + 5), SOUND_GRENADE_FIRE);
 			Die(m_pPlayer->GetCID(), WEAPON_SELF);
 			return;
 		}

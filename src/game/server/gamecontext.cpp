@@ -924,7 +924,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				if(m_apPlayers[ClientID]->m_Knapsack.m_Copper >= 25)
 				{
 					m_apPlayers[ClientID]->m_Knapsack.m_Copper -= 25;
-					if(rand()%10 >= 3)
+					if(rand()%100 >= 3)
 					{
 						SendChatTarget(ClientID, _("You made a copper Axe with 25 copper! Good Job"));
 						m_apPlayers[ClientID]->m_Knapsack.m_Axe[COPPER_AXE]++;
@@ -1073,12 +1073,12 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				}
 				return;
 			}
-			else if (str_comp(aCmd, "ccv_gold_sword") == 0)
+			else if (str_comp(aCmd, "ccv_diamond_sword") == 0)
 			{
 				if(m_apPlayers[ClientID]->m_Knapsack.m_Diamond >= 10)
 				{
 					m_apPlayers[ClientID]->m_Knapsack.m_Diamond -= 10;
-					if(rand()%10 >= 3)
+					if(rand()%100 >= 3)
 					{
 						SendChatTarget(ClientID, _("You made a diamond sword with 25 diamonds! Good Job"));
 						m_apPlayers[ClientID]->m_Knapsack.m_Sword[DIAMOND_SWORD]++;
@@ -1100,7 +1100,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				if(m_apPlayers[ClientID]->m_Knapsack.m_Log >= 25)
 				{
 					m_apPlayers[ClientID]->m_Knapsack.m_Log -= 25;
-					if(rand()%10 >= 3)
+					if(rand()%100 >= 3)
 					{
 						SendChatTarget(ClientID, _("You made a wooden pickaxe with 25 logs! Good Job"));
 						m_apPlayers[ClientID]->m_Knapsack.m_Pickaxe[LOG_PICKAXE]++;
@@ -1113,7 +1113,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				}
 				else
 				{
-					SendChatTarget(ClientID, _("You need at least 25 logs to make a wooden sword."));
+					SendChatTarget(ClientID, _("You need at least 25 logs to make a wooden pickaxe."));
 				}
 				return;
 			}
@@ -1163,14 +1163,14 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			}
 			else if (str_comp(aCmd, "ccv_gold_pickaxe") == 0)
 			{
-				if(m_apPlayers[ClientID]->m_Knapsack.m_Copper >= 25)
+				if(m_apPlayers[ClientID]->m_Knapsack.m_Gold >= 25)
 				{
-					m_apPlayers[ClientID]->m_Knapsack.m_Copper -= 25;
+					m_apPlayers[ClientID]->m_Knapsack.m_Gold -= 25;
 					if(rand()%10 >= 3)
 					{
 						SendChatTarget(ClientID, _("You made a golds pickaxe with 25 golds! Good Job"));
 						m_apPlayers[ClientID]->m_Knapsack.m_Pickaxe[GOLD_PICKAXE]++;
-					}
+					}	z
 					else
 					{
 						SendChatTarget(ClientID, _("Bad luck. The production failed..."));
@@ -1201,26 +1201,27 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				}
 				else
 				{
-					SendChatTarget(ClientID, _("You need at least 25 diamonds to make a diamond pickaxe."));
+					SendChatTarget(ClientID, _("You need at least 10 diamonds to make a diamond pickaxe."));
 				}
 				return;
 			}
 			else if(str_comp(aCmd, "ccv_gun_turret") == 0)
 			{
-				if(m_apPlayers[ClientID]->m_Knapsack.m_Log >= 20)
+				if(m_apPlayers[ClientID]->m_Knapsack.m_Log >= 20 && m_apPlayers[ClientID]->m_Knapsack.m_Copper >= 1)
 				{
 					m_apPlayers[ClientID]->m_Knapsack.m_Log -= 20;
+					m_apPlayers[ClientID]->m_Knapsack.m_Copper -= 1;
 					if(rand()%10 >= 2)
-						SendChatTarget(ClientID, _("You built a wooden gun turret with 20 logs! Do it again!"));
+						SendChatTarget(ClientID, _("You built a wooden gun turret with 20 logs, 1 copper! Do it again!"));
 					else
 					{
 						SendChatTarget(ClientID, _("Bad luck. The production failed..."));
-						SendChatTarget(ClientID, _("You lost 20 logs."));
+						SendChatTarget(ClientID, _("You lost 20 logs and 1 copper."));
 					}
 				}
 				else
 				{
-					SendChatTarget(ClientID, _("You need at least 20 logs to build a wooden gun turret."));
+					SendChatTarget(ClientID, _("You need at least 20 logs and 1 copper to build a wooden gun turret."));
 				}
 				return;
 			}

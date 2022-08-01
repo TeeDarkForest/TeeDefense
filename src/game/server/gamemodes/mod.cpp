@@ -53,7 +53,7 @@ void CGameControllerMOD::Tick()
 		}
 	}
 
-	if(Players >= 4 && (m_LastActivePlayers == 0))
+	if(Players >= 4 && (m_LastActivePlayers == 3 || m_LastActivePlayers == 4))
 	{
 		StartRound();
 	}

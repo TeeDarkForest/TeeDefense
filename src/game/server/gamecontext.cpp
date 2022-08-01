@@ -1170,7 +1170,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					{
 						SendChatTarget(ClientID, _("You made a golds pickaxe with 25 golds! Good Job"));
 						m_apPlayers[ClientID]->m_Knapsack.m_Pickaxe[GOLD_PICKAXE]++;
-					}	z
+					}
 					else
 					{
 						SendChatTarget(ClientID, _("Bad luck. The production failed..."));

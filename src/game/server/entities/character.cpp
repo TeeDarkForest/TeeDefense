@@ -818,7 +818,7 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 		GameServer()->CreateDamageInd(m_Pos, 0, Dmg);
 	}
 
-	if(!GameServer()->m_apPlayers[From]->GetZomb())
+	if(GameServer()->m_apPlayers[From] && !GameServer()->m_apPlayers[From]->GetZomb())
 	{
 		CPlayer *Player = GameServer()->m_apPlayers[From];
 		if(Player->m_Knapsack.m_Sword[LOG_SWORD])

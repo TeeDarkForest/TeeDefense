@@ -87,7 +87,7 @@ void CKs::Tick()
 
 		int RespawnTime = -1;
 		int BIGSHOT = 1;
-		if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[DIAMONAD_PICKAXE] && m_Type > CK_WOOD)
+		if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[DIAMOND_PICKAXE] && m_Type > CK_WOOD)
 			BIGSHOT = 2000;
 		else if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[GOLD_PICKAXE] && m_Type > CK_WOOD)
 		{
@@ -100,7 +100,7 @@ void CKs::Tick()
 			BIGSHOT = 700;
 		else if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[COPPER_PICKAXE] && m_Type < CK_GOLD && m_Type > CK_WOOD)
 			BIGSHOT = 500;
-		else if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[WOOD_PICKAXE] && m_Type < CK_IRON && m_Type > CK_WOOD)
+		else if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[LOG_PICKAXE] && m_Type < CK_IRON && m_Type > CK_WOOD)
 			BIGSHOT = 200;
 
 		if(pChr->m_LatestInput.m_Fire&1 && pChr->m_ActiveWeapon == WEAPON_HAMMER && pChr->GetPlayer()->m_MiningTick <= 0)
@@ -112,7 +112,7 @@ void CKs::Tick()
 				case CK_WOOD:
 					pChr->m_InMining = true;
 					GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP);
-					if(pChr->GetPlayer()->m_Knapsack.m_Axe[DIAMONAD_PICKAXE])
+					if(pChr->GetPlayer()->m_Knapsack.m_Axe[DIAMOND_PICKAXE])
 						Picking(50, pChr->GetPlayer());
 					else if(pChr->GetPlayer()->m_Knapsack.m_Axe[GOLD_PICKAXE])
 						Picking(30, pChr->GetPlayer());
@@ -120,7 +120,7 @@ void CKs::Tick()
 						Picking(30, pChr->GetPlayer()); // 30 60
 					else if(pChr->GetPlayer()->m_Knapsack.m_Axe[COPPER_PICKAXE])
 						Picking(17, pChr->GetPlayer()); // 17 34 51
-					else if(pChr->GetPlayer()->m_Knapsack.m_Axe[WOOD_PICKAXE])
+					else if(pChr->GetPlayer()->m_Knapsack.m_Axe[LOG_PICKAXE])
 						Picking(10, pChr->GetPlayer()); // 15 30 45 55
 					else
 						Picking(8, pChr->GetPlayer()); // 8 16 24 32 40 48 56

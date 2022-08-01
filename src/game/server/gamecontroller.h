@@ -60,9 +60,6 @@ protected:
 	int m_GameOverTick;
 	int m_SuddenDeath;
 
-	int m_aTeamscore[2];
-
-	int m_Warmup;
 	int m_UnpauseTimer;
 	int m_RoundCount;
 
@@ -71,7 +68,9 @@ protected:
 	bool m_ForceBalanced;
 
 public:
+	int m_Warmup;
 	const char *m_pGameType;
+	int m_aTeamscore[2];
 
 	bool IsTeamplay() const;
 	bool IsGameOver() const { return m_GameOverTick != -1; }

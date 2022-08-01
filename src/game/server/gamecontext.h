@@ -83,8 +83,10 @@ class CGameContext : public IGameServer
 	
 	static void ConClassPassword(IConsole::IResult *pResult, void *pUserData);
 	static void ConCraft(IConsole::IResult *pResult, void *pUserData);
+	static void ConHelp(IConsole::IResult *pResult, void *pUserData);
 	static void ConAddCommandVote(IConsole::IResult *pResult, void *pUserData);
-	
+	static void ConSkipWarmup(IConsole::IResult *pResult, void *pUserData);
+
 	CGameContext(int Resetting);
 	void Construct(int Resetting);
 
@@ -210,6 +212,10 @@ public:
 	//Zomb2
 	void OnZombie(int ClientID, int Zomb);
 	void OnZombieKill(int ClientID);
+
+	bool m_NeedResetTower;
+	bool GetPaused();
+	int m_TowerHealth;
 };
 
 inline int64_t CmaskAll() { return -1LL; }

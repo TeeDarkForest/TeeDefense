@@ -21,8 +21,8 @@ enum
 enum
 {
 	TEAM_SPECTATORS=-1,
-	TEAM_RED,
-	TEAM_BLUE,
+	TEAM_HUMAN,
+	TEAM_ZOMBIE,
 
 	FLAG_MISSING=-3,
 	FLAG_ATSTAND,
@@ -98,7 +98,7 @@ Objects = [
 		NetIntAny("m_X"),
 		NetIntAny("m_Y"),
 
-		NetIntRange("m_Team", 'TEAM_RED', 'TEAM_BLUE')
+		NetIntRange("m_Team", 'TEAM_HUMAN', 'TEAM_ZOMBIE')
 	]),
 
 	NetObject("GameInfo", [
@@ -156,7 +156,7 @@ Objects = [
 	NetObject("PlayerInfo", [
 		NetIntRange("m_Local", 0, 1),
 		NetIntRange("m_ClientID", 0, 'MAX_CLIENTS-1'),
-		NetIntRange("m_Team", 'TEAM_SPECTATORS', 'TEAM_BLUE'),
+		NetIntRange("m_Team", 'TEAM_SPECTATORS', 'TEAM_ZOMBIE'),
 
 		NetIntAny("m_Score"),
 		NetIntAny("m_Latency"),
@@ -229,7 +229,7 @@ Messages = [
 	]),
 
 	NetMessage("Sv_Chat", [
-		NetIntRange("m_Team", 'TEAM_SPECTATORS', 'TEAM_BLUE'),
+		NetIntRange("m_Team", 'TEAM_SPECTATORS', 'TEAM_ZOMBIE'),
 		NetIntRange("m_ClientID", -1, 'MAX_CLIENTS-1'),
 		NetStringStrict("m_pMessage"),
 	]),
@@ -298,7 +298,7 @@ Messages = [
 	]),
 
 	NetMessage("Cl_SetTeam", [
-		NetIntRange("m_Team", 'TEAM_SPECTATORS', 'TEAM_BLUE'),
+		NetIntRange("m_Team", 'TEAM_SPECTATORS', 'TEAM_ZOMBIE'),
 	]),
 
 	NetMessage("Cl_SetSpectatorMode", [

@@ -10,7 +10,7 @@
 #include <game/server/entities/tower-main.h>
 #include "gamecontroller.h"
 #include "gamecontext.h"
-
+#include <base/math.h>
 
 IGameController::IGameController(class CGameContext *pGameServer)
 {
@@ -25,8 +25,8 @@ IGameController::IGameController(class CGameContext *pGameServer)
 	m_RoundStartTick = Server()->Tick();
 	m_RoundCount = 0;
 	m_GameFlags = 0;
-	m_aTeamscore[TEAM_RED] = 0;
-	m_aTeamscore[TEAM_BLUE] = g_Config.m_SvLives;
+	m_aTeamscore[TEAM_HUMAN] = 0;
+	m_aTeamscore[TEAM_ZOMBIE] = g_Config.m_SvLives;
 	m_aMapWish[0] = 0;
 
 	m_UnbalancedTick = -1;
@@ -107,7 +107,7 @@ bool IGameController::CanSpawn(int Team, vec2 *pOutPos)
 	if(Team == TEAM_SPECTATORS)
 		return false;
 
-	if(Team == TEAM_RED)
+	if(Team == TEAM_HUMAN)
 	{
 		EvaluateSpawnType(&Eval, 0);
 		EvaluateSpawnType(&Eval, 1);
@@ -129,42 +129,68 @@ bool IGameController::OnEntity(int Index, vec2 Pos)
 	int Type = -1;
 	int SubType = 0;
 
-	if(Index == ENTITY_SPAWN_ANY)
-		m_aaSpawnPoints[0][m_aNumSpawnPoints[0]++] = Pos;
-	else if(Index == ENTITY_SPAWN_HUMAN)
-		m_aaSpawnPoints[1][m_aNumSpawnPoints[1]++] = Pos;
-	else if(Index == ENTITY_SPAWN_ZOMBIE)
-		m_aaSpawnPoints[2][m_aNumSpawnPoints[2]++] = Pos;
-	else if(Index == ENTITY_ARMOR_1)
-		Type = POWERUP_ARMOR;
-	else if(Index == ENTITY_HEALTH_1)
-		Type = POWERUP_HEALTH;
-	else if(Index == ENTITY_WEAPON_SHOTGUN)
+	switch (Index)
 	{
+	case ENTITY_SPAWN_ANY:
+		m_aaSpawnPoints[0][m_aNumSpawnPoints[0]++] = Pos;
+		break;
+	case ENTITY_SPAWN_HUMAN:
+		m_aaSpawnPoints[1][m_aNumSpawnPoints[1]++] = Pos;
+		break;
+	case ENTITY_SPAWN_ZOMBIE:
+		m_aaSpawnPoints[2][m_aNumSpawnPoints[2]++] = Pos;
+		break;
+	case ENTITY_ARMOR_1:
+		Type = POWERUP_ARMOR;
+		break;
+	case ENTITY_HEALTH_1:
+		Type = POWERUP_HEALTH;
+		break;
+	case ENTITY_WEAPON_SHOTGUN:
 		Type = POWERUP_WEAPON;
 		SubType = WEAPON_SHOTGUN;
-	}
-	else if(Index == ENTITY_WEAPON_GRENADE)
-	{
+		break;
+	case ENTITY_WEAPON_GRENADE:
 		Type = POWERUP_WEAPON;
 		SubType = WEAPON_GRENADE;
-	}
-	else if(Index == ENTITY_WEAPON_RIFLE)
-	{
+		break;
+	case ENTITY_WEAPON_RIFLE:
 		Type = POWERUP_WEAPON;
 		SubType = WEAPON_RIFLE;
-	}
-	else if(Index == ENTITY_POWERUP_NINJA && g_Config.m_SvPowerups)
-	{
-		Type = POWERUP_NINJA;
-		SubType = WEAPON_NINJA;
-	}
-	else if(Index == ENTITY_LOG)
+		break;
+	case ENTITY_POWERUP_NINJA:
+		if(g_Config.m_SvPowerups)
+		{
+			Type = POWERUP_NINJA;
+			SubType = WEAPON_NINJA;
+		}
+		break;
+	case ENTITY_LOG:
 		new CKs(&GameServer()->m_World, CK_WOOD, Pos);
-	else if(Index == ENTITY_COAL)
+		break;
+	case ENTITY_COAL:
 		new CKs(&GameServer()->m_World, CK_COAL, Pos);
-	else if(Index == ENTITY_MAIN_TOWER)
+		break;
+	case ENTITY_COPPER:
+		new CKs(&GameServer()->m_World, CK_COPPER, Pos);
+		break;
+	case ENTITY_IRON:
+		new CKs(&GameServer()->m_World, CK_IRON, Pos);
+		break;
+	case ENTITY_GOLD:
+		new CKs(&GameServer()->m_World, CK_GOLD, Pos);
+		break;
+	case ENTITY_DIAMOND:
+		new CKs(&GameServer()->m_World, CK_DIAMONAD, Pos);
+		break;
+	case ENTITY_MAIN_TOWER:
 		new CTowerMain(&GameServer()->m_World, Pos);
+		dbg_msg("TEST", "TOWERTOWER");
+		break;
+	
+	default:
+		break;
+	}
 
 	if(Type != -1)
 	{
@@ -186,7 +212,8 @@ void IGameController::EndRound()
 	m_GameOverTick = Server()->Tick();
 	m_SuddenDeath = 0;
 	m_Wave = 0;
-	//ResetGame();
+	ResetGame();
+	GameServer()->m_NeedResetTowers = true;
 	mem_zero(m_Zombie, sizeof(m_Zombie));
 }
 
@@ -197,9 +224,9 @@ void IGameController::ResetGame()
 
 const char *IGameController::GetTeamName(int Team)
 {
-	if(Team == TEAM_RED)
+	if(Team == TEAM_HUMAN)
 		return "humans";
-	else if(Team == TEAM_BLUE)
+	else if(Team == TEAM_ZOMBIE)
 		return "zombies";
 	return "spectators";
 }
@@ -208,17 +235,16 @@ static bool IsSeparator(char c) { return c == ';' || c == ' ' || c == ',' || c =
 
 void IGameController::StartRound()
 {
-	ResetGame();
+	//ResetGame();
 
 	m_RoundStartTick = Server()->Tick();
 	m_SuddenDeath = 0;
 	m_GameOverTick = -1;
-	GameServer()->m_World.m_Paused = false;
 	m_ForceBalanced = false;
 	Server()->DemoRecorder_HandleAutoStart();
 
 	//Zomb2
-	for(int i = 17; i < MAX_CLIENTS; i++)//bugfix
+	for(int i = ZOMBIE_START; i < ZOMBIE_END; i++)//bugfix
 		GameServer()->OnZombieKill(i);
 	m_Wave++;
 	StartWave(m_Wave);
@@ -328,7 +354,7 @@ void IGameController::OnPlayerInfoChange(class CPlayer *pP)
 	if(IsTeamplay())
 	{
 		pP->m_TeeInfos.m_UseCustomColor = 1;
-		if(pP->GetTeam() >= TEAM_RED && pP->GetTeam() <= TEAM_BLUE)
+		if(pP->GetTeam() >= TEAM_HUMAN && pP->GetTeam() <= TEAM_ZOMBIE)
 		{
 			pP->m_TeeInfos.m_ColorBody = aTeamColors[pP->GetTeam()];
 			pP->m_TeeInfos.m_ColorFeet = aTeamColors[pP->GetTeam()];
@@ -344,21 +370,34 @@ void IGameController::OnPlayerInfoChange(class CPlayer *pP)
 
 int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon)
 {
-	if(!pKiller)
-		return 0;
-
-	if(pVictim->GetPlayer()->GetTeam() == TEAM_BLUE)
-	{
-		if(pKiller && pKiller->GetTeam() == TEAM_RED)
-			m_aTeamscore[TEAM_RED]++;
-		DoZombMessage(m_ZombLeft--);
-	}
-	else if(pKiller->GetTeam() == TEAM_BLUE && pVictim->GetPlayer() && pVictim->GetPlayer()->GetTeam() == TEAM_RED)
-		DoLifeMessage(m_aTeamscore[TEAM_BLUE]--);
-
 	// do scoreing
 	if(Weapon == WEAPON_GAME)
 		return 0;
+
+	if(!pKiller)
+		return 0;
+
+	if(pVictim->GetPlayer()->GetTeam() == TEAM_ZOMBIE)
+	{
+		int rando = rand()%6 + 1;
+		if(rando <= 3)
+		{
+			pKiller->m_Knapsack.m_Log += 1;
+			GameServer()->SendChatTarget(pKiller->GetCID(), _("You got 1 Log from the Zombie"));
+		}
+		else if(rando == 4)
+		{
+			pKiller->m_Knapsack.m_Copper++;
+			GameServer()->SendChatTarget(pKiller->GetCID(), _("You got 1 Copper from the Zombie"));
+		}
+		else
+		{
+			// Give Player zombie's heart.
+			GameServer()->SendChatTarget(pKiller->GetCID(), _("You picked up Zombie's Heart (Unfinish)"));
+		}
+		pKiller->m_Score++;
+		DoZombMessage(m_ZombLeft--);
+	}
 	if(pKiller && pKiller == pVictim->GetPlayer())
 		return 0; // suicide
 	else
@@ -379,7 +418,7 @@ void IGameController::OnCharacterSpawn(class CCharacter *pChr)
 	// default health
 	pChr->IncreaseHealth(10);
 
-	if(pChr->GetPlayer()->GetTeam() == TEAM_RED)
+	if(pChr->GetPlayer()->GetTeam() == TEAM_HUMAN)
 	{
 		pChr->GiveWeapon(WEAPON_HAMMER, -1);
 		pChr->GiveWeapon(WEAPON_GUN, 10);
@@ -445,6 +484,8 @@ void IGameController::TogglePause()
 
 bool IGameController::IsFriendlyFire(int ClientID1, int ClientID2)
 {
+	if(ClientID1 == -1 || ClientID2 == -1)
+		return false;
 	if(ClientID1 == ClientID2)
 		return false;
 
@@ -483,7 +524,10 @@ void IGameController::Tick()
 	{
 		m_Warmup--;
 		if(!m_Warmup)
+		{
 			StartRound();
+			GameServer()->m_World.m_Paused = false;
+		}
 	}
 	
 	if(m_GameOverTick != -1)
@@ -495,9 +539,9 @@ void IGameController::Tick()
 			PostReset();
 
 			//Zomb2: Do this ONLY when the Game ended, that must be BEFORE the round restarts
-			m_aTeamscore[TEAM_RED] = 0;
-			m_aTeamscore[TEAM_BLUE] = g_Config.m_SvLives;
-			for(int i = 17; i < MAX_CLIENTS; i++)
+			m_aTeamscore[TEAM_HUMAN] = 0;
+			m_aTeamscore[TEAM_ZOMBIE] = g_Config.m_SvLives;
+			for(int i = ZOMBIE_START; i < ZOMBIE_END; i++)
 				GameServer()->OnZombieKill(i);
 			DoWarmup(g_Config.m_SvWarmup);
 			m_GameOverTick = -1;
@@ -671,14 +715,14 @@ int IGameController::GetAutoTeam(int NotThisID)
 	{
 		if(GameServer()->m_apPlayers[i] && i != NotThisID)
 		{
-			if(GameServer()->m_apPlayers[i]->GetTeam() >= TEAM_RED && GameServer()->m_apPlayers[i]->GetTeam() <= TEAM_BLUE)
+			if(GameServer()->m_apPlayers[i]->GetTeam() >= TEAM_HUMAN && GameServer()->m_apPlayers[i]->GetTeam() <= TEAM_ZOMBIE)
 				aNumplayers[GameServer()->m_apPlayers[i]->GetTeam()]++;
 		}
 	}
 
 	int Team = 0;
 	if(IsTeamplay())
-		Team = aNumplayers[TEAM_RED] > aNumplayers[TEAM_BLUE] ? TEAM_BLUE : TEAM_RED;
+		Team = aNumplayers[TEAM_HUMAN] > aNumplayers[TEAM_ZOMBIE] ? TEAM_ZOMBIE : TEAM_HUMAN;
 
 	if(CanJoinTeam(Team, NotThisID))
 		return Team;
@@ -695,7 +739,7 @@ bool IGameController::CanJoinTeam(int Team, int NotThisID)
 	{
 		if(GameServer()->m_apPlayers[i] && i != NotThisID)
 		{
-			if(GameServer()->m_apPlayers[i]->GetTeam() >= TEAM_RED && GameServer()->m_apPlayers[i]->GetTeam() <= TEAM_BLUE)
+			if(GameServer()->m_apPlayers[i]->GetTeam() >= TEAM_HUMAN && GameServer()->m_apPlayers[i]->GetTeam() <= TEAM_ZOMBIE)
 				aNumplayers[GameServer()->m_apPlayers[i]->GetTeam()]++;
 		}
 	}
@@ -732,7 +776,7 @@ bool IGameController::CanChangeTeam(CPlayer *pPlayer, int JoinTeam)
 	if(absolute(aT[0]-aT[1]) >= 2)
 	{
 		// player wants to join team with less players
-		if ((aT[0] < aT[1] && JoinTeam == TEAM_RED) || (aT[0] > aT[1] && JoinTeam == TEAM_BLUE))
+		if ((aT[0] < aT[1] && JoinTeam == TEAM_HUMAN) || (aT[0] > aT[1] && JoinTeam == TEAM_ZOMBIE))
 			return true;
 		else
 			return false;
@@ -745,46 +789,9 @@ void IGameController::DoWincheck()
 {
 	if(m_GameOverTick == -1 && !m_Warmup && !GameServer()->m_World.m_ResetRequested)
 	{
-		if(IsTeamplay())
+		if(GameServer()->m_TowerHealth <= 0)
 		{
-			// check score win condition
-			if((g_Config.m_SvScorelimit > 0 && (m_aTeamscore[TEAM_RED] >= g_Config.m_SvScorelimit || m_aTeamscore[TEAM_BLUE] >= g_Config.m_SvScorelimit)) ||
-				(g_Config.m_SvTimelimit > 0 && (Server()->Tick()-m_RoundStartTick) >= g_Config.m_SvTimelimit*Server()->TickSpeed()*60))
-			{
-				if(m_aTeamscore[TEAM_RED] != m_aTeamscore[TEAM_BLUE])
-					EndRound();
-				else
-					m_SuddenDeath = 1;
-			}
-		}
-		else
-		{
-			// gather some stats
-			int Topscore = 0;
-			int TopscoreCount = 0;
-			for(int i = 0; i < MAX_CLIENTS; i++)
-			{
-				if(GameServer()->m_apPlayers[i])
-				{
-					if(GameServer()->m_apPlayers[i]->m_Score > Topscore)
-					{
-						Topscore = GameServer()->m_apPlayers[i]->m_Score;
-						TopscoreCount = 1;
-					}
-					else if(GameServer()->m_apPlayers[i]->m_Score == Topscore)
-						TopscoreCount++;
-				}
-			}
-
-			// check score win condition
-			if((g_Config.m_SvScorelimit > 0 && Topscore >= g_Config.m_SvScorelimit) ||
-				(g_Config.m_SvTimelimit > 0 && (Server()->Tick()-m_RoundStartTick) >= g_Config.m_SvTimelimit*Server()->TickSpeed()*60))
-			{
-				if(TopscoreCount == 1)
-					EndRound();
-				else
-					m_SuddenDeath = 1;
-			}
+			EndRound();
 		}
 	}
 }
@@ -1027,7 +1034,7 @@ void IGameController::CheckZombie()
 {
 	if(m_Warmup || !m_Wave || EndWave())
 		return;
-	for(int i = 17; i < MAX_CLIENTS; i++)//...
+	for(int i = ZOMBIE_START; i < ZOMBIE_END; i++)//...
 	{
 		if(!GameServer()->m_apPlayers[i])//Check if the CID is free
 		{
@@ -1068,7 +1075,7 @@ bool IGameController::EndWave()
 	}
 	if(!PlayerCount)//No Players - reset round
 	{
-		for(int i = 17; i < MAX_CLIENTS; i++)
+		for(int i = ZOMBIE_START; i < ZOMBIE_END; i++)
 			GameServer()->OnZombieKill(i);
 		//HandleTop();
 		m_Wave = 0;
@@ -1079,12 +1086,12 @@ bool IGameController::EndWave()
 		if(m_Zombie[j])
 			return false;
 	}
-	for(int i = 17; i < MAX_CLIENTS; i++)
+	for(int i = ZOMBIE_START; i < ZOMBIE_END; i++)
 	{
 		if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
 			return false;
 	}	
-	DoWarmup(g_Config.m_SvZombWarmup);
+	DoWarmup(g_Config.m_SvZombWarmup+5*m_Wave);
 	return true;
 }
 
@@ -1113,29 +1120,19 @@ void IGameController::DoZombMessage(int Which)
 void IGameController::DoLifeMessage(int Life)
 {
 	char aBuf[64];
-	Life -= 1;
 
-	if(Life > 1 && (Life <= 5 || !(Life%10)))
+	GameServer()->SendChatTarget(-1, _("The main tower is under attacked!"));
+	if(Life > 1)
 	{
-		if(Life <= 10)
-		{
-			str_format(aBuf, sizeof(aBuf), "Only %d lifes left!", Life);
-			GameServer()->SendBroadcast(aBuf, -1);
-			GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
-		}
+		if(Life <= 30)
+			GameServer()->SendChatTarget(-1, _("Only {int:Health} lifes left!"), "Health", &Life);
+		else if(Life == 50)
+			GameServer()->SendChatTarget(-1, _("Only HALF health left!!"));
 		else
-		{
-			str_format(aBuf, sizeof(aBuf), "%d lifes left!", Life);
-			GameServer()->SendBroadcast(aBuf, -1);
-			GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
-		}
+			GameServer()->SendChatTarget(-1, _("{int:Health} health left!"), "Health", &Life);
 	}
 	else if(Life == 1)
-	{
-		str_format(aBuf, sizeof(aBuf), "!!!Only 1 life left!!!", Life);
-		GameServer()->SendBroadcast(aBuf, -1);
-		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
-	}
+		GameServer()->SendChatTarget(-1, _("!!!Only 1 health left!!!"));
 	
 }
 
@@ -1144,7 +1141,7 @@ void IGameController::HandleTop()
 /*	//char aBuf[16];
 	if(m_pTop->GetInfo())//File exist
 	{
-		if(m_pTop->m_TopFiveVars.m_aTeams[4].m_TeamScore < m_aTeamscore[TEAM_RED])
+		if(m_pTop->m_TopFiveVars.m_aTeams[4].m_TeamScore < m_aTeamscore[TEAM_HUMAN])
 		{
 			m_pTop->m_TopFiveVars.m_aTeams[4].m_NumPlayers = 0;
 			for(int i = 0; i < 16; i++)
@@ -1163,7 +1160,7 @@ void IGameController::HandleTop()
 					m_pTop->m_TopFiveVars.m_aTeams[4].m_aKills[i] = 0;
 				}
 			}
-			m_pTop->m_TopFiveVars.m_aTeams[4].m_TeamScore = m_aTeamscore[TEAM_RED];
+			m_pTop->m_TopFiveVars.m_aTeams[4].m_TeamScore = m_aTeamscore[TEAM_HUMAN];
 			m_pTop->m_TopFiveVars.m_aTeams[4].m_Waves = m_Wave;
 			m_pTop->SortArray(4);
 		}
@@ -1187,7 +1184,7 @@ void IGameController::HandleTop()
 				m_pTop->m_TopFiveVars.m_aTeams[0].m_aKills[i] = 0;
 			}
 		}
-		m_pTop->m_TopFiveVars.m_aTeams[0].m_TeamScore = m_aTeamscore[TEAM_RED];
+		m_pTop->m_TopFiveVars.m_aTeams[0].m_TeamScore = m_aTeamscore[TEAM_HUMAN];
 		m_pTop->m_TopFiveVars.m_aTeams[0].m_Waves = m_Wave;
 
 		for(int k = 1; k < 16; k++)//Speicher den rest als Null

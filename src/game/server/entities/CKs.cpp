@@ -19,7 +19,23 @@ CKs::CKs(CGameWorld *pGameWorld, int Type, vec2 Pos, int SubType)
 		break;
 	
 	case CK_COAL:
-		m_Health = 70;
+		m_Health = 800;
+		break;
+	
+	case CK_COPPER:
+		m_Health = 1600;
+		break;
+
+	case CK_IRON:
+		m_Health = 2000;
+		break;
+
+	case CK_GOLD:
+		m_Health = 2700;
+		break;
+
+	case CK_DIAMONAD:
+		m_Health = 3000;
 		break;
 	
 	default:
@@ -62,22 +78,29 @@ void CKs::Tick()
 	{
 		/* NOW U CHANCE TO BE [[BIG SHOT]]!         */
 		/*           --------  Spamton G. Spamton   */
+		
+		
+		/*If u have wooden pickaxe, u can mine all 'CKs' low then Iron(not include logs)*/
+		/*          copper                                        Gold                  */
+		/*          iron                                          Diamond               */
+		/*          gold                                          NULL                  */
+
 		int RespawnTime = -1;
 		int BIGSHOT = 1;
-		if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[CK_WOOD] && m_Type < CK_IRON)
+		if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[CK_WOOD] && m_Type < CK_IRON && m_Type > CK_WOOD)
 			BIGSHOT = 10;
-		if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[CK_COPPER] && m_Type < CK_GOLD)
+		if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[CK_COPPER] && m_Type < CK_GOLD && m_Type > CK_WOOD)
 			BIGSHOT = 20;
-		if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[CK_IRON] && m_Type < CK_DIAMONAD)
+		if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[CK_IRON] && m_Type < CK_DIAMONAD && m_Type > CK_WOOD)
 			BIGSHOT = 20;
-		if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[CK_GOLD])
+		if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[CK_GOLD] && m_Type > CK_WOOD)
 		{
 			if(m_Type < CK_DIAMONAD)
 				BIGSHOT = 10;
 			else
 				BIGSHOT = 30;
 		}
-		if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[CK_DIAMONAD])
+		if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[CK_DIAMONAD] && m_Type > CK_WOOD)
 			BIGSHOT = 50;
 
 		if(pChr->m_LatestInput.m_Fire&1 && pChr->m_ActiveWeapon == WEAPON_HAMMER && pChr->GetPlayer()->m_MiningTick <= 0)
@@ -113,12 +136,13 @@ void CKs::Tick()
 					break;
 
 				case CK_DIAMONAD:
-					if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[4] && !pChr->GetPlayer()->m_Knapsack.m_Pickaxe[5])
+					if(!pChr->GetPlayer()->m_Knapsack.m_Pickaxe[4] && !pChr->GetPlayer()->m_Knapsack.m_Pickaxe[5])
 					{
 						GameServer()->SendChatTarget(CID, _("You don't have a good pickaxe for Diamond"));
 						GameServer()->SendChatTarget(CID, _("Make a Iron pickaxe or Diamond pickaxe first."));
 						return;
 					}
+					GameServer()->SendChatTarget(CID, _("Make a Iron pickaxe or Diamond pickaxe first."));
 					pChr->m_InMining = true;
 					GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP);
 					Picking(BIGSHOT, pChr->GetPlayer());

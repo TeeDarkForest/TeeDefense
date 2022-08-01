@@ -202,6 +202,10 @@ public:
 
 	virtual void OnSetAuthed(int ClientID, int Level) = 0;
 	virtual class CLayers *Layers() = 0;
+
+	virtual bool GetPaused() = 0;
+public:
+	bool m_NeedResetTowers;
 };
 
 extern IGameServer *CreateGameServer();

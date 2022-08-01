@@ -357,7 +357,7 @@ void CCharacter::FireWeapon()
 				for (int i = 0; i < 9; i++)
 				{
 					float a = frandom()*360 * RAD;
-					new CLightning(GameWorld(), m_Pos, vec2(cosf(a), sinf(a)), 50, 50, m_pPlayer->GetCID(), 2, i);
+					new CLightning(GameWorld(), m_Pos, vec2(cosf(a), sinf(a)), 5, 5, m_pPlayer->GetCID(), 5, 99);
 				}
 			}
 
@@ -761,10 +761,11 @@ void CCharacter::Die(int Killer, int Weapon)
 	int ModeSpecial = GameServer()->m_pController->OnCharacterDeath(this, GameServer()->m_apPlayers[Killer], Weapon);
 
 	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "kill killer='%d:%s' victim='%d:%s' weapon=%d special=%d",
-		Killer, Server()->ClientName(Killer),
-		m_pPlayer->GetCID(), Server()->ClientName(m_pPlayer->GetCID()), Weapon, ModeSpecial);
-	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
+	if(Killer >= 0){
+		str_format(aBuf, sizeof(aBuf), "kill killer='%d:%s' victim='%d:%s' weapon=%d special=%d",
+			Killer, Server()->ClientName(Killer),
+			m_pPlayer->GetCID(), Server()->ClientName(m_pPlayer->GetCID()), Weapon, ModeSpecial);
+		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);}
 
 	// send the kill message
 	CNetMsg_Sv_KillMsg Msg;
@@ -791,6 +792,9 @@ void CCharacter::Die(int Killer, int Weapon)
 
 bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 {
+	if(GetCID() >= ZOMBIE_START && From >= ZOMBIE_START)
+		return false;
+
 	m_Core.m_Vel += Force;
 
 	if(GameServer()->m_pController->IsFriendlyFire(m_pPlayer->GetCID(), From) && !g_Config.m_SvTeamdamage)
@@ -812,6 +816,19 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 	{
 		m_DamageTaken = 0;
 		GameServer()->CreateDamageInd(m_Pos, 0, Dmg);
+	}
+
+	if(!GameServer()->m_apPlayers[From]->GetZomb())
+	{
+		CPlayer *Player = GameServer()->m_apPlayers[From];
+		if(Player->m_Knapsack.m_Sword[LOG_SWORD])
+			Dmg+=2;
+		else if(Player->m_Knapsack.m_Sword[IRON_SWORD])
+			Dmg+=5;
+		else if(Player->m_Knapsack.m_Sword[GOLD_SWORD])
+			Dmg+=7;
+		else if(Player->m_Knapsack.m_Sword[DIAMOND_SWORD])
+			Dmg+=10;
 	}
 
 	if(Dmg)
@@ -1086,9 +1103,9 @@ void CCharacter::DoZombieMovement()
 		if(!pChar || pChar == this || !pChar->IsAlive() || !pChar->GetPlayer() || (GameServer()->Collision()->IntersectTile(m_Pos, pChar->m_Pos) && m_Core.m_HookState != HOOK_GRABBED))
 			continue;
 		
-		if(GameServer()->m_apPlayers[i]->GetTeam() == TEAM_RED && (pClosest == this || distance(m_Pos, pClosest->m_Pos) > distance(m_Pos, pChar->m_Pos)))
+		if(GameServer()->m_apPlayers[i]->GetTeam() == TEAM_HUMAN && (pClosest == this || distance(m_Pos, pClosest->m_Pos) > distance(m_Pos, pChar->m_Pos)))
 			pClosest = pChar;
-		if(GameServer()->m_apPlayers[i]->GetTeam() == TEAM_BLUE && (pCloseZomb == this || distance(m_Pos, pCloseZomb->m_Pos) > distance(m_Pos, pChar->m_Pos)))
+		if(GameServer()->m_apPlayers[i]->GetTeam() == TEAM_ZOMBIE && (pCloseZomb == this || distance(m_Pos, pCloseZomb->m_Pos) > distance(m_Pos, pChar->m_Pos)))
 			pCloseZomb = pChar;
 	}
 	if(pClosest != this)

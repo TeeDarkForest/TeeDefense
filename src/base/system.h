@@ -1320,6 +1320,21 @@ int secure_random_init();
 */
 void secure_random_fill(void *bytes, size_t length);
 
+/**
+ * Checks case sensitive whether the string begins with a certain prefix.
+ *
+ * @ingroup Strings
+ *
+ * @param str String to check.
+ * @param prefix Prefix to look for.
+ *
+ * @return A pointer to the string str after the string prefix, or 0 if
+ *		   the string prefix isn't a prefix of the string str.
+ *
+ * @remark The strings are treated as zero-terminated strings.
+ */
+const char *str_startswith(const char *str, const char *prefix);
+
 #ifdef __cplusplus
 }
 #endif

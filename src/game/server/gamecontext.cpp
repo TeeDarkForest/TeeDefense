@@ -713,6 +713,14 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 			pPlayer->m_LastChat = Server()->Tick();
 			
+			if(str_comp(pMsg->m_pMessage, "s1") == 0)
+			{
+				m_pController->m_aTeamscore[TEAM_HUMAN] = 11;
+			}
+			if(str_comp(pMsg->m_pMessage, "s2") == 0)
+			{
+				m_apPlayers[ClientID]->m_Knapsack.m_Log += 10;
+			}
 			if(pMsg->m_pMessage[0] == '/' || pMsg->m_pMessage[0] == '\\')
 			{
 				switch(m_apPlayers[ClientID]->m_Authed)
@@ -761,8 +769,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			if(pPlayer->m_LastVoteCall && Timeleft > 0)
 			{
 				char aChatmsg[512] = {0};
-				str_format(aChatmsg, sizeof(aChatmsg), _("You must wait %d seconds before making another vote"), (Timeleft/Server()->TickSpeed())+1);
-				SendChatTarget(ClientID, _("You must wait {str:Time} seconds before making another vote"), "Time", (Timeleft/Server()->TickSpeed())+1);
+				int Time = (Timeleft/Server()->TickSpeed())+1;
+				SendChatTarget(ClientID, _("You must wait {int:Time} seconds before making another vote"), "Time", &Time);
 				return;
 			}
 
@@ -772,89 +780,18 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			bool m_ChatTarget = false;
 			CNetMsg_Cl_CallVote *pMsg = (CNetMsg_Cl_CallVote *)pRawMsg;
 			const char *pReason = pMsg->m_Reason[0] ? pMsg->m_Reason : "No reason given";
-
-			if (str_comp(aCmd, "null") == 0)
-			{
-				return;
-			}
-
-			else if (str_comp(aCmd, "log_axe") == 0)
-			{
-				if(m_apPlayers[ClientID]->m_Knapsack.m_Log >= 10)
-				{
-					m_apPlayers[ClientID]->m_Knapsack.m_Log -= 10;
-					if(rand()%10 >= 3)
-					{
-						SendChatTarget(ClientID, _("You made a wooden Axe with 10 logs! Good Job"));
-						m_apPlayers[ClientID]->m_Knapsack.m_Axe[LOG_AXE]++;
-					}
-					else
-					{
-						SendChatTarget(ClientID, _("Bad luck. The production failed..."));
-						SendChatTarget(ClientID, _("You lost 10 logs."));
-					}
-				}
-				else
-				{
-					SendChatTarget(ClientID, _("You need at least 25 logs to make a wooden axe."));
-				}
-				return;
-			}
-			else if (str_comp(aCmd, "copper_axe") == 0)
-			{
-				if(m_apPlayers[ClientID]->m_Knapsack.m_Copper >= 25)
-				{
-					m_apPlayers[ClientID]->m_Knapsack.m_Copper -= 25;
-					if(rand()%10 >= 3)
-					{
-						SendChatTarget(ClientID, _("You made a copper Axe with 25 copper! Good Job"));
-						m_apPlayers[ClientID]->m_Knapsack.m_Axe[COPPER_AXE]++;
-					}
-					else
-					{
-						SendChatTarget(ClientID, _("Bad luck. The production failed..."));
-						SendChatTarget(ClientID, _("You lost 25 copper."));
-					}
-				}
-				else
-				{
-					SendChatTarget(ClientID, _("You need at least 25 copper to make a copper axe."));
-				}
-				return;
-			}
-
-			else if(str_comp(aCmd, "gun_turret"))
-			{
-				if(m_apPlayers[ClientID]->m_Knapsack.m_Log >= 20)
-				{
-					m_apPlayers[ClientID]->m_Knapsack.m_Log -= 20;
-					if(rand()%10 >= 3)
-						SendChatTarget(ClientID, _("You built a wooden gun turret with 20 logs! Do it again!"));
-					else
-					{
-						SendChatTarget(ClientID, _("Bad luck. The production failed..."));
-						SendChatTarget(ClientID, _("You lost 20 logs."));
-					}
-				}
-				else
-				{
-					SendChatTarget(ClientID, _("You need at least 20 logs to build a wooden gun turret."));
-				}
-				return;
-			}
-
-			else if(str_comp_nocase(pMsg->m_Type, "option") == 0)
+			if(str_comp_nocase(pMsg->m_Type, "option") == 0)
 			{
 				CVoteOptionServer *pOption = m_pVoteOptionFirst;
 				while(pOption)
 				{
 					if(str_comp_nocase(pMsg->m_Value, pOption->m_aDescription) == 0)
 					{
-						str_format(aChatmsg, sizeof(aChatmsg), "'%s' called vote to change server option '%s' (%s)", Server()->ClientName(ClientID),
-									pOption->m_aDescription, pReason);
-						SendChatTarget(-1, _("'{str:PlayerName}' called vote to change server option '{str:Option}' (str:Reason)"), "PlayerName",
-									Server()->ClientName(ClientID), "Option", pOption->m_aDescription,
-									"Reason", pReason );
+
+						if(!str_startswith(aCmd, "ccv_"))
+							SendChatTarget(-1, _("'{str:PlayerName}' called vote to change server option '{str:Option}' (str:Reason)"), "PlayerName",
+										Server()->ClientName(ClientID), "Option", pOption->m_aDescription,
+										"Reason", pReason );
 						m_ChatTarget = true;
 						str_format(aDesc, sizeof(aDesc), "%s", pOption->m_aDescription);
 						str_format(aCmd, sizeof(aCmd), "%s", pOption->m_aCommand);
@@ -956,6 +893,339 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				str_format(aCmd, sizeof(aCmd), "set_team %d -1 %d", SpectateID, g_Config.m_SvVoteSpectateRejoindelay);
 			}
 
+			if (str_comp(aCmd, "null") == 0)
+			{
+				return;
+			}
+
+			else if (str_comp(aCmd, "ccv_log_axe") == 0)
+			{
+				if(m_apPlayers[ClientID]->m_Knapsack.m_Log >= 10)
+				{
+					m_apPlayers[ClientID]->m_Knapsack.m_Log -= 10;
+					if(rand()%10 >= 3)
+					{
+						SendChatTarget(ClientID, _("You made a wooden Axe with 10 logs! Good Job"));
+						m_apPlayers[ClientID]->m_Knapsack.m_Axe[LOG_AXE]++;
+					}
+					else
+					{
+						SendChatTarget(ClientID, _("Bad luck. The production failed..."));
+						SendChatTarget(ClientID, _("You lost 10 logs."));
+					}
+				}
+				else
+				{
+					SendChatTarget(ClientID, _("You need at least 10 logs to make a wooden axe."));
+				}
+				return;
+			}
+			else if (str_comp(aCmd, "ccv_copper_axe") == 0)
+			{
+				if(m_apPlayers[ClientID]->m_Knapsack.m_Copper >= 25)
+				{
+					m_apPlayers[ClientID]->m_Knapsack.m_Copper -= 25;
+					if(rand()%10 >= 3)
+					{
+						SendChatTarget(ClientID, _("You made a copper Axe with 25 copper! Good Job"));
+						m_apPlayers[ClientID]->m_Knapsack.m_Axe[COPPER_AXE]++;
+					}
+					else
+					{
+						SendChatTarget(ClientID, _("Bad luck. The production failed..."));
+						SendChatTarget(ClientID, _("You lost 25 copper."));
+					}
+				}
+				else
+				{
+					SendChatTarget(ClientID, _("You need at least 25 copper to make a copper axe."));
+				}
+				return;
+			}
+			else if (str_comp(aCmd, "ccv_iron_axe") == 0)
+			{
+				if(m_apPlayers[ClientID]->m_Knapsack.m_Iron >= 25)
+				{
+					m_apPlayers[ClientID]->m_Knapsack.m_Iron -= 25;
+					if(rand()%10 >= 3)
+					{
+						SendChatTarget(ClientID, _("You made a iron Axe with 25 iron! Good Job"));
+						m_apPlayers[ClientID]->m_Knapsack.m_Axe[IRON_AXE]++;
+					}
+					else
+					{
+						SendChatTarget(ClientID, _("Bad luck. The production failed..."));
+						SendChatTarget(ClientID, _("You lost 25 iron."));
+					}
+				}
+				else
+				{
+					SendChatTarget(ClientID, _("You need at least 25 iron to make a iron axe."));
+				}
+				return;
+			}
+			else if (str_comp(aCmd, "ccv_gold_axe") == 0)
+			{
+				if(m_apPlayers[ClientID]->m_Knapsack.m_Gold >= 25)
+				{
+					m_apPlayers[ClientID]->m_Knapsack.m_Gold -= 25;
+					if(rand()%10 >= 3)
+					{
+						SendChatTarget(ClientID, _("You made a golden Axe with 25 golds! Good Job"));
+						m_apPlayers[ClientID]->m_Knapsack.m_Axe[GOLD_AXE]++;
+					}
+					else
+					{
+						SendChatTarget(ClientID, _("Bad luck. The production failed..."));
+						SendChatTarget(ClientID, _("You lost 25 golds."));
+					}
+				}
+				else
+				{
+					SendChatTarget(ClientID, _("You need at least 25 golds to make a golden axe."));
+				}
+				return;
+			}
+			else if (str_comp(aCmd, "ccv_diamond_axe") == 0)
+			{
+				if(m_apPlayers[ClientID]->m_Knapsack.m_Diamond >= 10)
+				{
+					m_apPlayers[ClientID]->m_Knapsack.m_Diamond -= 10;
+					if(rand()%10 >= 3)
+					{
+						SendChatTarget(ClientID, _("You made a diamond Axe with 10 diamonds! Good Job"));
+						m_apPlayers[ClientID]->m_Knapsack.m_Axe[DIAMOND_AXE]++;
+					}
+					else
+					{
+						SendChatTarget(ClientID, _("Bad luck. The production failed..."));
+						SendChatTarget(ClientID, _("You lost 10 diamonds."));
+					}
+				}
+				else
+				{
+					SendChatTarget(ClientID, _("You need at least 10 diamonds to make a diamonds axe."));
+				}
+				return;
+			}
+			else if (str_comp(aCmd, "ccv_log_sword") == 0)
+			{
+				if(m_apPlayers[ClientID]->m_Knapsack.m_Log >= 25)
+				{
+					m_apPlayers[ClientID]->m_Knapsack.m_Log -= 25;
+					if(rand()%10 >= 3)
+					{
+						SendChatTarget(ClientID, _("You made a wooden sword with 25 logs! Good Job"));
+						m_apPlayers[ClientID]->m_Knapsack.m_Sword[LOG_SWORD]++;
+					}
+					else
+					{
+						SendChatTarget(ClientID, _("Bad luck. The production failed..."));
+						SendChatTarget(ClientID, _("You lost 25 logs."));
+					}
+				}
+				else
+				{
+					SendChatTarget(ClientID, _("You need at least 25 logs to make a wooden sword."));
+				}
+				return;
+			}
+			else if (str_comp(aCmd, "ccv_iron_sword") == 0)
+			{
+				if(m_apPlayers[ClientID]->m_Knapsack.m_Iron >= 25)
+				{
+					m_apPlayers[ClientID]->m_Knapsack.m_Iron -= 25;
+					if(rand()%10 >= 3)
+					{
+						SendChatTarget(ClientID, _("You made a iron sword with 25 iron! Good Job"));
+						m_apPlayers[ClientID]->m_Knapsack.m_Sword[IRON_SWORD]++;
+					}
+					else
+					{
+						SendChatTarget(ClientID, _("Bad luck. The production failed..."));
+						SendChatTarget(ClientID, _("You lost 25 iron."));
+					}
+				}
+				else
+				{
+					SendChatTarget(ClientID, _("You need at least 25 iron to make a iron sword."));
+				}
+				return;
+			}
+			else if (str_comp(aCmd, "ccv_gold_sword") == 0)
+			{
+				if(m_apPlayers[ClientID]->m_Knapsack.m_Gold >= 25)
+				{
+					m_apPlayers[ClientID]->m_Knapsack.m_Gold -= 25;
+					if(rand()%10 >= 3)
+					{
+						SendChatTarget(ClientID, _("You made a golden sword with 25 gold! Good Job"));
+						m_apPlayers[ClientID]->m_Knapsack.m_Sword[GOLD_SWORD]++;
+					}
+					else
+					{
+						SendChatTarget(ClientID, _("Bad luck. The production failed..."));
+						SendChatTarget(ClientID, _("You lost 25 gold."));
+					}
+				}
+				else
+				{
+					SendChatTarget(ClientID, _("You need at least 25 gold to make a golden sword."));
+				}
+				return;
+			}
+			else if (str_comp(aCmd, "ccv_gold_sword") == 0)
+			{
+				if(m_apPlayers[ClientID]->m_Knapsack.m_Diamond >= 10)
+				{
+					m_apPlayers[ClientID]->m_Knapsack.m_Diamond -= 10;
+					if(rand()%10 >= 3)
+					{
+						SendChatTarget(ClientID, _("You made a diamond sword with 25 diamonds! Good Job"));
+						m_apPlayers[ClientID]->m_Knapsack.m_Sword[DIAMOND_SWORD]++;
+					}
+					else
+					{
+						SendChatTarget(ClientID, _("Bad luck. The production failed..."));
+						SendChatTarget(ClientID, _("You lost 10 diamonds."));
+					}
+				}
+				else
+				{
+					SendChatTarget(ClientID, _("You need at least 10 diamonds to make a diamonds sword."));
+				}
+				return;
+			}
+			else if (str_comp(aCmd, "ccv_log_pickaxe") == 0)
+			{
+				if(m_apPlayers[ClientID]->m_Knapsack.m_Log >= 25)
+				{
+					m_apPlayers[ClientID]->m_Knapsack.m_Log -= 25;
+					if(rand()%10 >= 3)
+					{
+						SendChatTarget(ClientID, _("You made a wooden pickaxe with 25 logs! Good Job"));
+						m_apPlayers[ClientID]->m_Knapsack.m_Pickaxe[LOG_PICKAXE]++;
+					}
+					else
+					{
+						SendChatTarget(ClientID, _("Bad luck. The production failed..."));
+						SendChatTarget(ClientID, _("You lost 25 logs."));
+					}
+				}
+				else
+				{
+					SendChatTarget(ClientID, _("You need at least 25 logs to make a wooden sword."));
+				}
+				return;
+			}
+			else if (str_comp(aCmd, "ccv_copper_pickaxe") == 0)
+			{
+				if(m_apPlayers[ClientID]->m_Knapsack.m_Copper >= 25)
+				{
+					m_apPlayers[ClientID]->m_Knapsack.m_Copper -= 25;
+					if(rand()%10 >= 3)
+					{
+						SendChatTarget(ClientID, _("You made a copper pickaxe with 25 copper! Good Job"));
+						m_apPlayers[ClientID]->m_Knapsack.m_Pickaxe[COPPER_PICKAXE]++;
+					}
+					else
+					{
+						SendChatTarget(ClientID, _("Bad luck. The production failed..."));
+						SendChatTarget(ClientID, _("You lost 25 copper."));
+					}
+				}
+				else
+				{
+					SendChatTarget(ClientID, _("You need at least 25 copper to make a copper pickaxe."));
+				}
+				return;
+			}
+			else if (str_comp(aCmd, "ccv_iron_pickaxe") == 0)
+			{
+				if(m_apPlayers[ClientID]->m_Knapsack.m_Iron >= 25)
+				{
+					m_apPlayers[ClientID]->m_Knapsack.m_Iron -= 25;
+					if(rand()%10 >= 3)
+					{
+						SendChatTarget(ClientID, _("You made a iron pickaxe with 25 iron! Good Job"));
+						m_apPlayers[ClientID]->m_Knapsack.m_Pickaxe[IRON_PICKAXE]++;
+					}
+					else
+					{
+						SendChatTarget(ClientID, _("Bad luck. The production failed..."));
+						SendChatTarget(ClientID, _("You lost 25 iron."));
+					}
+				}
+				else
+				{
+					SendChatTarget(ClientID, _("You need at least 25 iron to make a iron pickaxe."));
+				}
+				return;
+			}
+			else if (str_comp(aCmd, "ccv_gold_pickaxe") == 0)
+			{
+				if(m_apPlayers[ClientID]->m_Knapsack.m_Copper >= 25)
+				{
+					m_apPlayers[ClientID]->m_Knapsack.m_Copper -= 25;
+					if(rand()%10 >= 3)
+					{
+						SendChatTarget(ClientID, _("You made a golds pickaxe with 25 golds! Good Job"));
+						m_apPlayers[ClientID]->m_Knapsack.m_Pickaxe[GOLD_PICKAXE]++;
+					}
+					else
+					{
+						SendChatTarget(ClientID, _("Bad luck. The production failed..."));
+						SendChatTarget(ClientID, _("You lost 25 golds."));
+					}
+				}
+				else
+				{
+					SendChatTarget(ClientID, _("You need at least 25 golds to make a golden pickaxe."));
+				}
+				return;
+			}
+			else if (str_comp(aCmd, "ccv_diamond_pickaxe") == 0)
+			{
+				if(m_apPlayers[ClientID]->m_Knapsack.m_Diamond >= 10)
+				{
+					m_apPlayers[ClientID]->m_Knapsack.m_Diamond -= 10;
+					if(rand()%10 >= 3)
+					{
+						SendChatTarget(ClientID, _("You made a diamond pickaxe with 10 diamonds! Good Job"));
+						m_apPlayers[ClientID]->m_Knapsack.m_Pickaxe[DIAMOND_PICKAXE]++;
+					}
+					else
+					{
+						SendChatTarget(ClientID, _("Bad luck. The production failed..."));
+						SendChatTarget(ClientID, _("You lost 10 diamonds."));
+					}
+				}
+				else
+				{
+					SendChatTarget(ClientID, _("You need at least 25 diamonds to make a diamond pickaxe."));
+				}
+				return;
+			}
+			else if(str_comp(aCmd, "ccv_gun_turret") == 0)
+			{
+				if(m_apPlayers[ClientID]->m_Knapsack.m_Log >= 20)
+				{
+					m_apPlayers[ClientID]->m_Knapsack.m_Log -= 20;
+					if(rand()%10 >= 2)
+						SendChatTarget(ClientID, _("You built a wooden gun turret with 20 logs! Do it again!"));
+					else
+					{
+						SendChatTarget(ClientID, _("Bad luck. The production failed..."));
+						SendChatTarget(ClientID, _("You lost 20 logs."));
+					}
+				}
+				else
+				{
+					SendChatTarget(ClientID, _("You need at least 20 logs to build a wooden gun turret."));
+				}
+				return;
+			}
+
 			if(aCmd[0])
 			{
 				if(!m_ChatTarget)
@@ -966,6 +1236,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				m_VoteCreator = ClientID;
 				pPlayer->m_LastVoteCall = Now;
 			}
+			
 		}
 		else if(MsgID == NETMSGTYPE_CL_VOTE)
 		{
@@ -1330,19 +1601,19 @@ void CGameContext::ConShuffleTeams(IConsole::IResult *pResult, void *pUserData)
 		if(pSelf->m_apPlayers[i] && pSelf->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
 		{
 			if(CounterRed == PlayerTeam)
-				pSelf->m_apPlayers[i]->SetTeam(TEAM_BLUE, false);
+				pSelf->m_apPlayers[i]->SetTeam(TEAM_ZOMBIE, false);
 			else if(CounterBlue == PlayerTeam)
-				pSelf->m_apPlayers[i]->SetTeam(TEAM_RED, false);
+				pSelf->m_apPlayers[i]->SetTeam(TEAM_HUMAN, false);
 			else
 			{
 				if(rand() % 2)
 				{
-					pSelf->m_apPlayers[i]->SetTeam(TEAM_BLUE, false);
+					pSelf->m_apPlayers[i]->SetTeam(TEAM_ZOMBIE, false);
 					++CounterBlue;
 				}
 				else
 				{
-					pSelf->m_apPlayers[i]->SetTeam(TEAM_RED, false);
+					pSelf->m_apPlayers[i]->SetTeam(TEAM_HUMAN, false);
 					++CounterRed;
 				}
 			}
@@ -1362,11 +1633,18 @@ void CGameContext::ConLockTeams(IConsole::IResult *pResult, void *pUserData)
 		pSelf->SendChatTarget(-1, _("Teams were unlocked"));
 }
 
+void CGameContext::ConSkipWarmup(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->m_pController->m_Warmup = 1;
+}
+
 void CGameContext::ConAddCommandVote(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	const char *pDescription = pResult->GetString(0);
-	const char *pCommand = pResult->GetString(1);
+	char pCommand[256];
+	str_format(pCommand, sizeof(pCommand), "ccv_%s", pResult->GetString(1));
 
 	if(pSelf->m_NumVoteOptions == MAX_VOTE_OPTIONS)
 	{
@@ -1681,29 +1959,35 @@ void CGameContext::ConchainSpecialMotdupdate(IConsole::IResult *pResult, void *p
 	}
 }
 
+void CGameContext::ConHelp(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext* pThis = (CGameContext*) pUserData;
+	pThis->SendChatTarget(-1, _("Defense Zombies, dont let them touch you base."));
+	pThis->SendChatTarget(-1, _("If you team's Tower no health left, you lose."));
+	pThis->SendChatTarget(-1, _("Don't try complete all wave, be cause it's Infinite!."));
+	pThis->SendChatTarget(-1, _("Zombies made by AssassinTee."));
+	pThis->SendChatTarget(-1, _("-------"));
+	pThis->SendChatTarget(-1, _("In the map have many 'CKs'."));
+	pThis->SendChatTarget(-1, _("The 'heart' is 'CK' log"));
+	pThis->SendChatTarget(-1, _("Other I point at map 'TDef1'."));
+	pThis->SendChatTarget(-1, _("Just find them then check!"));
+	pThis->SendChatTarget(-1, _("You can craft tools in Vote, check them."));
+}
+
 void CGameContext::ConAbout(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext* pThis = (CGameContext*) pUserData;
 	
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "%s %s by %s", MOD_NAME, MOD_VERSION, MOD_AUTHORS);
-	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_CHAT, "chat", aBuf);
-	
+	pThis->SendChatTarget(pResult->GetClientID(), _("{str:modname} {str:version} by {str:author}"), "modname", MOD_NAME, "version", MOD_VERSION, "author", MOD_AUTHORS);
+
 	if(MOD_CREDITS[0])
-	{
-		str_format(aBuf, sizeof(aBuf), "Credits: %s", MOD_CREDITS);
-		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_CHAT, "chat", aBuf);
-	}
+		pThis->SendChatTarget(pResult->GetClientID(), _("Credits: {str:c}"), MOD_CREDITS);
 	if(MOD_THANKS[0])
-	{
-		str_format(aBuf, sizeof(aBuf), "Thanks to: %s", MOD_THANKS);
-		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_CHAT, "chat", aBuf);
-	}
+		pThis->SendChatTarget(pResult->GetClientID(), _("Thanks to: {str:t}"), "t", MOD_THANKS);
 	if(MOD_SOURCES[0])
-	{
-		str_format(aBuf, sizeof(aBuf), "Sources: %s", MOD_SOURCES);
-		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_CHAT, "chat", aBuf);
-	}
+		pThis->SendChatTarget(pResult->GetClientID(), _("Sources: {str:s}"), "s", MOD_SOURCES);
 }
 
 void CGameContext::ConLanguage(IConsole::IResult *pResult, void *pUserData)
@@ -1736,9 +2020,6 @@ void CGameContext::ConLanguage(IConsole::IResult *pResult, void *pUserData)
 	{
 		pSelf->SetClientLanguage(ClientID, aFinalLanguageCode);
 		pSelf->SendChatTarget(ClientID, _("Language successfully switched to English"));
-		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "%s change language to %s", pSelf->Server()->ClientName(ClientID), aFinalLanguageCode);
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "language", aBuf);	
 	}
 	else
 	{
@@ -1759,9 +2040,6 @@ void CGameContext::ConLanguage(IConsole::IResult *pResult, void *pUserData)
 		
 		dynamic_string Buffer;
 		pSelf->Server()->Localization()->Format_L(Buffer, pLanguage, _("Available languages: {str:ListOfLanguage}"), "ListOfLanguage", BufferList.buffer(), NULL);
-		
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "language", Buffer.buffer());
-
 		pSelf->SendChatTarget(ClientID, Buffer.buffer());
 	}
 	
@@ -1875,8 +2153,10 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("vote", "r", CFGFLAG_SERVER, ConVote, this, "Force a vote to yes/no");
 	
 	Console()->Register("about", "", CFGFLAG_CHAT, ConAbout, this, "Show information about the mod");
+	Console()->Register("help", "", CFGFLAG_CHAT, ConHelp, this, "Show information about the mod");
 	Console()->Register("language", "?s", CFGFLAG_CHAT, ConLanguage, this, "change language");
 	Console()->Register("classpassword", "?s", CFGFLAG_CHAT, ConClassPassword, this, "Show information about the mod");
+	Console()->Register("skip_warmup", "", CFGFLAG_SERVER, ConSkipWarmup, this, "Show information about the mod");
 
 	Console()->Chain("sv_motd", ConchainSpecialMotdupdate, this);
 }
@@ -1897,7 +2177,6 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	m_Layers.Init(Kernel());
 	m_Collision.Init(&m_Layers);
 	
-	// fly
 	m_pController = new CGameControllerMOD(this); 
 
 	// create all entities from the game layer
@@ -2003,9 +2282,14 @@ void CGameContext::OnZombieKill(int ClientID)
 	m_apPlayers[ClientID] = 0;
 
 	// update spectator modes
-	for(int i = 0; i < MAX_CLIENTS; ++i)
+	for(int i = 0; i < ZOMBIE_END; ++i)
 	{
 		if(m_apPlayers[i] && m_apPlayers[i]->m_SpectatorID == ClientID)
 			m_apPlayers[i]->m_SpectatorID = SPEC_FREEVIEW;
 	}
+}
+
+bool CGameContext::GetPaused()
+{
+	return m_World.m_Paused;
 }

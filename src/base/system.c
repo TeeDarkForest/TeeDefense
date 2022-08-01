@@ -1794,6 +1794,19 @@ void net_stats(NETSTATS *stats_inout)
 	*stats_inout = network_stats;
 }
 
+const char *str_startswith(const char *str, const char *prefix)
+{
+	int prefixl = str_length(prefix);
+	if(str_comp_num(str, prefix, prefixl) == 0)
+	{
+		return str + prefixl;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
 void gui_messagebox(const char *title, const char *message)
 {
 #if defined(CONF_PLATFORM_MACOSX)

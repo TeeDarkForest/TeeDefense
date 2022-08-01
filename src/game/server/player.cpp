@@ -405,7 +405,7 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 		return;
 
 	char aBuf[512];
-	if(Team == TEAM_BLUE)
+	if(Team == TEAM_ZOMBIE)
 		return;
 
 	if(DoChatMsg)
@@ -413,10 +413,10 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 		if(Team == TEAM_SPECTATORS)
 		{
 			GameServer()->SendChatTarget(-1, _("'{str:Player}' joined the spectators"),"Player", Server()->ClientName(m_ClientID));
-		}else if(Team == TEAM_RED && GameServer()->m_pController->IsTeamplay())
+		}else if(Team == TEAM_HUMAN && GameServer()->m_pController->IsTeamplay())
 		{
 			GameServer()->SendChatTarget(-1, _("'{str:Player}' joined the redteam"),"Player", Server()->ClientName(m_ClientID));
-		}else if(Team == TEAM_BLUE && GameServer()->m_pController->IsTeamplay())
+		}else if(Team == TEAM_ZOMBIE && GameServer()->m_pController->IsTeamplay())
 		{
 			GameServer()->SendChatTarget(-1, _("'{str:Player}' joined the blueteam"),"Player", Server()->ClientName(m_ClientID));
 		}else

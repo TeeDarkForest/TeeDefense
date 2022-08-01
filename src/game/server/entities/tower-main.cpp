@@ -2,6 +2,7 @@
 #include <game/server/gamecontext.h>
 #include <game/server/player.h>
 #include <new>
+#include <engine/shared/config.h>
 
 #define PickupPhysSizeS 14
 #define M_PI 3.14159265358979323846
@@ -13,20 +14,47 @@ CTowerMain::CTowerMain(CGameWorld *pGameWorld, vec2 StandPos)
     for (unsigned i = 0; i < sizeof(m_aIDs) / sizeof(int); i ++)
         m_aIDs[i] = Server()->SnapNewID();
 
+    for(int i=0; i<NumSide; i++)
+	{
+		m_alIDs[i] = Server()->SnapNewID();
+	}
+
+    m_FlagID = Server()->SnapNewID();
     m_ProximityRadius = PickupPhysSizeS;
 
     GameWorld()->InsertEntity(this);
 
-    m_Health = 1;
+    m_Health = g_Config.m_SvMaxTowerHealth;
 }
 
 void CTowerMain::Tick()
 {
+    GameServer()->m_TowerHealth = m_Health;
     for(CCharacter *pChr = (CCharacter*) GameWorld()->FindFirst(CGameWorld::ENTTYPE_CHARACTER); pChr; pChr = (CCharacter *)pChr->TypeNext())
     {
-        int ClientID = pChr->GetCID();
-        if(Server()->Tick()%Server()->TickSpeed() == 0)
-            pChr->IncreaseHealth(1);
+        if(!pChr->IsAlive())
+            return;
+
+        float Len = distance(pChr->m_Pos, m_Pos);
+        if(Len < pChr->m_ProximityRadius+Radius)
+        {
+            if(pChr->GetPlayer()->GetZomb())
+            {
+                TakeDamage(1);
+                if(pChr && pChr->GetPlayer())
+                    pChr->Die(-1, WEAPON_GAME);
+                GameServer()->m_pController->DoLifeMessage(m_Health);
+                continue;
+            }
+
+            int ClientID = pChr->GetCID();
+
+            if(Server()->Tick()%Server()->TickSpeed() == 0)
+            {
+                pChr->IncreaseHealth(3);
+                GameServer()->SendBroadcast_VL(_("\n\n\n\n\n\n\nHealth: {int:Health}/{int:MaxHealth}"), ClientID, "Health", &m_Health, "MaxHealth", &g_Config.m_SvMaxTowerHealth);
+            }
+        }
     }
 }
 void CTowerMain::Reset() 
@@ -38,10 +66,17 @@ void CTowerMain::Reset()
 			m_aIDs[i] = -1;
 		}
 	}
+    Server()->SnapFreeID(m_FlagID);
+
+    for(int i=0; i<NumSide; i++)
+	{
+		Server()->SnapFreeID(m_alIDs[i]);
+	}
+
     GameServer()->m_World.DestroyEntity(this);
 }
 
-void CTowerMain::Snap(int SnappingCLient)
+void CTowerMain::Snap(int SnappingClient)
 {
     int aSize = sizeof(m_aIDs) / sizeof(int);
 
@@ -58,13 +93,23 @@ void CTowerMain::Snap(int SnappingCLient)
 		pEff->m_Type = WEAPON_SHOTGUN;
     }
 
-    CNetObj_Flag *pFlag = static_cast<CNetObj_Flag *>(Server()->SnapNewItem(NETOBJTYPE_FLAG, m_FlagID, sizeof(CNetObj_Flag)));
-    if(!pFlag)
-        return;
+    float AngleStep = 2.0f * M_PI / NumSide;
 
-    pFlag->m_Team = TEAM_RED;    
-    pFlag->m_X = m_Pos.x;
-    pFlag->m_Y = m_Pos.y;
+    for(int i=0; i<NumSide; i++)
+	{
+		vec2 PartPosStart = m_Pos + vec2(Radius * cos(AngleStep*i), Radius * sin(AngleStep*i));
+		vec2 PartPosEnd = m_Pos + vec2(Radius * cos(AngleStep*(i+1)), Radius * sin(AngleStep*(i+1)));
+		
+		CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_alIDs[i], sizeof(CNetObj_Laser)));
+		if(!pObj)
+			return;
+
+		pObj->m_X = (int)PartPosStart.x;
+		pObj->m_Y = (int)PartPosStart.y;
+		pObj->m_FromX = (int)PartPosEnd.x;
+		pObj->m_FromY = (int)PartPosEnd.y;
+		pObj->m_StartTick = Server()->Tick();
+	}
 }
 
 void CTowerMain::TakeDamage(int Dmg)

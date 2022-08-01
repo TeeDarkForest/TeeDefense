@@ -90,6 +90,10 @@ MACRO_CONFIG_INT(SvLives, sv_lives, 10, 0, 0, CFGFLAG_SERVER, "Number of the hum
 MACRO_CONFIG_INT(SvAllowSpecVote, sv_spec_vote, 0, 1, 1, CFGFLAG_SERVER, "Allow spec voting or not")
 MACRO_CONFIG_INT(SvMaxZombieSpawn, sv_max_zombie_spawn, 1, 1, 20, CFGFLAG_SERVER, "Number of the max spawn tries of all zombies per tick")
 
+// TeeDefense
+MACRO_CONFIG_INT(SvMaxTowerHealth, sv_max_tower_health, 100, 1, 1000, CFGFLAG_SERVER, "Main max tower health")
+
+
 // debug
 #ifdef CONF_DEBUG // this one can crash the server if not used correctly
 	MACRO_CONFIG_INT(DbgDummies, dbg_dummies, 0, 0, 15, CFGFLAG_SERVER, "")

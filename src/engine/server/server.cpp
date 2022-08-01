@@ -1591,6 +1591,27 @@ int CServer::Run()
 			int64 t = time_get();
 			int NewTicks = 0;
 
+			if(GameServer()->m_NeedResetTowers && !GameServer()->GetPaused())
+			{
+				GameServer()->OnShutdown();
+
+				for(int c = 0; c < MAX_CLIENTS; c++)
+				{
+					if(m_aClients[c].m_State <= CClient::STATE_AUTH)
+						continue;
+
+					SendMap(c);
+					m_aClients[c].Reset();
+					m_aClients[c].m_State = CClient::STATE_CONNECTING;
+				}
+
+				m_GameStartTime = time_get();
+				m_CurrentGameTick = 0;
+				Kernel()->ReregisterInterface(GameServer());
+				GameServer()->OnInit();
+				UpdateServerInfo();
+				GameServer()->m_NeedResetTowers = false;	
+			}
 			// load new map TODO: don't poll this
 			if(str_comp(g_Config.m_SvMap, m_aCurrentMap) != 0 || m_MapReload)
 			{

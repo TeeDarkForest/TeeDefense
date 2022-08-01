@@ -4,7 +4,8 @@
 #include <game/server/gamecontext.h>
 #include <game/server/entity.h>
 
-
+#define NumSide 32
+#define Radius 240
 class CTowerMain : public CEntity
 {
 public:
@@ -22,6 +23,7 @@ private:
 
     int m_FlagID;
     int m_aIDs[9];
+    int m_alIDs[NumSide];
 };
 
 #endif

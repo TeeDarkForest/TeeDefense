@@ -32,8 +32,8 @@ void CGameControllerMOD::Snap(int SnappingClient)
 	if(!pGameDataObj)
 		return;
 
-	pGameDataObj->m_TeamscoreRed = m_aTeamscore[TEAM_RED];
-	pGameDataObj->m_TeamscoreBlue = m_aTeamscore[TEAM_BLUE];
+	pGameDataObj->m_TeamscoreRed = m_aTeamscore[TEAM_HUMAN];
+	pGameDataObj->m_TeamscoreBlue = m_aTeamscore[TEAM_ZOMBIE];
 
 	pGameDataObj->m_FlagCarrierRed = 0;
 	pGameDataObj->m_FlagCarrierBlue = 0;
@@ -42,11 +42,11 @@ void CGameControllerMOD::Snap(int SnappingClient)
 void CGameControllerMOD::Tick()
 {
 	int Players = 0;
-	for(int i = 0;i < VANILLA_MAX_CLIENTS - 1; i++)
+	for(int i = 0;i < ZOMBIE_START; i++)
 	{
 		if(GameServer()->m_apPlayers[Players])
 		{
-			if(GameServer()->m_apPlayers[Players]->GetTeam() == TEAM_RED)
+			if(GameServer()->m_apPlayers[Players]->GetTeam() == TEAM_HUMAN)
 			{
 				Players++;
 			}

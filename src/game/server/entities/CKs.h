@@ -15,6 +15,7 @@ enum
     CK_IRON,
     CK_GOLD,
     CK_DIAMONAD,
+	CK_ENEGRY,
 };
 
 class CKs : public CEntity

@@ -37,6 +37,10 @@ CKs::CKs(CGameWorld *pGameWorld, int Type, vec2 Pos, int SubType)
 	case CK_DIAMONAD:
 		m_Health = 10000;
 		break;
+
+	case CK_ENEGRY:
+		m_Health = 15000;
+		break;
 	
 	default:
 		m_Health = 99999999;
@@ -58,20 +62,6 @@ void CKs::Reset()
 
 void CKs::Tick()
 {
-	// wait for respawn
-	if(m_SpawnTick > 0)
-	{
-		if(Server()->Tick() > m_SpawnTick)
-		{
-			// respawn
-			m_SpawnTick = -1;
-
-			if(m_Type == POWERUP_WEAPON)
-				GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN);
-		}
-		else
-			return;
-	}
 	// Check if a player intersected us
 	CCharacter *pChr = GameServer()->m_World.ClosestCharacter(m_Pos, 20.0f, 0);
 	if(pChr && pChr->IsAlive() && !pChr->GetPlayer()->GetZomb())
@@ -88,7 +78,12 @@ void CKs::Tick()
 		int RespawnTime = -1;
 		int BIGSHOT = 1;
 		if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[DIAMOND_PICKAXE] && m_Type > CK_WOOD)
-			BIGSHOT = 2000;
+		{
+			if(m_Type < CK_ENEGRY)
+				BIGSHOT = 3500;
+			else
+				BIGSHOT = 1000;
+		}
 		else if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[GOLD_PICKAXE] && m_Type > CK_WOOD)
 		{
 			if(m_Type == CK_DIAMONAD)
@@ -160,6 +155,20 @@ void CKs::Tick()
 					GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP);
 					Picking(BIGSHOT, pChr->GetPlayer());
 					break;
+				case CK_ENEGRY:
+					if(!pChr->GetPlayer()->m_Knapsack.m_Pickaxe[DIAMOND_PICKAXE])
+					{
+						if(Server()->Tick()%50 == 0)
+						{
+							GameServer()->SendChatTarget(CID, _("You need Diamond pickaxe for pick Enegry!"));
+							GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO);
+						}
+						return;
+					}
+					pChr->m_InMining = true;
+					GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP);
+					Picking(BIGSHOT, pChr->GetPlayer());
+					break;
 				
 
 				default:
@@ -199,13 +208,18 @@ void CKs::Picking(int Time, CPlayer *Player)
 			break;
 		case CK_GOLD:
 			Player->m_Knapsack.m_Gold++;
-			GameServer()->SendChatTarget(CID, _("You picked up a Gold (damn why when I created this mode just make gold important, in Minecraft it just a piece of sXXt!!!!!!!!!)"));
+			GameServer()->SendChatTarget(CID, _("You picked up a Gold"));
 			m_Health = 6000;
 			break;
 		case CK_DIAMONAD:
 			Player->m_Knapsack.m_Diamond++;
-			GameServer()->SendChatTarget(CID, _("OMG DIAMONAD! U PICKED UP A DIAMONAD!!!!!"));
+			GameServer()->SendChatTarget(CID, _("You picked up a Diamond."));
 			m_Health = 10000;
+			break;
+		case CK_ENEGRY:
+			Player->m_Knapsack.m_Enegry++;
+			GameServer()->SendChatTarget(CID, _("You"));
+			m_Health = 15000;
 			break;
 		
 		default:

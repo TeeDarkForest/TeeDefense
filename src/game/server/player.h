@@ -9,26 +9,31 @@
 
 enum
 {
-	SWORD_TYPES=4,
-	PICKAXE_TYPES=5,
-	AXE_TYPES=5,
+	SWORD_TYPES=END_SWORD,
+	PICKAXE_TYPES=END_PICKAXE,
+	AXE_TYPES=END_AXE,
 
 	LOG_AXE=0,
 	COPPER_AXE,
 	IRON_AXE,
 	GOLD_AXE,
 	DIAMOND_AXE,
+	END_AXE,
 
 	LOG_SWORD=0,
 	IRON_SWORD,
 	GOLD_SWORD,
 	DIAMOND_SWORD,
+	ENEGRY_SWORD,
+	END_SWORD,
 
 	LOG_PICKAXE=0,
 	COPPER_PICKAXE,
 	IRON_PICKAXE,
 	GOLD_PICKAXE,
 	DIAMOND_PICKAXE,
+	ENEGRY_PICKAXE
+	END_PICKAXE,
 };
 // player object
 class CPlayer
@@ -159,7 +164,8 @@ public:
 		int m_Copper; // Step 3
 		int m_Iron; // Step 4
 		int m_Gold; // Step 5
-		int m_Diamond; // LAST STEP, DIAMOND!
+		int m_Diamond; // Step 6
+		int m_Enegry;
 
 		int m_Sword[SWORD_TYPES];
 		int m_Pickaxe[PICKAXE_TYPES];

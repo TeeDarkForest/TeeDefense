@@ -1273,11 +1273,6 @@ void CCharacter::DoZombieAim(vec2 VictimPos, int VicCID, vec2 NearZombPos, int N
 		//Zamer
 		if(m_pPlayer->GetZomb(4))
 		{	
-			m_Aim.m_Explode = true;
-			GameServer()->CreateExplosion(m_Pos, m_pPlayer->GetCID(), WEAPON_GRENADE, false);
-			for(int i = 0; i < 100; i++)
-				GameServer()->CreateSound(vec2(m_Pos.x + 5, m_Pos.y + 5), SOUND_GRENADE_FIRE);
-			Die(m_pPlayer->GetCID(), WEAPON_SELF);
 			return;
 		}
 

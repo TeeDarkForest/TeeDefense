@@ -87,21 +87,21 @@ void CKs::Tick()
 
 		int RespawnTime = -1;
 		int BIGSHOT = 1;
-		if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[CK_WOOD] && m_Type < CK_IRON && m_Type > CK_WOOD)
-			BIGSHOT = 10;
-		if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[CK_COPPER] && m_Type < CK_GOLD && m_Type > CK_WOOD)
-			BIGSHOT = 20;
-		if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[CK_IRON] && m_Type < CK_DIAMONAD && m_Type > CK_WOOD)
-			BIGSHOT = 20;
-		if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[CK_GOLD] && m_Type > CK_WOOD)
+		if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[CK_DIAMONAD])
+			BIGSHOT = 2000;
+		else if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[CK_GOLD])
 		{
-			if(m_Type < CK_DIAMONAD)
-				BIGSHOT = 10;
+			if(m_Type == CK_DIAMONAD)
+				BIGSHOT = 100;
 			else
-				BIGSHOT = 30;
+				BIGSHOT = 1500;
 		}
-		if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[CK_DIAMONAD] && m_Type > CK_WOOD)
-			BIGSHOT = 50;
+		else if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[CK_IRON] && m_Type < CK_DIAMONAD && m_Type > CK_WOOD)
+			BIGSHOT = 700;
+		else if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[CK_COPPER] && m_Type < CK_GOLD && m_Type > CK_WOOD)
+			BIGSHOT = 500;
+		else if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[CK_WOOD] && m_Type < CK_IRON && m_Type > CK_WOOD)
+			BIGSHOT = 200;
 
 		if(pChr->m_LatestInput.m_Fire&1 && pChr->m_ActiveWeapon == WEAPON_HAMMER && pChr->GetPlayer()->m_MiningTick <= 0)
 		{
@@ -127,14 +127,25 @@ void CKs::Tick()
 					break;
 
 				case CK_COAL:
+					pChr->m_InMining = true;
+					GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP);
+					Picking(BIGSHOT, pChr->GetPlayer());
+					break;
 				case CK_IRON:
+					pChr->m_InMining = true;
+					GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP);
+					Picking(BIGSHOT, pChr->GetPlayer());
+					break;
 				case CK_COPPER:
+					pChr->m_InMining = true;
+					GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP);
+					Picking(BIGSHOT, pChr->GetPlayer());
+					break;
 				case CK_GOLD:
 					pChr->m_InMining = true;
 					GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP);
 					Picking(BIGSHOT, pChr->GetPlayer());
 					break;
-
 				case CK_DIAMONAD:
 					if(!pChr->GetPlayer()->m_Knapsack.m_Pickaxe[4] && !pChr->GetPlayer()->m_Knapsack.m_Pickaxe[5])
 					{

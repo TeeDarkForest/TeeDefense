@@ -27,15 +27,15 @@ CKs::CKs(CGameWorld *pGameWorld, int Type, vec2 Pos, int SubType)
 		break;
 
 	case CK_IRON:
-		m_Health = 2000;
+		m_Health = 4000;
 		break;
 
 	case CK_GOLD:
-		m_Health = 2700;
+		m_Health = 6000;
 		break;
 
 	case CK_DIAMONAD:
-		m_Health = 3000;
+		m_Health = 10000;
 		break;
 	
 	default:
@@ -112,15 +112,15 @@ void CKs::Tick()
 				case CK_WOOD:
 					pChr->m_InMining = true;
 					GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP);
-					if(pChr->GetPlayer()->m_Knapsack.m_Axe[DIAMOND_PICKAXE])
+					if(pChr->GetPlayer()->m_Knapsack.m_Axe[DIAMOND_AXE])
 						Picking(50, pChr->GetPlayer());
-					else if(pChr->GetPlayer()->m_Knapsack.m_Axe[GOLD_PICKAXE])
+					else if(pChr->GetPlayer()->m_Knapsack.m_Axe[GOLD_AXE])
 						Picking(30, pChr->GetPlayer());
-					else if(pChr->GetPlayer()->m_Knapsack.m_Axe[IRON_PICKAXE])
+					else if(pChr->GetPlayer()->m_Knapsack.m_Axe[IRON_AXE])
 						Picking(30, pChr->GetPlayer()); // 30 60
-					else if(pChr->GetPlayer()->m_Knapsack.m_Axe[COPPER_PICKAXE])
+					else if(pChr->GetPlayer()->m_Knapsack.m_Axe[COPPER_AXE])
 						Picking(17, pChr->GetPlayer()); // 17 34 51
-					else if(pChr->GetPlayer()->m_Knapsack.m_Axe[LOG_PICKAXE])
+					else if(pChr->GetPlayer()->m_Knapsack.m_Axe[LOG_AXE])
 						Picking(10, pChr->GetPlayer()); // 15 30 45 55
 					else
 						Picking(8, pChr->GetPlayer()); // 8 16 24 32 40 48 56
@@ -195,17 +195,17 @@ void CKs::Picking(int Time, CPlayer *Player)
 		case CK_IRON:
 			Player->m_Knapsack.m_Iron++;
 			GameServer()->SendChatTarget(CID, _("You picked up a Iron"));
-			m_Health = 2000;
+			m_Health = 4000;
 			break;
 		case CK_GOLD:
 			Player->m_Knapsack.m_Gold++;
 			GameServer()->SendChatTarget(CID, _("You picked up a Gold (damn why when I created this mode just make gold important, in Minecraft it just a piece of sXXt!!!!!!!!!)"));
-			m_Health = 2700;
+			m_Health = 6000;
 			break;
 		case CK_DIAMONAD:
 			Player->m_Knapsack.m_Diamond++;
 			GameServer()->SendChatTarget(CID, _("OMG DIAMONAD! U PICKED UP A DIAMONAD!!!!!"));
-			m_Health = 3000;
+			m_Health = 10000;
 			break;
 		
 		default:

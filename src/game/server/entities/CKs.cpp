@@ -174,29 +174,34 @@ void CKs::Picking(int Time, CPlayer *Player)
 		case CK_COAL:
 			Player->m_Knapsack.m_Coal++;
 			GameServer()->SendChatTarget(CID, _("You picked up a Coal"));
-			m_Health = 70;
+			m_Health = 800;
 			break;
 		case CK_COPPER:
 			Player->m_Knapsack.m_Copper++;
 			GameServer()->SendChatTarget(CID, _("You picked up a Copper"));
+			m_Health = 1600;
 			break;
 		case CK_IRON:
 			Player->m_Knapsack.m_Iron++;
 			GameServer()->SendChatTarget(CID, _("You picked up a Iron"));
+			m_Health = 2000;
 			break;
 		case CK_GOLD:
 			Player->m_Knapsack.m_Gold++;
 			GameServer()->SendChatTarget(CID, _("You picked up a Gold (damn why when I created this mode just make gold important, in Minecraft it just a piece of sXXt!!!!!!!!!)"));
+			m_Health = 2700;
 			break;
 		case CK_DIAMONAD:
 			Player->m_Knapsack.m_Diamond++;
 			GameServer()->SendChatTarget(CID, _("OMG DIAMONAD! U PICKED UP A DIAMONAD!!!!!"));
+			m_Health = 3000;
 			break;
 		
 		default:
 			break;
 		}
 	}
+	GameServer()->SendBroadcast_VL(_("{int:Health} left. Keep hit!"), CID, "Health", &m_Health);
 	Player->m_MiningTick = 25;
 }
 

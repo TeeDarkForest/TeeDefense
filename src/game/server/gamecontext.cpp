@@ -787,14 +787,13 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				{
 					if(str_comp_nocase(pMsg->m_Value, pOption->m_aDescription) == 0)
 					{
-
+						str_format(aDesc, sizeof(aDesc), "%s", pOption->m_aDescription);
+						str_format(aCmd, sizeof(aCmd), "%s", pOption->m_aCommand);
 						if(!str_startswith(aCmd, "ccv_"))
 							SendChatTarget(-1, _("'{str:PlayerName}' called vote to change server option '{str:Option}' (str:Reason)"), "PlayerName",
 										Server()->ClientName(ClientID), "Option", pOption->m_aDescription,
 										"Reason", pReason );
 						m_ChatTarget = true;
-						str_format(aDesc, sizeof(aDesc), "%s", pOption->m_aDescription);
-						str_format(aCmd, sizeof(aCmd), "%s", pOption->m_aCommand);
 						break;
 					}
 

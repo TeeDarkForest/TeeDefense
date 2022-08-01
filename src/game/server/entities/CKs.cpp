@@ -39,7 +39,7 @@ CKs::CKs(CGameWorld *pGameWorld, int Type, vec2 Pos, int SubType)
 		break;
 	
 	default:
-		m_Health = 10;
+		m_Health = 99999999;
 		break;
 	}
 
@@ -87,20 +87,20 @@ void CKs::Tick()
 
 		int RespawnTime = -1;
 		int BIGSHOT = 1;
-		if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[CK_DIAMONAD])
+		if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[DIAMONAD_PICKAXE] && m_Type > CK_WOOD)
 			BIGSHOT = 2000;
-		else if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[CK_GOLD])
+		else if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[GOLD_PICKAXE] && m_Type > CK_WOOD)
 		{
 			if(m_Type == CK_DIAMONAD)
 				BIGSHOT = 100;
 			else
 				BIGSHOT = 1500;
 		}
-		else if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[CK_IRON] && m_Type < CK_DIAMONAD && m_Type > CK_WOOD)
+		else if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[IRON_PICKAXE] && m_Type < CK_DIAMONAD && m_Type > CK_WOOD)
 			BIGSHOT = 700;
-		else if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[CK_COPPER] && m_Type < CK_GOLD && m_Type > CK_WOOD)
+		else if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[COPPER_PICKAXE] && m_Type < CK_GOLD && m_Type > CK_WOOD)
 			BIGSHOT = 500;
-		else if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[CK_WOOD] && m_Type < CK_IRON && m_Type > CK_WOOD)
+		else if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[WOOD_PICKAXE] && m_Type < CK_IRON && m_Type > CK_WOOD)
 			BIGSHOT = 200;
 
 		if(pChr->m_LatestInput.m_Fire&1 && pChr->m_ActiveWeapon == WEAPON_HAMMER && pChr->GetPlayer()->m_MiningTick <= 0)
@@ -112,15 +112,15 @@ void CKs::Tick()
 				case CK_WOOD:
 					pChr->m_InMining = true;
 					GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP);
-					if(pChr->GetPlayer()->m_Knapsack.m_Axe[CK_DIAMONAD])
+					if(pChr->GetPlayer()->m_Knapsack.m_Axe[DIAMONAD_PICKAXE])
 						Picking(50, pChr->GetPlayer());
-					else if(pChr->GetPlayer()->m_Knapsack.m_Axe[CK_GOLD])
+					else if(pChr->GetPlayer()->m_Knapsack.m_Axe[GOLD_PICKAXE])
 						Picking(30, pChr->GetPlayer());
-					else if(pChr->GetPlayer()->m_Knapsack.m_Axe[CK_IRON])
+					else if(pChr->GetPlayer()->m_Knapsack.m_Axe[IRON_PICKAXE])
 						Picking(30, pChr->GetPlayer()); // 30 60
-					else if(pChr->GetPlayer()->m_Knapsack.m_Axe[CK_COPPER])
+					else if(pChr->GetPlayer()->m_Knapsack.m_Axe[COPPER_PICKAXE])
 						Picking(17, pChr->GetPlayer()); // 17 34 51
-					else if(pChr->GetPlayer()->m_Knapsack.m_Axe[CK_WOOD])
+					else if(pChr->GetPlayer()->m_Knapsack.m_Axe[WOOD_PICKAXE])
 						Picking(10, pChr->GetPlayer()); // 15 30 45 55
 					else
 						Picking(8, pChr->GetPlayer()); // 8 16 24 32 40 48 56
@@ -147,7 +147,7 @@ void CKs::Tick()
 					Picking(BIGSHOT, pChr->GetPlayer());
 					break;
 				case CK_DIAMONAD:
-					if(!pChr->GetPlayer()->m_Knapsack.m_Pickaxe[4] && !pChr->GetPlayer()->m_Knapsack.m_Pickaxe[5])
+					if(!pChr->GetPlayer()->m_Knapsack.m_Pickaxe[GOLD_PICKAXE] && !pChr->GetPlayer()->m_Knapsack.m_Pickaxe[DIAMOND_PICKAXE])
 					{
 						if(Server()->Tick()%50 == 0)
 						{

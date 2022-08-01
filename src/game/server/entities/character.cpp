@@ -817,18 +817,20 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 		m_DamageTaken = 0;
 		GameServer()->CreateDamageInd(m_Pos, 0, Dmg);
 	}
-
-	if(GameServer()->m_apPlayers[From] && !GameServer()->m_apPlayers[From]->GetZomb())
+	if(GameServer()->m_apPlayers[From])
 	{
-		CPlayer *Player = GameServer()->m_apPlayers[From];
-		if(Player->m_Knapsack.m_Sword[LOG_SWORD])
-			Dmg+=2;
-		else if(Player->m_Knapsack.m_Sword[IRON_SWORD])
-			Dmg+=5;
-		else if(Player->m_Knapsack.m_Sword[GOLD_SWORD])
-			Dmg+=7;
-		else if(Player->m_Knapsack.m_Sword[DIAMOND_SWORD])
-			Dmg+=10;
+		if(!GameServer()->m_apPlayers[From]->GetZomb())
+		{
+			CPlayer *Player = GameServer()->m_apPlayers[From];
+			if(Player->m_Knapsack.m_Sword[LOG_SWORD])
+				Dmg+=2;
+			else if(Player->m_Knapsack.m_Sword[IRON_SWORD])
+				Dmg+=5;
+			else if(Player->m_Knapsack.m_Sword[GOLD_SWORD])
+				Dmg+=7;
+			else if(Player->m_Knapsack.m_Sword[DIAMOND_SWORD])
+				Dmg+=10;
+		}
 	}
 
 	if(Dmg)

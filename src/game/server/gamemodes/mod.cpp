@@ -57,7 +57,7 @@ void CGameControllerMOD::Tick()
 	{
 		StartRound();
 	}
-	else
+	else if(!GameServer()->m_pController->m_Wave)
 	{
 		if(Server()->Tick()%Server()->TickSpeed() == 0)
 		{

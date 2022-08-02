@@ -11,6 +11,7 @@
 #include "gamecontroller.h"
 #include "gamecontext.h"
 #include <base/math.h>
+#include "entities/turret.h"
 
 IGameController::IGameController(class CGameContext *pGameServer)
 {
@@ -185,6 +186,7 @@ bool IGameController::OnEntity(int Index, vec2 Pos)
 		break;
 	case ENTITY_MAIN_TOWER:
 		new CTowerMain(&GameServer()->m_World, Pos);
+		//new CTurret(&GameServer()->m_World, Pos, 0, TURRET_SHOTGUN, 64);
 		dbg_msg("TEST", "TOWERTOWER");
 		break;
 	

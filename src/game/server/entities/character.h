@@ -100,6 +100,8 @@ public:
 
 	bool m_InMining;
 
+	void Teleport(vec2 Pos);
+
 private:
 	// player controlling this character
 	class CPlayer *m_pPlayer;

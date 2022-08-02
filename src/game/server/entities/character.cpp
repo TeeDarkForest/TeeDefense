@@ -352,12 +352,24 @@ void CCharacter::FireWeapon()
 				Hits++;
 			}
 
-			if(GetPlayer() && !GetPlayer()->GetZomb() && GetPlayer()->m_Knapsack.m_FFS)
+			if(GetPlayer() && !GetPlayer()->GetZomb() && (GetPlayer()->m_Knapsack.m_FFS || GetPlayer()->m_Knapsack.m_Sword[DIAMOND_SWORD]))
 			{
-				for (int i = 0; i < 9; i++)
+				for (int i = 0; i < 25; i++)
 				{
-					float a = frandom()*360 * RAD;
-					new CLightning(GameWorld(), m_Pos, vec2(cosf(a), sinf(a)), 5, 5, m_pPlayer->GetCID(), 5, 99);
+					float Spreading[] = {-0.185f, -0.130f, -0.050f, 0.050f, 0.130f, 0.185f};
+					float a = GetAngle(Direction);
+					a += Spreading[i+3];
+					new CLightning(GameWorld(), m_Pos, vec2(cosf(a), sinf(a)), 1, 5, m_pPlayer->GetCID(), 20);
+				}
+			}
+
+			if(GetPlayer() && !GetPlayer()->GetZomb() && (GetPlayer()->m_Knapsack.m_EDreemurr || GetPlayer()->m_Knapsack.m_Sword[DIAMOND_SWORD]))
+			{
+				m_Core.m_Vel += ((normalize(vec2(m_LatestInput.m_TargetX, m_LatestInput.m_TargetY))) * max(0.001f, 64.0f));
+				for(int i = 0; i < 10; i++)
+				{
+					float a = frandom() * m_Core.m_Angle * RAD;
+					new CLightning(GameWorld(), m_Core.m_Pos, vec2(cosf(a), sinf(a)), 100, 300, m_pPlayer->GetCID(), -3);
 				}
 			}
 
@@ -1296,4 +1308,15 @@ void CCharacter::DoZombieAim(vec2 VictimPos, int VicCID, vec2 NearZombPos, int N
 int CCharacter::GetCID()
 {
 	return GetPlayer()->GetCID();
+}
+
+void CCharacter::Teleport(vec2 Pos)
+{
+	m_Pos = Pos;
+	m_Core.m_Pos = m_Pos;
+
+	m_Core.Reset();
+	
+	m_Pos = Pos;
+	m_Core.m_Pos = m_Pos;
 }

@@ -10,6 +10,7 @@
 #include <game/collision.h>
 #include <game/gamecore.h>
 #include "gamemodes/mod.h"
+#include "entities/turret.h"
 
 #include <teeuniverses/components/localization.h>
 
@@ -1211,8 +1212,11 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				{
 					m_apPlayers[ClientID]->m_Knapsack.m_Log -= 20;
 					m_apPlayers[ClientID]->m_Knapsack.m_Copper -= 1;
-					if(rand()%10 >= 2)
+					if(rand()%20 >= 2)
+					{
 						SendChatTarget(ClientID, _("You built a wooden gun turret with 20 logs, 1 copper! Do it again!"));
+						new CTurret(&m_World, m_apPlayers[ClientID]->GetCharacter()->m_Pos, ClientID, TURRET_GUN, 64);	
+					}
 					else
 					{
 						SendChatTarget(ClientID, _("Bad luck. The production failed..."));
@@ -1221,7 +1225,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				}
 				else
 				{
-					SendChatTarget(ClientID, _("You need at least 20 logs and 1 copper to build a wooden gun turret."));
+					SendChatTarget(ClientID, _("You need at least 20 logs and 1 copper to build a gun turret."));
 				}
 				return;
 			}

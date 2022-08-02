@@ -26,6 +26,12 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 	if(!pHit)
 		return false;
 
+	if(!pOwnerChar)
+		return false;
+
+	if(pOwnerChar->GetPlayer()->GetTeam() == pHit->GetPlayer()->GetTeam())
+		return false;
+
 	m_From = From;
 	m_Pos = At;
 	m_Energy = -1;

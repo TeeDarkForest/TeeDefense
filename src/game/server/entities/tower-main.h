@@ -5,7 +5,7 @@
 #include <game/server/entity.h>
 
 #define NumSide 32
-#define Radius 240
+#define TowerRadius 240
 class CTowerMain : public CEntity
 {
 public:

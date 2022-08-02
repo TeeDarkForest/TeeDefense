@@ -36,7 +36,7 @@ void CTowerMain::Tick()
             return;
 
         float Len = distance(pChr->m_Pos, m_Pos);
-        if(Len < pChr->m_ProximityRadius+Radius)
+        if(Len < pChr->m_ProximityRadius+TowerRadius)
         {
             if(pChr->GetPlayer()->GetZomb())
             {
@@ -97,8 +97,8 @@ void CTowerMain::Snap(int SnappingClient)
 
     for(int i=0; i<NumSide; i++)
 	{
-		vec2 PartPosStart = m_Pos + vec2(Radius * cos(AngleStep*i), Radius * sin(AngleStep*i));
-		vec2 PartPosEnd = m_Pos + vec2(Radius * cos(AngleStep*(i+1)), Radius * sin(AngleStep*(i+1)));
+		vec2 PartPosStart = m_Pos + vec2(TowerRadius * cos(AngleStep*i), TowerRadius * sin(AngleStep*i));
+		vec2 PartPosEnd = m_Pos + vec2(TowerRadius * cos(AngleStep*(i+1)), TowerRadius * sin(AngleStep*(i+1)));
 		
 		CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_alIDs[i], sizeof(CNetObj_Laser)));
 		if(!pObj)

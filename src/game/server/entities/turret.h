@@ -25,7 +25,7 @@ enum
 class CTurret : public CEntity
 {
 public:
-    CTurret(CGameWorld *pGameWorld, vec2 Pos, int Owner, int Type, int Radius = 64, bool Follow = false, bool Lightning = false, bool Freeze = false);
+    CTurret(CGameWorld *pGameWorld, vec2 Pos, int Owner, int Type, int Radius = 64, int Lifes = 120, bool Follow = false, bool Lightning = false, bool Freeze = false);
 
     virtual void Tick();
     virtual void Reset();
@@ -50,5 +50,7 @@ private:
 
     int m_FireDelay;
     int m_Degres;
+
+    int m_Lifes;
 };
 #endif

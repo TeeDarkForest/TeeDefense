@@ -39,7 +39,7 @@ CKs::CKs(CGameWorld *pGameWorld, int Type, vec2 Pos, int SubType)
 		break;
 
 	case CK_ENEGRY:
-		m_Health = 15000;
+		m_Health = 30000;
 		break;
 	
 	default:
@@ -77,7 +77,14 @@ void CKs::Tick()
 
 		int RespawnTime = -1;
 		int BIGSHOT = 1;
-		if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[DIAMOND_PICKAXE] && m_Type > CK_WOOD)
+		if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[ENEGRY_PICKAXE])
+		{
+			if(m_Type == CK_ENEGRY)
+				BIGSHOT = 3000;
+			else
+				BIGSHOT = 5000;
+		}
+		else if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[DIAMOND_PICKAXE] && m_Type > CK_WOOD)
 		{
 			if(m_Type < CK_ENEGRY)
 				BIGSHOT = 3500;

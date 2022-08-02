@@ -502,6 +502,7 @@ void CPlayer::ResetKnapsack()
 	m_Knapsack.m_Gold = 0;
 	m_Knapsack.m_Iron = 0;
 	m_Knapsack.m_Log = 0;
+	m_Knapsack.m_Enegry = 0;
 	for(int i = 0; i < SWORD_TYPES; i++)
 		m_Knapsack.m_Sword[i] = 0;
 	for(int i = 0; i < PICKAXE_TYPES; i++)

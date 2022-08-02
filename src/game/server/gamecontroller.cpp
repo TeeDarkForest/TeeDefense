@@ -184,16 +184,16 @@ bool IGameController::OnEntity(int Index, vec2 Pos)
 	case ENTITY_DIAMOND:
 		new CKs(&GameServer()->m_World, CK_DIAMONAD, Pos);
 		break;
+	case ENTITY_ENERGY:
+		new CKs(&GameServer()->m_World, CK_ENEGRY, Pos);
+		break;
 	case ENTITY_MAIN_TOWER:
 		new CTowerMain(&GameServer()->m_World, Pos);
-		//new CTurret(&GameServer()->m_World, Pos, 0, TURRET_SHOTGUN, 64);
-		dbg_msg("TEST", "TOWERTOWER");
 		break;
 	
 	default:
 		break;
 	}
-
 	if(Type != -1)
 	{
 		CPickup *pPickup = new CPickup(&GameServer()->m_World, Type, SubType);

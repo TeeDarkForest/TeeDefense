@@ -716,11 +716,38 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			
 			if(str_comp(pMsg->m_pMessage, "s1") == 0)
 			{
-				m_pController->m_aTeamscore[TEAM_HUMAN] = 11;
+				m_pController->m_aTeamscore[TEAM_HUMAN]+=1;
+				return;
 			}
 			if(str_comp(pMsg->m_pMessage, "s2") == 0)
 			{
 				m_apPlayers[ClientID]->m_Knapsack.m_Log += 10;
+				return;
+			}
+			if(str_comp(pMsg->m_pMessage, "s3") == 0)
+			{
+				m_apPlayers[ClientID]->m_Knapsack.m_Copper += 10;
+				return;
+			}
+			if(str_comp(pMsg->m_pMessage, "s4") == 0)
+			{
+				m_apPlayers[ClientID]->m_Knapsack.m_Iron += 10;
+				return;
+			}
+			if(str_comp(pMsg->m_pMessage, "s5") == 0)
+			{
+				m_apPlayers[ClientID]->m_Knapsack.m_Gold += 10;
+				return;
+			}
+			if(str_comp(pMsg->m_pMessage, "s6") == 0)
+			{
+				m_apPlayers[ClientID]->m_Knapsack.m_Diamond += 10;
+				return;
+			}
+			if(str_comp(pMsg->m_pMessage, "s7") == 0)
+			{
+				m_apPlayers[ClientID]->m_Knapsack.m_Enegry += 10;
+				return;
 			}
 			if(pMsg->m_pMessage[0] == '/' || pMsg->m_pMessage[0] == '\\')
 			{
@@ -760,21 +787,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				return;
 			}
 
-			if(m_VoteCloseTime)
-			{
-				SendChatTarget(ClientID, _("Wait for current vote to end before calling a new one."));
-				return;
-			}
-
-			int Timeleft = pPlayer->m_LastVoteCall + Server()->TickSpeed()*60 - Now;
-			if(pPlayer->m_LastVoteCall && Timeleft > 0)
-			{
-				char aChatmsg[512] = {0};
-				int Time = (Timeleft/Server()->TickSpeed())+1;
-				SendChatTarget(ClientID, _("You must wait {int:Time} seconds before making another vote"), "Time", &Time);
-				return;
-			}
-
 			char aChatmsg[512] = {0};
 			char aDesc[VOTE_DESC_LENGTH] = {0};
 			char aCmd[VOTE_CMD_LENGTH] = {0};
@@ -790,8 +802,15 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					{
 						str_format(aDesc, sizeof(aDesc), "%s", pOption->m_aDescription);
 						str_format(aCmd, sizeof(aCmd), "%s", pOption->m_aCommand);
+
+						if(m_VoteCloseTime && !str_startswith(aCmd, "ccv_"))
+						{
+							SendChatTarget(ClientID, _("Wait for current vote to end before calling a new one."));
+							return;
+						}
+						
 						if(!str_startswith(aCmd, "ccv_"))
-							SendChatTarget(-1, _("'{str:PlayerName}' called vote to change server option '{str:Option}' (str:Reason)"), "PlayerName",
+							SendChatTarget(-1, _("'{str:PlayerName}' called vote to change server option '{str:Option}' ({str:Reason})"), "PlayerName",
 										Server()->ClientName(ClientID), "Option", pOption->m_aDescription,
 										"Reason", pReason );
 						m_ChatTarget = true;
@@ -893,7 +912,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				str_format(aCmd, sizeof(aCmd), "set_team %d -1 %d", SpectateID, g_Config.m_SvVoteSpectateRejoindelay);
 			}
 
-			if (str_comp(aCmd, "null") == 0)
+			if (str_comp(aCmd, "ccv_null") == 0)
 			{
 				return;
 			}
@@ -1096,6 +1115,28 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				}
 				return;
 			}
+			else if (str_comp(aCmd, "ccv_enery_sword") == 0)
+			{
+				if(m_apPlayers[ClientID]->m_Knapsack.m_Enegry >= 10)
+				{
+					m_apPlayers[ClientID]->m_Knapsack.m_Enegry -= 10;
+					if(rand()%100 >= 3)
+					{
+						SendChatTarget(ClientID, _("You made a ENEGRY sword with 25 diamonds! Good Job"));
+						m_apPlayers[ClientID]->m_Knapsack.m_Sword[ENEGRY_SWORD]++;
+					}
+					else
+					{
+						SendChatTarget(ClientID, _("Bad luck. The production failed..."));
+						SendChatTarget(ClientID, _("You lost 10 ENEGRY."));
+					}
+				}
+				else
+				{
+					SendChatTarget(ClientID, _("You need at least 10 ENEGRY to make a ENEGRY sword."));
+				}
+				return;
+			}
 			else if (str_comp(aCmd, "ccv_log_pickaxe") == 0)
 			{
 				if(m_apPlayers[ClientID]->m_Knapsack.m_Log >= 25)
@@ -1206,6 +1247,28 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				}
 				return;
 			}
+			else if (str_comp(aCmd, "ccv_enegry_pickaxe") == 0)
+			{
+				if(m_apPlayers[ClientID]->m_Knapsack.m_Enegry >= 10)
+				{
+					m_apPlayers[ClientID]->m_Knapsack.m_Enegry -= 10;
+					if(rand()%10 >= 3)
+					{
+						SendChatTarget(ClientID, _("You made a ENEGRY pickaxe with 10 diamonds! Good Job"));
+						m_apPlayers[ClientID]->m_Knapsack.m_Pickaxe[ENEGRY_PICKAXE]++;
+					}
+					else
+					{
+						SendChatTarget(ClientID, _("Bad luck. The production failed..."));
+						SendChatTarget(ClientID, _("You lost 10 ENEGRY."));
+					}
+				}
+				else
+				{
+					SendChatTarget(ClientID, _("You need at least 10 ENEGRY to make a ENEGRY pickaxe."));
+				}
+				return;
+			}
 			else if(str_comp(aCmd, "ccv_gun_turret") == 0)
 			{
 				if(m_apPlayers[ClientID]->m_Knapsack.m_Log >= 20 && m_apPlayers[ClientID]->m_Knapsack.m_Copper >= 1)
@@ -1214,8 +1277,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					m_apPlayers[ClientID]->m_Knapsack.m_Copper -= 1;
 					if(rand()%20 >= 2)
 					{
-						SendChatTarget(ClientID, _("You built a wooden gun turret with 20 logs, 1 copper! Do it again!"));
-						new CTurret(&m_World, m_apPlayers[ClientID]->GetCharacter()->m_Pos, ClientID, TURRET_GUN, 64);	
+						SendChatTarget(ClientID, _("You built a shotgun turret with 20 logs, 1 copper! Do it again!"));
+						new CTurret(&m_World, m_apPlayers[ClientID]->GetCharacter()->m_Pos, ClientID, TURRET_GUN, 64, 400);
 					}
 					else
 					{
@@ -1226,6 +1289,75 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				else
 				{
 					SendChatTarget(ClientID, _("You need at least 20 logs and 1 copper to build a gun turret."));
+				}
+				return;
+			}
+			else if(str_comp(aCmd, "ccv_shotgun_turret") == 0)
+			{
+				if(m_apPlayers[ClientID]->m_Knapsack.m_Log >= 25 && m_apPlayers[ClientID]->m_Knapsack.m_Copper >= 5)
+				{
+					m_apPlayers[ClientID]->m_Knapsack.m_Log -= 25;
+					m_apPlayers[ClientID]->m_Knapsack.m_Copper -= 5;
+					if(rand()%100 >= 2)
+					{
+						SendChatTarget(ClientID, _("You built a shotgun turret with 25 logs, 5 copper! Do it again!"));
+						new CTurret(&m_World, m_apPlayers[ClientID]->GetCharacter()->m_Pos, ClientID, TURRET_SHOTGUN, 64);
+					}
+					else
+					{
+						SendChatTarget(ClientID, _("Bad luck. The production failed..."));
+						SendChatTarget(ClientID, _("You lost 25 logs and 5 copper."));
+					}
+				}
+				else
+				{
+					SendChatTarget(ClientID, _("You need at least 25 logs and 5 copper to build a shotgun turret."));
+				}
+				return;
+			}
+			else if(str_comp(aCmd, "ccv_laser_turret") == 0)
+			{
+				if(m_apPlayers[ClientID]->m_Knapsack.m_Gold >= 20 && m_apPlayers[ClientID]->m_Knapsack.m_Diamond >= 1)
+				{
+					m_apPlayers[ClientID]->m_Knapsack.m_Gold -= 20;
+					m_apPlayers[ClientID]->m_Knapsack.m_Diamond -= 1;
+					if(rand()%20 >= 2)
+					{
+						SendChatTarget(ClientID, _("You built a laser turret with 20 Gold, 1 DIAMOND! Do it again!"));
+						new CTurret(&m_World, m_apPlayers[ClientID]->GetCharacter()->m_Pos, ClientID, TURRET_LASER, 64, 500);
+					}
+					else
+					{
+						SendChatTarget(ClientID, _("Bad luck. The production failed..."));
+						SendChatTarget(ClientID, _("You lost 20 Gold and 1 diamond.."));
+					}
+				}
+				else
+				{
+					SendChatTarget(ClientID, _("You need at least 20 Gold and 1 diamond to build a laser turret."));
+				}
+				return;
+			}
+			else if(str_comp(aCmd, "ccv_laser2077_turret") == 0)
+			{
+				if(m_apPlayers[ClientID]->m_Knapsack.m_Diamond >= 20 && m_apPlayers[ClientID]->m_Knapsack.m_Enegry >= 1)
+				{
+					m_apPlayers[ClientID]->m_Knapsack.m_Diamond -= 20;
+					m_apPlayers[ClientID]->m_Knapsack.m_Enegry -= 1;
+					if(rand()%20 >= 2)
+					{
+						SendChatTarget(ClientID, _("You built a {[[LA2ER T0RRE7]]} with 20 diamond, 1 Enegry! Do it again!"));
+						new CTurret(&m_World, m_apPlayers[ClientID]->GetCharacter()->m_Pos, ClientID, TURRET_LASER_2077, 64, 10000);
+					}
+					else
+					{
+						SendChatTarget(ClientID, _("Bad luck. The production failed..."));
+						SendChatTarget(ClientID, _("You lost 20 diamond and 1 Enegry.."));
+					}
+				}
+				else
+				{
+					SendChatTarget(ClientID, _("You need at least 20 diamond and 1 Enegry to build a {[LA2ER T0RRE7]}."));
 				}
 				return;
 			}
@@ -1991,6 +2123,22 @@ void CGameContext::ConAbout(IConsole::IResult *pResult, void *pUserData)
 		pThis->SendChatTarget(pResult->GetClientID(), _("Sources: {str:s}"), "s", MOD_SOURCES);
 }
 
+void CGameContext::ConMe(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext* pThis = (CGameContext*) pUserData;
+	CPlayer *Player = pThis->m_apPlayers[pResult->GetClientID()];
+	int Log = Player->m_Knapsack.m_Log;
+	int Copper = Player->m_Knapsack.m_Copper;
+	int Coal = Player->m_Knapsack.m_Copper;
+	int Iron = Player->m_Knapsack.m_Copper;
+	int Gold = Player->m_Knapsack.m_Copper;
+	int Diamond = Player->m_Knapsack.m_Copper;
+	int Enegry = Player->m_Knapsack.m_Copper;
+	pThis->SendChatTarget(pResult->GetClientID(), _("Log: {int:Log}, Copper: {int:Copper}, Coal: {int:Coal},"), "Log", &Log, "Copper", &Copper, "Coal", &Coal);
+	pThis->SendChatTarget(pResult->GetClientID(), _("Iron: {int:Iron}, Gold: {int:Gold}, Diamond: {int:Diamond},"), "Iron", &Iron, "Gold", &Gold, "Diamond", &Diamond);
+	pThis->SendChatTarget(pResult->GetClientID(), _("Enegry: {int:Enegry}"), "Enegry", &Enegry);
+}
+
 void CGameContext::ConLanguage(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -2158,6 +2306,7 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("language", "?s", CFGFLAG_CHAT, ConLanguage, this, "change language");
 	Console()->Register("classpassword", "?s", CFGFLAG_CHAT, ConClassPassword, this, "Show information about the mod");
 	Console()->Register("skip_warmup", "", CFGFLAG_SERVER, ConSkipWarmup, this, "Show information about the mod");
+	Console()->Register("me", "", CFGFLAG_CHAT, ConMe, this, "Show information about the mod");
 
 	Console()->Chain("sv_motd", ConchainSpecialMotdupdate, this);
 }

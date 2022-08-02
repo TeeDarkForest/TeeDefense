@@ -86,6 +86,8 @@ class CGameContext : public IGameServer
 	static void ConHelp(IConsole::IResult *pResult, void *pUserData);
 	static void ConAddCommandVote(IConsole::IResult *pResult, void *pUserData);
 	static void ConSkipWarmup(IConsole::IResult *pResult, void *pUserData);
+	static void ConMe(IConsole::IResult *pResult, void *pUserData);
+	
 
 	CGameContext(int Resetting);
 	void Construct(int Resetting);

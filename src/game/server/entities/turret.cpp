@@ -4,8 +4,9 @@
 #include <new>
 #include <engine/shared/config.h>
 #include "lightning.h"
+#include "follow-gun.h"
 #define RAD 0.017453292519943295769236907684886f
-CTurret::CTurret(CGameWorld *pGameWorld, vec2 Pos, int Owner, int Type, int Radius, bool Follow, bool Lightning, bool Freeze)
+CTurret::CTurret(CGameWorld *pGameWorld, vec2 Pos, int Owner, int Type, int Radius, int Lifes, bool Follow, bool Lightning, bool Freeze)
 : CEntity(pGameWorld, CGameWorld::ENTTYPE_TURRET)
 {
     m_Pos = Pos;
@@ -16,6 +17,7 @@ CTurret::CTurret(CGameWorld *pGameWorld, vec2 Pos, int Owner, int Type, int Radi
     m_Lightning = Lightning;
     m_Freeze = Freeze;
     m_FireDelay = 0;
+    m_Lifes = Lifes;
 
     for (unsigned i = 0; i < sizeof(m_IDs) / sizeof(int); i ++)
         m_IDs[i] = Server()->SnapNewID();
@@ -62,11 +64,7 @@ int CTurret::GetSnapType()
     case TURRET_GUN:
         return WEAPON_GUN;
         break;
-    
-    case TURRET_SHOTGUN:
-        return WEAPON_SHOTGUN;
-        break;
-    
+
     case TURRET_FOLLOW_GRENADE:
         return WEAPON_GRENADE;
         break;
@@ -84,7 +82,7 @@ void CTurret::Tick()
 {
     for(CCharacter *pChr = (CCharacter*) GameWorld()->FindFirst(CGameWorld::ENTTYPE_CHARACTER); pChr; pChr = (CCharacter *)pChr->TypeNext())
     {
-        if(!pChr->IsAlive()/* || !pChr->GetPlayer()->GetZomb()*/)
+        if(!pChr->IsAlive() || !pChr->GetPlayer()->GetZomb())
             return;
 
         vec2 TargetPos;
@@ -100,6 +98,7 @@ void CTurret::Tick()
                 {
                     new CProjectile(GameWorld(), WEAPON_GUN, GetOwner(), m_Pos, Direction, 5000, 1, false, 10, SOUND_GRENADE_EXPLODE, WEAPON_GUN);
                     m_FireDelay = 50;
+                    m_Lifes--;
                 }
                 break;
 
@@ -108,6 +107,7 @@ void CTurret::Tick()
                 {
                     new CProjectile(GameWorld(), WEAPON_SHOTGUN, GetOwner(), m_Pos, Direction, 5000, 1, false, 10, SOUND_GRENADE_EXPLODE, WEAPON_SHOTGUN);
                     m_FireDelay = 75;
+                    m_Lifes--;
                 }
                 break;
             case TURRET_LASER:
@@ -115,9 +115,26 @@ void CTurret::Tick()
                 {
                     new CLaser(GameWorld(), m_Pos, Direction, GameServer()->Tuning()->m_LaserReach, 1);
                     m_FireDelay = 50;
+                    m_Lifes--;
                 }
                 break;
-            
+            case TURRET_LASER_2077:
+                if(m_FireDelay <= 0)
+                {
+	    			new CLightning(GameWorld(), m_Pos, Direction, 400, 20, 1, -1);
+                    m_FireDelay = 5;
+                    m_Lifes--;
+                }
+                break;
+            // EDreemurr
+            /*case TURRET_FOLLOW_GRENADE:
+                if(m_FireDelay <= 0)
+                {
+                    new CFGun(GameWorld(), m_Pos, GetOwner(), Direction, WEAPON_GRENADE, 7);
+                    m_FireDelay = 50;
+                }
+                break;*/
+
             default:
                 break;
 
@@ -127,6 +144,11 @@ void CTurret::Tick()
 
     if(m_FireDelay >= 0)
         m_FireDelay--;
+    
+    if(m_Lifes <= 0)
+    {
+        Reset();
+    }
 }
 
 void CTurret::Reset()
@@ -138,6 +160,15 @@ void CTurret::Reset()
 			m_IDs[i] = -1;
 		}
 	}
+
+    for (unsigned i = 0; i < sizeof(m_aIDs) / sizeof(int); i ++)
+	{
+		if(m_aIDs[i] >= 0){
+			Server()->SnapFreeID(m_IDs[i]);
+			m_aIDs[i] = -1;
+		}
+	}
+
     Server()->SnapFreeID(m_ID);
 
     GameServer()->m_World.DestroyEntity(this);
@@ -197,13 +228,21 @@ void CTurret::Snap(int SnappingClient)
             CNetObj_Projectile *pEff = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, m_aIDs[i], sizeof(CNetObj_Projectile)));
 	        if(!pEff)
 	        	return;
-            vec2 a = m_Pos + (GetDir((m_Degres-i*22.5)*M_PIl/180) * 32);
+            vec2 a = m_Pos + (GetDir((m_Degres-i*22.5)*M_PIl/180) * 48);
             pEff->m_X = a.x;
             pEff->m_Y = a.y;
             pEff->m_Type = WEAPON_SHOTGUN;
             pEff->m_StartTick = Server()->Tick();
         }
         break;
+    }
+    case TURRET_LASER_2077:
+    {
+        for (int i = 0; i < aIDSize; i++)
+        {
+            float a = frandom() * 360 * RAD;
+            new CLightning(GameWorld(), m_Pos, vec2(cosf(a), sinf(a)), 1, 50, GetOwner(), 5, 9);
+        }
     }
     default:
         break;

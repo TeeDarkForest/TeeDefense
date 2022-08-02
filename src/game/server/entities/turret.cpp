@@ -5,6 +5,7 @@
 #include <engine/shared/config.h>
 #include "lightning.h"
 #include "follow-gun.h"
+#include <base/math.h>
 #define RAD 0.017453292519943295769236907684886f
 CTurret::CTurret(CGameWorld *pGameWorld, vec2 Pos, int Owner, int Type, int Radius, int Lifes, bool Follow, bool Lightning, bool Freeze)
 : CEntity(pGameWorld, CGameWorld::ENTTYPE_TURRET)
@@ -83,14 +84,14 @@ void CTurret::Tick()
     for(CCharacter *pChr = (CCharacter*) GameWorld()->FindFirst(CGameWorld::ENTTYPE_CHARACTER); pChr; pChr = (CCharacter *)pChr->TypeNext())
     {
         if(!pChr->IsAlive() || !pChr->GetPlayer()->GetZomb())
-            return;
+            continue;
 
         vec2 TargetPos;
-        float Len = distance(pChr->m_Pos, m_Pos);
+        TargetPos = pChr->m_Pos;
+        float Len = distance(TargetPos, m_Pos);
+        vec2 Direction = normalize(TargetPos - m_Pos);
         if(Len < pChr->m_ProximityRadius+GameServer()->Tuning()->m_LaserReach)
         {
-            TargetPos = pChr->m_Pos;
-            vec2 Direction = normalize(TargetPos - m_Pos);
             switch (GetType())
             {
             case TURRET_GUN:
@@ -121,7 +122,7 @@ void CTurret::Tick()
             case TURRET_LASER_2077:
                 if(m_FireDelay <= 0)
                 {
-	    			new CLightning(GameWorld(), m_Pos, Direction, 400, 20, 1, -1);
+	    			new CLightning(GameWorld(), m_Pos, Direction, 1, 1, 1, 0);
                     m_FireDelay = 5;
                     m_Lifes--;
                 }
@@ -183,7 +184,7 @@ void CTurret::Snap(int SnappingClient)
 
     int aIDSize = sizeof(m_aIDs) / sizeof(int);
 
-    float AngleStep = 2.0f * M_PI / NumSide;
+    float AngleStep = 2.0f * pi / NumSide;
 
     for(int i=0; i<NumSide; i++)
 	{
@@ -228,7 +229,7 @@ void CTurret::Snap(int SnappingClient)
             CNetObj_Projectile *pEff = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, m_aIDs[i], sizeof(CNetObj_Projectile)));
 	        if(!pEff)
 	        	return;
-            vec2 a = m_Pos + (GetDir((m_Degres-i*22.5)*M_PIl/180) * 48);
+            vec2 a = m_Pos + (GetDir((m_Degres-i*22.5)*pi/180) * 48);
             pEff->m_X = a.x;
             pEff->m_Y = a.y;
             pEff->m_Type = WEAPON_SHOTGUN;

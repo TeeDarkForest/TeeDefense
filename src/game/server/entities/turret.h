@@ -6,7 +6,7 @@
 #include "laser.h"
 #include <game/server/gamecontext.h>
 
-#define NumSide 16
+#define NumSide 6
 #define PickupPhysSizeS 14
 
 enum

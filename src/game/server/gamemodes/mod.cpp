@@ -53,7 +53,7 @@ void CGameControllerMOD::Tick()
 		}
 	}
 
-	if(Players >= 4 && !GameServer()->m_pController->m_Wave)
+	if(Players >= 1 && !GameServer()->m_pController->m_Wave)
 	{
 		StartRound();
 	}

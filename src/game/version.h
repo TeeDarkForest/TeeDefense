@@ -17,7 +17,7 @@
 static const char GAME_RELEASE_VERSION[8] = {'0', '.', '6', '.', '4', 0};
 
 #define MOD_NAME "TeeDefense"
-#define MOD_VERSION "0.1.0"
+#define MOD_VERSION "v0.2.0"
 #define MOD_AUTHORS "FlowerFell-Sans, EDreemurr"
 #define MOD_CREDITS "FlowerFell-Sans, EDreemurr"
 #define MOD_THANKS "necropotame, GutZuFusss, AssassinTee, StarOnTheSky"

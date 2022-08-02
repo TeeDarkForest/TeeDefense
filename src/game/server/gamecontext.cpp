@@ -1100,7 +1100,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					m_apPlayers[ClientID]->m_Knapsack.m_Diamond -= 10;
 					if(rand()%100 >= 3)
 					{
-						SendChatTarget(ClientID, _("You made a diamond sword with 25 diamonds! Good Job"));
+						SendChatTarget(ClientID, _("You made a diamond sword with 10 diamonds! Good Job"));
 						m_apPlayers[ClientID]->m_Knapsack.m_Sword[DIAMOND_SWORD]++;
 					}
 					else
@@ -1115,14 +1115,14 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				}
 				return;
 			}
-			else if (str_comp(aCmd, "ccv_enery_sword") == 0)
+			else if (str_comp(aCmd, "ccv_enegry_sword") == 0)
 			{
 				if(m_apPlayers[ClientID]->m_Knapsack.m_Enegry >= 10)
 				{
 					m_apPlayers[ClientID]->m_Knapsack.m_Enegry -= 10;
 					if(rand()%100 >= 3)
 					{
-						SendChatTarget(ClientID, _("You made a ENEGRY sword with 25 diamonds! Good Job"));
+						SendChatTarget(ClientID, _("You made a ENEGRY sword with 10 ENEGRY! Good Job"));
 						m_apPlayers[ClientID]->m_Knapsack.m_Sword[ENEGRY_SWORD]++;
 					}
 					else
@@ -1340,24 +1340,24 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			}
 			else if(str_comp(aCmd, "ccv_laser2077_turret") == 0)
 			{
-				if(m_apPlayers[ClientID]->m_Knapsack.m_Diamond >= 20 && m_apPlayers[ClientID]->m_Knapsack.m_Enegry >= 1)
+				if(m_apPlayers[ClientID]->m_Knapsack.m_Diamond >= 50 && m_apPlayers[ClientID]->m_Knapsack.m_Enegry >= 100)
 				{
-					m_apPlayers[ClientID]->m_Knapsack.m_Diamond -= 20;
-					m_apPlayers[ClientID]->m_Knapsack.m_Enegry -= 1;
+					m_apPlayers[ClientID]->m_Knapsack.m_Diamond -= 50;
+					m_apPlayers[ClientID]->m_Knapsack.m_Enegry -= 100;
 					if(rand()%20 >= 2)
 					{
-						SendChatTarget(ClientID, _("You built a {[[LA2ER T0RRE7]]} with 20 diamond, 1 Enegry! Do it again!"));
+						SendChatTarget(ClientID, _("You built a {[[LA2ER T0RRE7]]} with 50 diamond, 100 Enegry! Do it again!"));
 						new CTurret(&m_World, m_apPlayers[ClientID]->GetCharacter()->m_Pos, ClientID, TURRET_LASER_2077, 64, 10000);
 					}
 					else
 					{
 						SendChatTarget(ClientID, _("Bad luck. The production failed..."));
-						SendChatTarget(ClientID, _("You lost 20 diamond and 1 Enegry.."));
+						SendChatTarget(ClientID, _("You lost 50 diamonds and 100 Enegry.."));
 					}
 				}
 				else
 				{
-					SendChatTarget(ClientID, _("You need at least 20 diamond and 1 Enegry to build a {[LA2ER T0RRE7]}."));
+					SendChatTarget(ClientID, _("You need at least 50 diamonds and 100 Enegry to build a {[LA2ER T0RRE7]}."));
 				}
 				return;
 			}
@@ -1470,8 +1470,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			Server()->SetClientName(ClientID, pMsg->m_pName);
 			if(str_comp(aOldName, Server()->ClientName(ClientID)) != 0)
 			{
-				char aChatText[256];
-				str_format(aChatText, sizeof(aChatText), "'%s' changed name to '%s'", aOldName, Server()->ClientName(ClientID));
 				SendChatTarget(-1, _("'{str:Old}' changed name to '{str:New}'"), "Old", aOldName, "New", Server()->ClientName(ClientID));
 			}
 			Server()->SetClientClan(ClientID, pMsg->m_pClan);
@@ -2106,9 +2104,9 @@ void CGameContext::ConHelp(IConsole::IResult *pResult, void *pUserData)
 	pThis->SendChatTarget(-1, _("-------"));
 	pThis->SendChatTarget(-1, _("In the map have many 'CKs'."));
 	pThis->SendChatTarget(-1, _("The 'heart' is 'CK' log"));
-	pThis->SendChatTarget(-1, _("Other I point at map 'TDef1'."));
+	pThis->SendChatTarget(-1, _("Others I have point at map."));
 	pThis->SendChatTarget(-1, _("Just find them then check!"));
-	pThis->SendChatTarget(-1, _("You can craft tools in Vote, check them."));
+	pThis->SendChatTarget(-1, _("You can make tools in Vote, check them."));
 }
 
 void CGameContext::ConAbout(IConsole::IResult *pResult, void *pUserData)
@@ -2129,11 +2127,11 @@ void CGameContext::ConMe(IConsole::IResult *pResult, void *pUserData)
 	CPlayer *Player = pThis->m_apPlayers[pResult->GetClientID()];
 	int Log = Player->m_Knapsack.m_Log;
 	int Copper = Player->m_Knapsack.m_Copper;
-	int Coal = Player->m_Knapsack.m_Copper;
-	int Iron = Player->m_Knapsack.m_Copper;
-	int Gold = Player->m_Knapsack.m_Copper;
-	int Diamond = Player->m_Knapsack.m_Copper;
-	int Enegry = Player->m_Knapsack.m_Copper;
+	int Coal = Player->m_Knapsack.m_Coal;
+	int Iron = Player->m_Knapsack.m_Iron;
+	int Gold = Player->m_Knapsack.m_Gold;
+	int Diamond = Player->m_Knapsack.m_Diamond;
+	int Enegry = Player->m_Knapsack.m_Enegry;
 	pThis->SendChatTarget(pResult->GetClientID(), _("Log: {int:Log}, Copper: {int:Copper}, Coal: {int:Coal},"), "Log", &Log, "Copper", &Copper, "Coal", &Coal);
 	pThis->SendChatTarget(pResult->GetClientID(), _("Iron: {int:Iron}, Gold: {int:Gold}, Diamond: {int:Diamond},"), "Iron", &Iron, "Gold", &Gold, "Diamond", &Diamond);
 	pThis->SendChatTarget(pResult->GetClientID(), _("Enegry: {int:Enegry}"), "Enegry", &Enegry);
@@ -2207,23 +2205,23 @@ void CGameContext::ConClassPassword(IConsole::IResult *pResult, void *pUserData)
 		Player->m_Knapsack.m_FFS = 1;
 		YES = true;
 	}
-	if(str_comp(pMessage, g_Config.m_Ninecloud) == 0){
+	else if(str_comp(pMessage, g_Config.m_Ninecloud) == 0){
 		Player->m_Knapsack.m_Ninecloud = 1;
 		YES = true;
 	}
-	if(str_comp(pMessage, g_Config.m_EDreemurr) == 0){
+	else if(str_comp(pMessage, g_Config.m_EDreemurr) == 0){
 		Player->m_Knapsack.m_EDreemurr = 1;
 		YES = true;
 	}
-	if(str_comp(pMessage, g_Config.m_Shengyan) == 0){
+	else if(str_comp(pMessage, g_Config.m_Shengyan) == 0){
 		Player->m_Knapsack.m_Shengyan = 1;
 		YES = true;
 	}
-	if(str_comp(pMessage, g_Config.m_XyCloud) == 0){
+	else if(str_comp(pMessage, g_Config.m_XyCloud) == 0){
 		Player->m_Knapsack.m_XyCloud = 1;
 		YES = true;
 	}
-	if(str_comp(pMessage, g_Config.m_HGDio) == 0){
+	else if(str_comp(pMessage, g_Config.m_HGDio) == 0){
 		Player->m_Knapsack.m_HGDio = 1;
 		YES = true;
 	}

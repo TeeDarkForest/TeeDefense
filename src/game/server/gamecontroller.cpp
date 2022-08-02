@@ -388,7 +388,7 @@ int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 		int rando = rand()%6 + 1;
 		if(rando <= 3)
 		{
-			pKiller->m_Knapsack.m_Log += 1;
+			pKiller->m_Knapsack.m_Log++;
 			GameServer()->SendChatTarget(pKiller->GetCID(), _("You got 1 Log from the Zombie"));
 		}
 		else if(rando == 4)
@@ -399,7 +399,7 @@ int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 		else
 		{
 			// Give Player zombie's heart.
-			GameServer()->SendChatTarget(pKiller->GetCID(), _("You picked up Zombie's Heart (Unfinish)"));
+			GameServer()->SendChatTarget(pKiller->GetCID(), _("You picked up Zombie's Heart"));
 		}
 		pKiller->m_Score++;
 		DoZombMessage(m_ZombLeft--);
@@ -1107,20 +1107,17 @@ void IGameController::DoZombMessage(int Which)
 	char aBuf[64];
 	if(!Which)
 	{
-		str_format(aBuf, sizeof(aBuf), "Wave %d started with %d Zombies!", m_Wave, m_ZombLeft);
-		GameServer()->SendBroadcast(aBuf, -1);
+		GameServer()->SendBroadcast_VL(_("Wave {int:a} started with {int:a} Zombies!"), -1, "a", &m_Wave, "a", &m_ZombLeft);
 		return;
 	}
 	Which -= 1;
 	if(Which > 1 && (Which <= 5 || !(Which%10)))
 	{
-		str_format(aBuf, sizeof(aBuf), "Wave %d: %d zombies are left", m_Wave, Which);
-		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
+		GameServer()->SendChatTarget(-1, _("Wave {int:a}: {int:a} zombies are left"), "a", &m_Wave, "a", &Which);
 	}
 	else if(Which == 1)
 	{
-		str_format(aBuf, sizeof(aBuf), "Wave %d: 1 zombie is left", m_Wave);
-		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
+		GameServer()->SendChatTarget(-1, "Wave {int:i}: 1 zombie is left", "a", &m_Wave);
 	}
 }
 

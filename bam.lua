@@ -45,7 +45,6 @@ function DuplicateDirectoryStructure(orgpath, srcpath, dstpath)
 		DuplicateDirectoryStructure(orgpath, v, dstpath)
 	end
 end
-
 DuplicateDirectoryStructure("src", "src", "objs")
 ]]
 

@@ -1,6 +1,6 @@
 sv_name ""
 sv_rcon_password rcon
-sv_map TDef1
+sv_map Mine-Craft
 
 ffs_password
 xc_password

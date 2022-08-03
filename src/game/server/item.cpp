@@ -149,7 +149,7 @@ CItemSystem::CItemSystem(CGameContext *GameServer)
             10,// Log
              0,// Coal
               0,//Copper
-               25// Iron
+               25,// Iron
                 0,// Gold
                  0,// Diamond
                   0//Enegry

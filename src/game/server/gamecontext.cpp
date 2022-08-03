@@ -928,10 +928,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 				if(ItemSystem()->CheckItemName(ItemName))
 				{
-					SendChatTarget(ClientID, "find item");
-				}else
-				{
-					SendChatTarget(ClientID, "this item is not find");
+					ItemSystem()->MakeItem(ItemName, ClientID);
 				}
 				return;
 			}

@@ -7,16 +7,13 @@
 #include "follow-gun.h"
 #include <base/math.h>
 #define RAD 0.017453292519943295769236907684886f
-CTurret::CTurret(CGameWorld *pGameWorld, vec2 Pos, int Owner, int Type, int Radius, int Lifes, bool Follow, bool Lightning, bool Freeze)
+CTurret::CTurret(CGameWorld *pGameWorld, vec2 Pos, int Owner, int Type, int Radius, int Lifes)
 : CEntity(pGameWorld, CGameWorld::ENTTYPE_TURRET)
 {
     m_Pos = Pos;
     m_Owner = Owner;
     m_Type = Type;
     m_Radius = Radius;
-    m_Follow = Follow;
-    m_Lightning = Lightning;
-    m_Freeze = Freeze;
     m_FireDelay = 0;
     m_Lifes = Lifes;
 
@@ -56,18 +53,6 @@ CTurret::~CTurret()
     }
 }
 
-bool CTurret::GetFollow()
-{
-    return m_Follow;
-}
-bool CTurret::GetFreeze()
-{
-    return m_Freeze;
-}
-bool CTurret::GetLightning()
-{
-    return m_Lightning;
-}
 int CTurret::GetOwner()
 {
     return m_Owner;

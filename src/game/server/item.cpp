@@ -6,6 +6,7 @@
 #include "item.h"
 #include "gamecontext.h"
 #include "gamecontroller.h"
+#include "entities/turret.h"
 
 void CItem::Load(int ID, int Log, int Coal, int Copper, int Iron, int Gold, int Diamond, int Enegry)
 {
@@ -22,8 +23,19 @@ void CItem::Load(int ID, int Log, int Coal, int Copper, int Iron, int Gold, int 
 CItemSystem::CItemSystem()
 {
     m_IDs = 0;
+    // unfinish. ED ni lai gao zhe ge.
+    CreateItem("log_sword", m_IDs, ITYPE_SWORD, 0, LEVEL_LOG, -1, 20, 10, 10, 0, 0, 0, 0, 0, 0);
     CreateItem("log_axe", m_IDs, ITYPE_AXE, 0, LEVEL_LOG, -1, 20, 10, 10, 0, 0, 0, 0, 0, 0);
     CreateItem("log_pickaxe", m_IDs, ITYPE_PICKAXE, 0, LEVEL_LOG, -1, 20, 500, 25, 0, 0, 0, 0, 0, 0);
+    CreateItem("copper_sword", m_IDs, ITYPE_SWORD, 0, LEVEL_COPPER, -1, 20, 10, 10, 0, 25, 0, 0, 0, 0);
+    CreateItem("copper_axe", m_IDs, ITYPE_AXE, 0, LEVEL_COPPER, -1, 20, 10, 10, 0, 0, 0, 0, 0, 0);
+    CreateItem("copper_pickaxe", m_IDs, ITYPE_PICKAXE, 0, LEVEL_COPPER, -1, 20, 500, 25, 0, 0, 0, 0, 0, 0);
+    CreateItem("iron_sword", m_IDs, ITYPE_SWORD, 0, LEVEL_IRON, -1, 20, 10, 10, 0, 0, 0, 0, 0, 0);
+    CreateItem("iron_axe", m_IDs, ITYPE_AXE, 0, LEVEL_IRON, -1, 20, 10, 10, 0, 0, 0, 0, 0, 0);
+    CreateItem("iron_pickaxe", m_IDs, ITYPE_PICKAXE, 0, LEVEL_IRON, -1, 20, 500, 25, 0, 0, 0, 0, 0, 0);
+    
+    CreateItem("gun_turret", m_IDs, ITYPE_TURRET, 0, LEVEL_LOG, TURRET_GUN, 20, 500, 25, 0, 0, 0, 0, 0, 0);
+    
 }
 
 bool CItemSystem::CheckItemName(const char* pItemName)
@@ -122,29 +134,34 @@ void CItemSystem::SendMakeItemFailedChat(int To, int* Resource)
     Buffer.append("You lost ");
     if(Resource[RESOURCE_LOG] > 0)
     {
-        str_format(aBuf, sizeof(aBuf), "%s %d log", aBuf, Resource[RESOURCE_LOG]);
+        str_format(aBuf, sizeof(aBuf), "%d log.", Resource[RESOURCE_LOG]);
+        Buffer.append(aBuf);
     }
     if(Resource[RESOURCE_COAL] > 0)
     {
-        str_format(aBuf, sizeof(aBuf), "%s %d coal", aBuf, Resource[RESOURCE_COAL]);
+        str_format(aBuf, sizeof(aBuf), "%d coal.", Resource[RESOURCE_COAL]);
+        Buffer.append(aBuf);
     }
     if(Resource[RESOURCE_COPPER] > 0)
     {
-        str_format(aBuf, sizeof(aBuf), "%s %d copper", aBuf, Resource[RESOURCE_COPPER]);
+        str_format(aBuf, sizeof(aBuf), "%d copper.", Resource[RESOURCE_COPPER]);
+        Buffer.append(aBuf);
     }
     if(Resource[RESOURCE_IRON] > 0)
     {
-        str_format(aBuf, sizeof(aBuf), "%s %d iron", aBuf, Resource[RESOURCE_IRON]);
+        str_format(aBuf, sizeof(aBuf), "%d iron.", Resource[RESOURCE_IRON]);
+        Buffer.append(aBuf);
     }
     if(Resource[RESOURCE_DIAMOND] > 0)
     {
-        str_format(aBuf, sizeof(aBuf), "%s %d diamond", aBuf, Resource[RESOURCE_DIAMOND]);
+        str_format(aBuf, sizeof(aBuf), "%d diamond.", Resource[RESOURCE_DIAMOND]);
+        Buffer.append(aBuf);
     }
     if(Resource[RESOURCE_ENEGRY] > 0)
     {
-        str_format(aBuf, sizeof(aBuf), "%s %d enegry", aBuf, Resource[RESOURCE_ENEGRY]);
+        str_format(aBuf, sizeof(aBuf), "%d enegry.", Resource[RESOURCE_ENEGRY]);
+        Buffer.append(aBuf);
     }
-    Buffer.append(aBuf);
     m_pGameServer->SendChatTarget(To, Buffer.c_str());
 }
 
@@ -159,22 +176,61 @@ void CItemSystem::MakeItem(const char* pItemName, int ClientID)
 
     for(int i = 0;i < NUM_RESOURCE;i++)
     {
-        if(m_pGameServer->m_apPlayers[ClientID]->m_Knapsack.m_Resource[i] < MakeItem->m_NeedResource[i])
-        {
-            SendCantMakeItemChat(ClientID, MakeItem->m_NeedResource);
-            return;
-        }
+        if(MakeItem->m_NeedResource[i] && m_pGameServer->m_apPlayers[ClientID]->m_Knapsack.m_Resource[i])
+            if(m_pGameServer->m_apPlayers[ClientID]->m_Knapsack.m_Resource[i] < MakeItem->m_NeedResource[i])
+            {
+                SendCantMakeItemChat(ClientID, MakeItem->m_NeedResource);
+                return;
+            }
     }
 
     if(random_int(0, 100) < MakeItem->m_Proba)
     {
 		SendMakeItemChat(ClientID, MakeItem);
-        int ItemId = MakeItem->m_ID;
+        int ItemLevel = MakeItem->m_Level;
         switch (MakeItem->m_Type)
         {
-            case ITYPE_AXE: m_pGameServer->m_apPlayers[ClientID]->m_Knapsack.m_Axe = ItemId;break;
-            case ITYPE_PICKAXE: m_pGameServer->m_apPlayers[ClientID]->m_Knapsack.m_Pickaxe = ItemId;break;
-            case ITYPE_SWORD: m_pGameServer->m_apPlayers[ClientID]->m_Knapsack.m_Sword = ItemId;break;
+            case ITYPE_AXE: 
+                if(m_pGameServer->m_apPlayers[ClientID]->m_Knapsack.m_Axe < ItemLevel)
+                    m_pGameServer->m_apPlayers[ClientID]->m_Knapsack.m_Axe = ItemLevel;
+                break;
+            
+            case ITYPE_PICKAXE:
+                if(m_pGameServer->m_apPlayers[ClientID]->m_Knapsack.m_Pickaxe < ItemLevel)
+                   m_pGameServer->m_apPlayers[ClientID]->m_Knapsack.m_Pickaxe = ItemLevel;
+                break;
+            
+            case ITYPE_SWORD:
+                if(m_pGameServer->m_apPlayers[ClientID]->m_Knapsack.m_Sword < ItemLevel)
+                    m_pGameServer->m_apPlayers[ClientID]->m_Knapsack.m_Sword = ItemLevel;
+                break;
+            
+            case ITYPE_TURRET:
+            {
+                int Lifes;
+                switch (MakeItem->m_TurretType)
+                {
+                case TURRET_GUN:
+                    Lifes = 400;
+                    break;
+                
+                case TURRET_SHOTGUN:
+                    Lifes = 64;
+                    break;
+                
+                case TURRET_LASER:
+                    Lifes = 200;
+                    break;
+                
+                case TURRET_LASER_2077:
+                    Lifes = 350;
+                    break;
+
+                default:
+                    break;
+                }
+                new CTurret(&m_pGameServer->m_World, m_pGameServer->GetPlayerChar(ClientID)->m_Pos, ClientID, MakeItem->m_TurretType, 64, Lifes);
+            }
         }
     }else
     {

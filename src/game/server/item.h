@@ -17,7 +17,7 @@ enum
 
 enum
 {
-    LEVEL_LOG=0,
+    LEVEL_LOG=1,
     LEVEL_COAL,
     LEVEL_COPPER,
     LEVEL_IRON,

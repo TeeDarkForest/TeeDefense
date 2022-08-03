@@ -25,7 +25,7 @@ enum
 class CTurret : public CEntity
 {
 public:
-    CTurret(CGameWorld *pGameWorld, vec2 Pos, int Owner, int Type, int Radius = 64, int Lifes = 120, bool Follow = false, bool Lightning = false, bool Freeze = false);
+    CTurret(CGameWorld *pGameWorld, vec2 Pos, int Owner, int Type, int Radius = 64, int Lifes = 120);
     virtual ~CTurret();
 
     virtual void Tick();
@@ -33,18 +33,12 @@ public:
 	virtual void Snap(int SnappingClient);
 
     int GetOwner();
-    bool GetFreeze();
-    bool GetLightning();
-    bool GetFollow();
     int GetRadius();
     int GetType();
     int GetSnapType();
 private:
     int m_Type;
     int m_Radius;
-    bool m_Follow;
-    bool m_Lightning;
-    bool m_Freeze;
     int m_Owner;
     int m_IDs[NumSide];
     int m_aIDs[NumSide];

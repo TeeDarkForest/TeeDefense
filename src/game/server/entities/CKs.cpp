@@ -83,7 +83,7 @@ void CKs::Tick()
 		{
 			if(pChr->GetPlayer()->m_Knapsack.m_Axe >= 0 && m_Type == CK_WOOD)
 			{
-				
+
 				pChr->m_InMining = true;
 				GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP);
 				Picking(GameServer()->ItemSystem()->GetSpeed(pChr->GetPlayer()->m_Knapsack.m_Axe,ITYPE_AXE), pChr->GetPlayer());
@@ -171,7 +171,7 @@ void CKs::Picking(int Time, CPlayer *Player)
 	int CID = Player->GetCID();
 	if(m_Health <= 0)
 	{
-		switch (Player->m_MiningType)
+		switch (m_Type)
 		{
 		case CK_WOOD:
 			Player->m_Knapsack.m_Resource[RESOURCE_LOG]++;

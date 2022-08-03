@@ -86,7 +86,7 @@ void CKs::Tick()
 				
 				pChr->m_InMining = true;
 				GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP);
-				Picking(GameServer()->CItemSystem()->GetItem(pChr->GetPlayer()->m_Knapsack.m_Axe).m_Speed, pChr->GetPlayer());
+				Picking(GameServer()->ItemSystem()->GetItem(pChr->GetPlayer()->m_Knapsack.m_Axe)->m_Speed, pChr->GetPlayer());
 				return;
 			}
 			else if(m_Type == CK_WOOD) 
@@ -97,9 +97,9 @@ void CKs::Tick()
 			else if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe >= 0)
 			{
 				if(m_Type == CK_ENEGRY)
-					PickSpeed = GameServer()->CItemSystem()->GetItem(pChr->GetPlayer()->m_Knapsack.m_Pickaxe).m_Speed / 2;
+					PickSpeed = GameServer()->ItemSystem()->GetItem(pChr->GetPlayer()->m_Knapsack.m_Pickaxe)->m_Speed / 2;
 				else
-					PickSpeed = GameServer()->CItemSystem()->GetItem(pChr->GetPlayer()->m_Knapsack.m_Pickaxe).m_Speed;
+					PickSpeed = GameServer()->ItemSystem()->GetItem(pChr->GetPlayer()->m_Knapsack.m_Pickaxe)->m_Speed;
 			}
 
 			pChr->GetPlayer()->m_MiningType = m_Type;
@@ -127,7 +127,7 @@ void CKs::Tick()
 					Picking(PickSpeed, pChr->GetPlayer());
 					break;
 				case CK_DIAMONAD:
-					if(GameServer()->CItemSystem()->GetItem(pChr->GetPlayer()->m_Knapsack.m_Pickaxe).m_Level < LEVEL_GOLD)
+					if(GameServer()->ItemSystem()->GetItem(pChr->GetPlayer()->m_Knapsack.m_Pickaxe)->m_Level < LEVEL_GOLD)
 					{
 						if(Server()->Tick()%50 == 0)
 						{
@@ -141,7 +141,7 @@ void CKs::Tick()
 					Picking(PickSpeed, pChr->GetPlayer());
 					break;
 				case CK_ENEGRY:
-					if(GameServer()->CItemSystem()->GetItem(pChr->GetPlayer()->m_Knapsack.m_Pickaxe).m_Level < LEVEL_DIAMOND)
+					if(GameServer()->ItemSystem()->GetItem(pChr->GetPlayer()->m_Knapsack.m_Pickaxe)->m_Level < LEVEL_DIAMOND)
 					{
 						if(Server()->Tick()%50 == 0)
 						{

@@ -39,6 +39,8 @@ void CGameContext::Construct(int Resetting)
 
 	if(Resetting==NO_RESET)
 		m_pVoteOptionHeap = new CHeap();
+	
+	m_pItemSystem = new CItemSystem;
 }
 
 CGameContext::CGameContext(int Resetting)
@@ -83,6 +85,8 @@ void CGameContext::Clear()
 	m_pVoteOptionLast = pVoteOptionLast;
 	m_NumVoteOptions = NumVoteOptions;
 	m_Tuning = Tuning;
+
+	delete m_pItemSystem;
 }
 
 
@@ -922,7 +926,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				char ItemName[128];
 				mem_copy(ItemName, aCmd+4, sizeof(ItemName));
 
-				if(CItemSystem()->CheckItemName(ItemName))
+				if(ItemSystem()->CheckItemName(ItemName))
 				{
 					SendChatTarget(ClientID, "find item");
 				}else

@@ -59,14 +59,14 @@ public:
 
     CItemSystem();
 
-    CItem m_ItemList[128];
+    CItem *m_ItemList[128];
 
     bool CreateItem(const char* pItemName, int ID, int Type, int Damage, int Level, int TurretType, int Proba, 
         int Speed, int Log, int Coal, int Copper, int Iron, int Gold, int Diamond, int Enegry);
 
     int GetItemId(const char* pItemName);
 
-    CItem GetItem(int ItemID) { return m_ItemList[ItemID]; };
+    CItem *GetItem(int ItemID) { return m_ItemList[ItemID]; };
 
     void MakeItem(const char* pItemName, int ClientID);
 
@@ -74,7 +74,7 @@ public:
 
     void SendCantMakeItemChat(int To, int *Resource);
 
-    void SendMakeItemChat(int To, CItem Item);
+    void SendMakeItemChat(int To, CItem *Item);
 
     void SendMakeItemFailedChat(int To, int* Resource);
 };

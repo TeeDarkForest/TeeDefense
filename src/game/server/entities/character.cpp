@@ -357,7 +357,7 @@ void CCharacter::FireWeapon()
 				Hits++;
 			}
 
-			if(GetPlayer() && !GetPlayer()->GetZomb() && (GetPlayer()->m_Knapsack.m_FFS || (GetPlayer()->m_Knapsack.m_Sword >= 0 && GameServer()->CItemSystem()->GetItem(GetPlayer()->m_Knapsack.m_Sword).m_Level >= LEVEL_DIAMOND)))
+			if(GetPlayer() && !GetPlayer()->GetZomb() && (GetPlayer()->m_Knapsack.m_FFS || (GetPlayer()->m_Knapsack.m_Sword >= 0 && GameServer()->ItemSystem()->GetItem(GetPlayer()->m_Knapsack.m_Sword)->m_Level >= LEVEL_DIAMOND)))
 			{
 				for (int i = 0; i < 25; i++)
 				{
@@ -368,7 +368,7 @@ void CCharacter::FireWeapon()
 				}
 			}
 
-			if(GetPlayer() && !GetPlayer()->GetZomb() && (GetPlayer()->m_Knapsack.m_EDreemurr || (GetPlayer()->m_Knapsack.m_Sword >= 0 && GameServer()->CItemSystem()->GetItem(GetPlayer()->m_Knapsack.m_Sword).m_Level >= LEVEL_DIAMOND)))
+			if(GetPlayer() && !GetPlayer()->GetZomb() && (GetPlayer()->m_Knapsack.m_EDreemurr || (GetPlayer()->m_Knapsack.m_Sword >= 0 && GameServer()->ItemSystem()->GetItem(GetPlayer()->m_Knapsack.m_Sword)->m_Level >= LEVEL_DIAMOND)))
 			{
 				m_Core.m_Vel += ((normalize(vec2(m_LatestInput.m_TargetX, m_LatestInput.m_TargetY))) * max(0.001f, 64.0f));
 				for(int i = 0; i < 10; i++)
@@ -845,18 +845,18 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 			CPlayer *Player = GameServer()->m_apPlayers[From];
 			if(Player->m_Knapsack.m_Sword >= 0)
 			{
-				CItem Sword = GameServer()->CItemSystem()->GetItem(Player->m_Knapsack.m_Sword);
-				if(Sword.m_Level == LEVEL_ENEGRY)
+				CItem *Sword = GameServer()->ItemSystem()->GetItem(Player->m_Knapsack.m_Sword);
+				if(Sword->m_Level == LEVEL_ENEGRY)
 					Dmg+=32;
-				if(Sword.m_Level == LEVEL_DIAMOND)
+				if(Sword->m_Level == LEVEL_DIAMOND)
 					Dmg+=20;
-				else if(Sword.m_Level == LEVEL_GOLD)
+				else if(Sword->m_Level == LEVEL_GOLD)
 					Dmg+=10;
-				else if(Sword.m_Level == LEVEL_IRON)
+				else if(Sword->m_Level == LEVEL_IRON)
 					Dmg+=7;
-				else if(Sword.m_Level == LEVEL_COPPER)
+				else if(Sword->m_Level == LEVEL_COPPER)
 					Dmg+=5;
-				else if(Sword.m_Level == LEVEL_LOG)
+				else if(Sword->m_Level == LEVEL_LOG)
 					Dmg+=2;
 			}
 		}

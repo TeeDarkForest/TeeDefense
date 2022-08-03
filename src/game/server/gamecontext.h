@@ -16,6 +16,7 @@
 #include "gamecontroller.h"
 #include "gameworld.h"
 #include "player.h"
+#include "item.h"
 
 #ifdef _MSC_VER
 typedef __int32 int32_t;
@@ -53,6 +54,7 @@ class CGameContext : public IGameServer
 	class IConsole *m_pConsole;
 	CLayers m_Layers;
 	CCollision m_Collision;
+	CItemSystem *m_pItemSystem;
 	CNetObjHandler m_NetObjHandler;
 	CTuningParams m_Tuning;
 
@@ -103,6 +105,7 @@ public:
 	IServer *Server() const { return m_pServer; }
 	class IConsole *Console() { return m_pConsole; }
 	CCollision *Collision() { return &m_Collision; }
+	CItemSystem *CItemSystem() { return m_pItemSystem; }
 	CTuningParams *Tuning() { return &m_Tuning; }
 	virtual class CLayers *Layers() { return &m_Layers; }
 

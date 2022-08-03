@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <new>
 #include <base/math.h>
+#include <string.h>
 #include <engine/shared/config.h>
 #include <engine/map.h>
 #include <engine/console.h>
@@ -721,32 +722,32 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			}
 			if(str_comp(pMsg->m_pMessage, "s2") == 0)
 			{
-				m_apPlayers[ClientID]->m_Knapsack.m_Log += 10;
+				m_apPlayers[ClientID]->m_Knapsack.m_Resource[RESOURCE_LOG] += 10;
 				return;
 			}
 			if(str_comp(pMsg->m_pMessage, "s3") == 0)
 			{
-				m_apPlayers[ClientID]->m_Knapsack.m_Copper += 10;
+				m_apPlayers[ClientID]->m_Knapsack.m_Resource[RESOURCE_COPPER] += 10;
 				return;
 			}
 			if(str_comp(pMsg->m_pMessage, "s4") == 0)
 			{
-				m_apPlayers[ClientID]->m_Knapsack.m_Iron += 10;
+				m_apPlayers[ClientID]->m_Knapsack.m_Resource[RESOURCE_IRON] += 10;
 				return;
 			}
 			if(str_comp(pMsg->m_pMessage, "s5") == 0)
 			{
-				m_apPlayers[ClientID]->m_Knapsack.m_Gold += 10;
+				m_apPlayers[ClientID]->m_Knapsack.m_Resource[RESOURCE_GOLD] += 10;
 				return;
 			}
 			if(str_comp(pMsg->m_pMessage, "s6") == 0)
 			{
-				m_apPlayers[ClientID]->m_Knapsack.m_Diamond += 10;
+				m_apPlayers[ClientID]->m_Knapsack.m_Resource[RESOURCE_DIAMOND] += 10;
 				return;
 			}
 			if(str_comp(pMsg->m_pMessage, "s7") == 0)
 			{
-				m_apPlayers[ClientID]->m_Knapsack.m_Enegry += 10;
+				m_apPlayers[ClientID]->m_Knapsack.m_Resource[RESOURCE_ENEGRY] += 10;
 				return;
 			}
 			if(pMsg->m_pMessage[0] == '/' || pMsg->m_pMessage[0] == '\\')
@@ -911,11 +912,26 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				str_format(aDesc, sizeof(aDesc), "move '%s' to spectators", Server()->ClientName(SpectateID));
 				str_format(aCmd, sizeof(aCmd), "set_team %d -1 %d", SpectateID, g_Config.m_SvVoteSpectateRejoindelay);
 			}
-
-			if (str_comp(aCmd, "ccv_null") == 0)
+			std::string ItemCode(aCmd);
+			if (str_comp(aCmd, "ccv_skip") == 0)
 			{
 				return;
 			}
+			else if(ItemCode.find("ccv_") == 0)
+			{
+				char ItemName[128];
+				mem_copy(ItemName, aCmd+4, sizeof(ItemName));
+
+				if(CItemSystem()->CheckItemName(ItemName))
+				{
+					SendChatTarget(ClientID, "find item");
+				}else
+				{
+					SendChatTarget(ClientID, "this item is not find");
+				}
+				return;
+			}
+			/*
 
 			else if (str_comp(aCmd, "ccv_log_axe") == 0)
 			{
@@ -1360,7 +1376,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					SendChatTarget(ClientID, _("You need at least 50 diamonds and 100 Enegry to build a {[LA2ER T0RRE7]}."));
 				}
 				return;
-			}
+			}*/
 
 			if(aCmd[0])
 			{
@@ -2125,13 +2141,13 @@ void CGameContext::ConMe(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext* pThis = (CGameContext*) pUserData;
 	CPlayer *Player = pThis->m_apPlayers[pResult->GetClientID()];
-	int Log = Player->m_Knapsack.m_Log;
-	int Copper = Player->m_Knapsack.m_Copper;
-	int Coal = Player->m_Knapsack.m_Coal;
-	int Iron = Player->m_Knapsack.m_Iron;
-	int Gold = Player->m_Knapsack.m_Gold;
-	int Diamond = Player->m_Knapsack.m_Diamond;
-	int Enegry = Player->m_Knapsack.m_Enegry;
+	int Log = Player->m_Knapsack.m_Resource[RESOURCE_LOG];
+	int Copper = Player->m_Knapsack.m_Resource[RESOURCE_COPPER];
+	int Coal = Player->m_Knapsack.m_Resource[RESOURCE_COAL];
+	int Iron = Player->m_Knapsack.m_Resource[RESOURCE_IRON];
+	int Gold = Player->m_Knapsack.m_Resource[RESOURCE_GOLD];
+	int Diamond = Player->m_Knapsack.m_Resource[RESOURCE_DIAMOND];
+	int Enegry = Player->m_Knapsack.m_Resource[RESOURCE_ENEGRY];
 	pThis->SendChatTarget(pResult->GetClientID(), _("Log: {int:Log}, Copper: {int:Copper}, Coal: {int:Coal},"), "Log", &Log, "Copper", &Copper, "Coal", &Coal);
 	pThis->SendChatTarget(pResult->GetClientID(), _("Iron: {int:Iron}, Gold: {int:Gold}, Diamond: {int:Diamond},"), "Iron", &Iron, "Gold", &Gold, "Diamond", &Diamond);
 	pThis->SendChatTarget(pResult->GetClientID(), _("Enegry: {int:Enegry}"), "Enegry", &Enegry);
@@ -2172,7 +2188,7 @@ void CGameContext::ConLanguage(IConsole::IResult *pResult, void *pUserData)
 	{
 		const char* pLanguage = pSelf->m_apPlayers[ClientID]->GetLanguage();
 		const char* pTxtUnknownLanguage = pSelf->Server()->Localization()->Localize(pLanguage, _("Unknown language or no input language code"));
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "language", pTxtUnknownLanguage);	
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_CHAT, "language", pTxtUnknownLanguage);	
 		
 		pSelf->SendChatTarget(ClientID, pTxtUnknownLanguage);
 

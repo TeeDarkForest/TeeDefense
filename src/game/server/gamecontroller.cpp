@@ -388,12 +388,12 @@ int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 		int rando = rand()%6 + 1;
 		if(rando <= 3)
 		{
-			pKiller->m_Knapsack.m_Log++;
+			pKiller->m_Knapsack.m_Resource[RESOURCE_LOG]++;
 			GameServer()->SendChatTarget(pKiller->GetCID(), _("You got 1 Log from the Zombie"));
 		}
 		else if(rando == 4)
 		{
-			pKiller->m_Knapsack.m_Copper++;
+			pKiller->m_Knapsack.m_Resource[RESOURCE_COPPER]++;
 			GameServer()->SendChatTarget(pKiller->GetCID(), _("You got 1 Copper from the Zombie"));
 		}
 		else
@@ -1117,7 +1117,7 @@ void IGameController::DoZombMessage(int Which)
 	}
 	else if(Which == 1)
 	{
-		GameServer()->SendChatTarget(-1, "Wave {int:i}: 1 zombie is left", "a", &m_Wave);
+		GameServer()->SendChatTarget(-1, "Wave {int:i}: 1 zombie is left", "i", &m_Wave);
 	}
 }
 

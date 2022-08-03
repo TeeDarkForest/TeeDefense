@@ -496,17 +496,9 @@ bool CPlayer::GetZomb(int Type)
 
 void CPlayer::ResetKnapsack()
 {
-	m_Knapsack.m_Coal = 0;
-	m_Knapsack.m_Copper = 0;
-	m_Knapsack.m_Diamond = 0;
-	m_Knapsack.m_Gold = 0;
-	m_Knapsack.m_Iron = 0;
-	m_Knapsack.m_Log = 0;
-	m_Knapsack.m_Enegry = 0;
-	for(int i = 0; i < SWORD_TYPES; i++)
-		m_Knapsack.m_Sword[i] = 0;
-	for(int i = 0; i < PICKAXE_TYPES; i++)
-		m_Knapsack.m_Pickaxe[i] = 0;
-	for(int i = 0; i < AXE_TYPES; i++)
-		m_Knapsack.m_Axe[i] = 0;
+	for(int i = 0; i < NUM_RESOURCE; i++)
+		m_Knapsack.m_Resource[i] = 0;
+	m_Knapsack.m_Axe = -1;
+	m_Knapsack.m_Pickaxe = -1;
+	m_Knapsack.m_Sword = -1;
 }

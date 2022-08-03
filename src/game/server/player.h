@@ -6,35 +6,8 @@
 // this include should perhaps be removed
 #include "entities/character.h"
 #include "gamecontext.h"
+#include "item.h"
 
-enum
-{
-	LOG_AXE=0,
-	COPPER_AXE,
-	IRON_AXE,
-	GOLD_AXE,
-	DIAMOND_AXE,
-	END_AXE,
-
-	LOG_SWORD=0,
-	IRON_SWORD,
-	GOLD_SWORD,
-	DIAMOND_SWORD,
-	ENEGRY_SWORD,
-	END_SWORD,
-
-	LOG_PICKAXE=0,
-	COPPER_PICKAXE,
-	IRON_PICKAXE,
-	GOLD_PICKAXE,
-	DIAMOND_PICKAXE,
-	ENEGRY_PICKAXE,
-	END_PICKAXE,
-
-	SWORD_TYPES=END_SWORD,
-	PICKAXE_TYPES=END_PICKAXE,
-	AXE_TYPES=END_AXE,
-};
 // player object
 class CPlayer
 {
@@ -154,36 +127,6 @@ public:
 	void DeleteCharacter();
 	int GetZomb() { return m_Zomb; };
 	bool GetZomb(int Zomb);
-	
-
-	// Tee Dark Forest.
-	struct // knapsack
-	{
-		int m_Log; // Step 1
-		int m_Coal; // Step 2
-		int m_Copper; // Step 3
-		int m_Iron; // Step 4
-		int m_Gold; // Step 5
-		int m_Diamond; // Step 6
-		int m_Enegry;
-
-		int m_Sword[SWORD_TYPES];
-		int m_Pickaxe[PICKAXE_TYPES];
-		int m_Axe[AXE_TYPES];
-		// Developers (Special things. XD)
-		int m_Shengyan; // This is special, he is SLUG lmao! hahahahahahah xaxaxaxaxaxaxaxaxa
-		int m_Ninecloud;
-		int m_EDreemurr;
-		int m_XyCloud;
-		int m_HGDio; // This is special one too, he is OOOOOOOOOOOOOOOO.
-		int m_Jiuyuan; // half developer (?)
-		int m_FFS; // it me, FlowerFell-Sans. lmao(why my name is soo long...)
-	} m_Knapsack;
-
-	void ResetKnapsack();
-	
-	int m_MiningType;
-	int m_MiningTick;
 
 private:
 	CCharacter *m_pCharacter;
@@ -198,6 +141,29 @@ private:
 	int m_Team;
 
 	char m_aLanguage[16];
+
+public:
+	// Tee Dark Forest.
+	struct // knapsack
+	{
+		int m_Resource[NUM_RESOURCE];
+		int m_Sword;
+		int m_Pickaxe;
+		int m_Axe;
+		// Developers (Special things. XD)
+		int m_Shengyan; // This is special, he is SLUG lmao! hahahahahahah xaxaxaxaxaxaxaxaxa
+		int m_Ninecloud;
+		int m_EDreemurr;
+		int m_XyCloud;
+		int m_HGDio; // This is special one too, he is OOOOOOOOOOOOOOOO.
+		int m_Jiuyuan; // half developer (?)
+		int m_FFS; // it me, FlowerFell-Sans. lmao(why my name is soo long...)
+	} m_Knapsack;
+
+	void ResetKnapsack();
+	
+	int m_MiningType;
+	int m_MiningTick;
 
 private:
 	CTuningParams m_PrevTuningParams;

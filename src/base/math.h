@@ -37,6 +37,7 @@ inline T mix(const T a, const T b, TB amount)
 float random_float();
 bool random_prob(float f);
 int random_int(int Min, int Max);
+int random_distribution(double* pProb, double* pProb2);
 inline float frandom() { return rand()/(float)(RAND_MAX); }
 
 // float to fixed

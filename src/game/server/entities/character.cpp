@@ -285,6 +285,11 @@ void CCharacter::FireWeapon()
 	// check if we gonna fire
 	bool WillFire = false;
 
+	if(!m_pPlayer)
+	{
+		return;
+	}
+
 	if(m_pPlayer->GetZomb() && m_Input.m_Fire == 1)
 		WillFire = true;
 
@@ -352,7 +357,7 @@ void CCharacter::FireWeapon()
 				Hits++;
 			}
 
-			if(GetPlayer() && !GetPlayer()->GetZomb() && (GetPlayer()->m_Knapsack.m_FFS || GetPlayer()->m_Knapsack.m_Sword[DIAMOND_SWORD]))
+			if(GetPlayer() && !GetPlayer()->GetZomb() && (GetPlayer()->m_Knapsack.m_FFS || (GetPlayer()->m_Knapsack.m_Sword >= 0 && GameServer()->CItemSystem()->GetItem(GetPlayer()->m_Knapsack.m_Sword).m_Level >= LEVEL_DIAMOND)))
 			{
 				for (int i = 0; i < 25; i++)
 				{
@@ -363,7 +368,7 @@ void CCharacter::FireWeapon()
 				}
 			}
 
-			if(GetPlayer() && !GetPlayer()->GetZomb() && (GetPlayer()->m_Knapsack.m_EDreemurr || GetPlayer()->m_Knapsack.m_Sword[ENEGRY_SWORD]))
+			if(GetPlayer() && !GetPlayer()->GetZomb() && (GetPlayer()->m_Knapsack.m_EDreemurr || (GetPlayer()->m_Knapsack.m_Sword >= 0 && GameServer()->CItemSystem()->GetItem(GetPlayer()->m_Knapsack.m_Sword).m_Level >= LEVEL_DIAMOND)))
 			{
 				m_Core.m_Vel += ((normalize(vec2(m_LatestInput.m_TargetX, m_LatestInput.m_TargetY))) * max(0.001f, 64.0f));
 				for(int i = 0; i < 10; i++)
@@ -834,16 +839,22 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 		if(!GameServer()->m_apPlayers[From]->GetZomb())
 		{
 			CPlayer *Player = GameServer()->m_apPlayers[From];
-			if(Player->m_Knapsack.m_Sword[ENEGRY_SWORD])
-				Dmg+=20;
-			else if(Player->m_Knapsack.m_Sword[DIAMOND_SWORD])
-				Dmg+=10;
-			else if(Player->m_Knapsack.m_Sword[GOLD_SWORD])
-				Dmg+=7;
-			else if(Player->m_Knapsack.m_Sword[IRON_SWORD])
-				Dmg+=5;
-			else if(Player->m_Knapsack.m_Sword[LOG_SWORD])
-				Dmg+=2;
+			if(Player->m_Knapsack.m_Sword >= 0)
+			{
+				CItem Sword = GameServer()->CItemSystem()->GetItem(Player->m_Knapsack.m_Sword);
+				if(Sword.m_Level == LEVEL_ENEGRY)
+					Dmg+=32;
+				if(Sword.m_Level == LEVEL_DIAMOND)
+					Dmg+=20;
+				else if(Sword.m_Level == LEVEL_GOLD)
+					Dmg+=10;
+				else if(Sword.m_Level == LEVEL_IRON)
+					Dmg+=7;
+				else if(Sword.m_Level == LEVEL_COPPER)
+					Dmg+=5;
+				else if(Sword.m_Level == LEVEL_LOG)
+					Dmg+=2;
+			}
 		}
 	}
 

@@ -76,80 +76,58 @@ void CKs::Tick()
 		/*          gold                                          NULL                  */
 
 		int RespawnTime = -1;
-		int BIGSHOT = 1;
-		if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[ENEGRY_PICKAXE])
-		{
-			if(m_Type == CK_ENEGRY)
-				BIGSHOT = 3000;
-			else
-				BIGSHOT = 5000;
-		}
-		else if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[DIAMOND_PICKAXE] && m_Type > CK_WOOD)
-		{
-			if(m_Type < CK_ENEGRY)
-				BIGSHOT = 3500;
-			else
-				BIGSHOT = 1000;
-		}
-		else if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[GOLD_PICKAXE] && m_Type > CK_WOOD)
-		{
-			if(m_Type == CK_DIAMONAD)
-				BIGSHOT = 100;
-			else
-				BIGSHOT = 1500;
-		}
-		else if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[IRON_PICKAXE] && m_Type < CK_DIAMONAD && m_Type > CK_WOOD)
-			BIGSHOT = 700;
-		else if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[COPPER_PICKAXE] && m_Type < CK_GOLD && m_Type > CK_WOOD)
-			BIGSHOT = 500;
-		else if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe[LOG_PICKAXE] && m_Type < CK_IRON && m_Type > CK_WOOD)
-			BIGSHOT = 200;
+		int PickSpeed = 1;
+		
 
-		if(pChr->m_LatestInput.m_Fire&1 && pChr->m_ActiveWeapon == WEAPON_HAMMER && pChr->GetPlayer()->m_MiningTick <= 0)
+		if(pChr->m_LatestInput.m_Fire&1&& pChr->m_ActiveWeapon == WEAPON_HAMMER && pChr->GetPlayer()->m_MiningTick <= 0)
 		{
+			if(pChr->GetPlayer()->m_Knapsack.m_Axe >= 0 && m_Type == CK_WOOD)
+			{
+				
+				pChr->m_InMining = true;
+				GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP);
+				Picking(GameServer()->CItemSystem()->GetItem(pChr->GetPlayer()->m_Knapsack.m_Axe).m_Speed, pChr->GetPlayer());
+				return;
+			}
+			else if(m_Type == CK_WOOD) 
+			{
+				Picking(8, pChr->GetPlayer()); // 8 16 24 32 40 48 56
+				return;
+			}
+			else if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe >= 0)
+			{
+				if(m_Type == CK_ENEGRY)
+					PickSpeed = GameServer()->CItemSystem()->GetItem(pChr->GetPlayer()->m_Knapsack.m_Pickaxe).m_Speed / 2;
+				else
+					PickSpeed = GameServer()->CItemSystem()->GetItem(pChr->GetPlayer()->m_Knapsack.m_Pickaxe).m_Speed;
+			}
+
 			pChr->GetPlayer()->m_MiningType = m_Type;
 			int CID = pChr->GetCID();
 			switch (m_Type)
 			{
-				case CK_WOOD:
-					pChr->m_InMining = true;
-					GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP);
-					if(pChr->GetPlayer()->m_Knapsack.m_Axe[DIAMOND_AXE])
-						Picking(50, pChr->GetPlayer());
-					else if(pChr->GetPlayer()->m_Knapsack.m_Axe[GOLD_AXE])
-						Picking(30, pChr->GetPlayer());
-					else if(pChr->GetPlayer()->m_Knapsack.m_Axe[IRON_AXE])
-						Picking(30, pChr->GetPlayer()); // 30 60
-					else if(pChr->GetPlayer()->m_Knapsack.m_Axe[COPPER_AXE])
-						Picking(17, pChr->GetPlayer()); // 17 34 51
-					else if(pChr->GetPlayer()->m_Knapsack.m_Axe[LOG_AXE])
-						Picking(10, pChr->GetPlayer()); // 15 30 45 55
-					else
-						Picking(8, pChr->GetPlayer()); // 8 16 24 32 40 48 56
-					break;
-
 				case CK_COAL:
 					pChr->m_InMining = true;
 					GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP);
-					Picking(BIGSHOT, pChr->GetPlayer());
+					Picking(PickSpeed, pChr->GetPlayer());
 					break;
 				case CK_IRON:
 					pChr->m_InMining = true;
 					GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP);
-					Picking(BIGSHOT, pChr->GetPlayer());
+					Picking(PickSpeed, pChr->GetPlayer());
 					break;
 				case CK_COPPER:
 					pChr->m_InMining = true;
 					GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP);
-					Picking(BIGSHOT, pChr->GetPlayer());
+					Picking(PickSpeed, pChr->GetPlayer());
 					break;
 				case CK_GOLD:
 					pChr->m_InMining = true;
 					GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP);
-					Picking(BIGSHOT, pChr->GetPlayer());
+					Picking(PickSpeed, pChr->GetPlayer());
 					break;
 				case CK_DIAMONAD:
-					if(!pChr->GetPlayer()->m_Knapsack.m_Pickaxe[GOLD_PICKAXE] && !pChr->GetPlayer()->m_Knapsack.m_Pickaxe[DIAMOND_PICKAXE])
+					if(GameServer()->CItemSystem()->GetItem(pChr->GetPlayer()->m_Knapsack.m_Pickaxe).m_Level < LEVEL_GOLD)
 					{
 						if(Server()->Tick()%50 == 0)
 						{
@@ -160,10 +138,10 @@ void CKs::Tick()
 					}
 					pChr->m_InMining = true;
 					GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP);
-					Picking(BIGSHOT, pChr->GetPlayer());
+					Picking(PickSpeed, pChr->GetPlayer());
 					break;
 				case CK_ENEGRY:
-					if(!pChr->GetPlayer()->m_Knapsack.m_Pickaxe[DIAMOND_PICKAXE])
+					if(GameServer()->CItemSystem()->GetItem(pChr->GetPlayer()->m_Knapsack.m_Pickaxe).m_Level < LEVEL_DIAMOND)
 					{
 						if(Server()->Tick()%50 == 0)
 						{
@@ -174,13 +152,14 @@ void CKs::Tick()
 					}
 					pChr->m_InMining = true;
 					GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP);
-					Picking(BIGSHOT, pChr->GetPlayer());
+					Picking(PickSpeed, pChr->GetPlayer());
 					break;
 				
 
 				default:
 					break;
-			};
+			}
+			
 		}
 	}
 }
@@ -194,38 +173,38 @@ void CKs::Picking(int Time, CPlayer *Player)
 		switch (Player->m_MiningType)
 		{
 		case CK_WOOD:
-			Player->m_Knapsack.m_Log++;
+			Player->m_Knapsack.m_Resource[RESOURCE_LOG]++;
 			GameServer()->SendChatTarget(CID, _("You picked up a Log"));
 			m_Health = 50;
 			break;
 		case CK_COAL:
-			Player->m_Knapsack.m_Coal++;
+			Player->m_Knapsack.m_Resource[RESOURCE_COAL]++;
 			GameServer()->SendChatTarget(CID, _("You picked up a Coal"));
 			m_Health = 800;
 			break;
 		case CK_COPPER:
-			Player->m_Knapsack.m_Copper++;
+			Player->m_Knapsack.m_Resource[RESOURCE_COPPER]++;
 			GameServer()->SendChatTarget(CID, _("You picked up a Copper"));
 			m_Health = 1600;
 			break;
 		case CK_IRON:
-			Player->m_Knapsack.m_Iron++;
+			Player->m_Knapsack.m_Resource[RESOURCE_IRON]++;
 			GameServer()->SendChatTarget(CID, _("You picked up a Iron"));
 			m_Health = 4000;
 			break;
 		case CK_GOLD:
-			Player->m_Knapsack.m_Gold++;
+			Player->m_Knapsack.m_Resource[RESOURCE_GOLD]++;
 			GameServer()->SendChatTarget(CID, _("You picked up a Gold"));
 			m_Health = 6000;
 			break;
 		case CK_DIAMONAD:
-			Player->m_Knapsack.m_Diamond++;
+			Player->m_Knapsack.m_Resource[RESOURCE_DIAMOND]++;
 			GameServer()->SendChatTarget(CID, _("You picked up a Diamond."));
 			m_Health = 10000;
 			break;
 		case CK_ENEGRY:
-			Player->m_Knapsack.m_Enegry++;
-			GameServer()->SendChatTarget(CID, _("You"));
+			Player->m_Knapsack.m_Resource[RESOURCE_ENEGRY]++;
+			GameServer()->SendChatTarget(CID, _("You picked up enegry"));
 			m_Health = 15000;
 			break;
 		

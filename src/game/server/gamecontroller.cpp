@@ -1117,7 +1117,7 @@ void IGameController::DoZombMessage(int Which)
 	}
 	else if(Which == 1)
 	{
-		GameServer()->SendChatTarget(-1, "Wave {int:i}: 1 zombie is left", "a", &m_Wave);
+		GameServer()->SendChatTarget(-1, "Wave {int:i}: 1 zombie is left", "i", &m_Wave);
 	}
 }
 

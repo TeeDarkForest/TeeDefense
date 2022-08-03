@@ -225,7 +225,7 @@ void CKs::Picking(int Time, CPlayer *Player)
 			break;
 		case CK_ENEGRY:
 			Player->m_Knapsack.m_Enegry++;
-			GameServer()->SendChatTarget(CID, _("You"));
+			GameServer()->SendChatTarget(CID, _("You picked up a Enegry"));
 			m_Health = 15000;
 			break;
 		

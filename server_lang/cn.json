@@ -165,12 +165,12 @@
             "value": "'{str:P}' 加入了游戏"
         },
         {
-            "key": "Wave {int:a} started with {int:a} Zombies!",
-            "value": "第 {int:a} 轮迎来 {int:a} 只僵尸！"
+            "key": "Wave {int:a} started with {int:a1} Zombies!",
+            "value": "第 {int:a} 轮迎来 {int:a1} 只僵尸！"
         },
         {
             "key": "Wave {int:a}:{int:a} zombies are left",
-            "value": "[第 {int:a} 轮]:还剩 {int:a} 只僵尸"
+            "value": "[第 {int:a} 轮]:还剩 {int:a1} 只僵尸"
         },
         {
             "key": "Wave {int:i}:1 zombie is left",
@@ -189,8 +189,8 @@
             "value": "\n\n\n\n\n\n\n主塔血量: {int:Health}/{int:MaxHealth}"
         },
         {
-            "key": "{int:a} left. Keep hit!",
-            "value": "还需要挖 {int:a} 下。按住锤击键！"
+            "key": "{int:Health} left. Keep hit!",
+            "value": "还需要挖 {int:Health} 下。按住锤击键！"
         },
         {
             "key": "You don't have a good pickaxe for Diamond",

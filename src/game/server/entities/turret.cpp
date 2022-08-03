@@ -33,6 +33,29 @@ CTurret::CTurret(CGameWorld *pGameWorld, vec2 Pos, int Owner, int Type, int Radi
     GameWorld()->InsertEntity(this);
 }
 
+CTurret::~CTurret()
+{
+    for (unsigned i = 0; i < sizeof(m_IDs) / sizeof(int); i ++)
+	{
+		if(m_IDs[i] >= 0){
+			Server()->SnapFreeID(m_IDs[i]);
+			m_IDs[i] = -1;
+		}
+	}
+
+    for (unsigned i = 0; i < sizeof(m_aIDs) / sizeof(int); i ++)
+	{
+		if(m_aIDs[i] >= 0){
+			Server()->SnapFreeID(m_IDs[i]);
+			m_aIDs[i] = -1;
+		}
+	}
+    if(m_ID >= 0){
+        Server()->SnapFreeID(m_ID);
+        m_ID = -1;
+    }
+}
+
 bool CTurret::GetFollow()
 {
     return m_Follow;
@@ -98,7 +121,7 @@ void CTurret::Tick()
                 if(m_FireDelay <= 0)
                 {
                     new CProjectile(GameWorld(), WEAPON_GUN, GetOwner(), m_Pos, Direction, 5000, 1, false, 10, SOUND_GRENADE_EXPLODE, WEAPON_GUN);
-                    m_FireDelay = 50;
+                    m_FireDelay = 1;
                     m_Lifes--;
                 }
                 break;
@@ -106,23 +129,38 @@ void CTurret::Tick()
             case TURRET_SHOTGUN:
                 if(m_FireDelay <= 0)
                 {
-                    new CProjectile(GameWorld(), WEAPON_SHOTGUN, GetOwner(), m_Pos, Direction, 5000, 1, false, 10, SOUND_GRENADE_EXPLODE, WEAPON_SHOTGUN);
-                    m_FireDelay = 75;
+                    int ShotSpread = 3;
+
+        			for(int i = -ShotSpread; i <= ShotSpread; ++i)
+        			{
+        				float Spreading[] = {-0.185f, -0.070f, 0, 0.070f, 0.185f};
+        				float a = GetAngle(Direction);
+        				a += Spreading[i+2];
+        				float v = 1-(absolute(i)/(float)ShotSpread);
+        				float Speed = mix((float)GameServer()->Tuning()->m_ShotgunSpeeddiff, 1.0f, v);
+        				CProjectile *pProj = new CProjectile(GameWorld(), WEAPON_SHOTGUN,
+        					GetOwner(),
+        					m_Pos,
+        					vec2(cosf(a), sinf(a))*Speed,
+        					(int)(Server()->TickSpeed()*GameServer()->Tuning()->m_ShotgunLifetime),
+        					1, 0, 0, SOUND_GRENADE_EXPLODE, WEAPON_SHOTGUN);
+        			}
+                    m_FireDelay = 5;
                     m_Lifes--;
                 }
                 break;
             case TURRET_LASER:
                 if(m_FireDelay <= 0)
                 {
-                    new CLaser(GameWorld(), m_Pos, Direction, GameServer()->Tuning()->m_LaserReach, 1);
-                    m_FireDelay = 50;
+                    new CLaser(GameWorld(), m_Pos, Direction, GameServer()->Tuning()->m_LaserReach, GetOwner());
+                    m_FireDelay = 10;
                     m_Lifes--;
                 }
                 break;
             case TURRET_LASER_2077:
                 if(m_FireDelay <= 0)
                 {
-	    			new CLightning(GameWorld(), m_Pos, Direction, 1, 1, 1, 0);
+	    			new CLightning(GameWorld(), m_Pos, Direction, 35, 35, GetOwner(), 10);
                     m_FireDelay = 5;
                     m_Lifes--;
                 }
@@ -154,24 +192,6 @@ void CTurret::Tick()
 
 void CTurret::Reset()
 {
-    for (unsigned i = 0; i < sizeof(m_IDs) / sizeof(int); i ++)
-	{
-		if(m_IDs[i] >= 0){
-			Server()->SnapFreeID(m_IDs[i]);
-			m_IDs[i] = -1;
-		}
-	}
-
-    for (unsigned i = 0; i < sizeof(m_aIDs) / sizeof(int); i ++)
-	{
-		if(m_aIDs[i] >= 0){
-			Server()->SnapFreeID(m_IDs[i]);
-			m_aIDs[i] = -1;
-		}
-	}
-
-    Server()->SnapFreeID(m_ID);
-
     GameServer()->m_World.DestroyEntity(this);
 }
 

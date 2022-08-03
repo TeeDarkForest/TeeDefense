@@ -26,6 +26,7 @@ class CTurret : public CEntity
 {
 public:
     CTurret(CGameWorld *pGameWorld, vec2 Pos, int Owner, int Type, int Radius = 64, int Lifes = 120, bool Follow = false, bool Lightning = false, bool Freeze = false);
+    virtual ~CTurret();
 
     virtual void Tick();
     virtual void Reset();

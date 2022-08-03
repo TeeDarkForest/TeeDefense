@@ -181,6 +181,7 @@ void CPlayer::Snap(int SnappingClient)
 		pClientInfo->m_Country = 1000;
 		pClientInfo->m_ColorBody = 16776960;
 		pClientInfo->m_ColorFeet = 16776960;
+		m_Team = 10; // Don't snap Zombies at Scorebroad.
 		if(m_Zomb == 1)//Zaby
 		{
 			StrToInts(&pClientInfo->m_Name0, 4, "Zaby");
@@ -290,10 +291,13 @@ void CPlayer::FakeSnap(int SnappingClient)
 {
 	IServer::CClientInfo info;
 	Server()->GetClientInfo(SnappingClient, &info);
-	if (info.m_CustClt)
-		return;
 
-	int id = VANILLA_MAX_CLIENTS - 1;
+	int id;
+
+	if (info.m_CustClt)
+		int id = MAX_CHARACTERS-1;
+	else
+		int id = VANILLA_MAX_CLIENTS - 1;
 
 	CNetObj_ClientInfo *pClientInfo = static_cast<CNetObj_ClientInfo *>(Server()->SnapNewItem(NETOBJTYPE_CLIENTINFO, id, sizeof(CNetObj_ClientInfo)));
 

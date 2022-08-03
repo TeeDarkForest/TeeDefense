@@ -246,7 +246,7 @@ void IGameController::StartRound()
 	Server()->DemoRecorder_HandleAutoStart();
 
 	//Zomb2
-	for(int i = ZOMBIE_START; i < ZOMBIE_END; i++)//bugfix
+	for(int i = ZOMBIE_START+1; i < ZOMBIE_END; i++)//bugfix
 		GameServer()->OnZombieKill(i);
 	m_Wave++;
 	StartWave(m_Wave);
@@ -548,7 +548,7 @@ void IGameController::Tick()
 			//Zomb2: Do this ONLY when the Game ended, that must be BEFORE the round restarts
 			m_aTeamscore[TEAM_HUMAN] = 0;
 			m_aTeamscore[TEAM_ZOMBIE] = g_Config.m_SvLives;
-			for(int i = ZOMBIE_START; i < ZOMBIE_END; i++)
+			for(int i = ZOMBIE_START+1; i < ZOMBIE_END; i++)
 				GameServer()->OnZombieKill(i);
 			DoWarmup(g_Config.m_SvWarmup);
 			m_GameOverTick = -1;
@@ -701,7 +701,7 @@ void IGameController::Snap(int SnappingClient)
 		pGameInfoObj->m_GameStateFlags |= GAMESTATEFLAG_SUDDENDEATH;
 	if(GameServer()->m_World.m_Paused)
 		pGameInfoObj->m_GameStateFlags |= GAMESTATEFLAG_PAUSED;
-	pGameInfoObj->m_RoundStartTick = m_RoundStartTick;
+	pGameInfoObj->m_RoundStartTick = 0;
 	pGameInfoObj->m_WarmupTimer = GameServer()->m_World.m_Paused ? m_UnpauseTimer : m_Warmup;
 
 	pGameInfoObj->m_ScoreLimit = g_Config.m_SvScorelimit;
@@ -1041,7 +1041,7 @@ void IGameController::CheckZombie()
 {
 	if(m_Warmup || !m_Wave || EndWave())
 		return;
-	for(int i = ZOMBIE_START; i < ZOMBIE_END; i++)//...
+	for(int i = ZOMBIE_START+1; i < ZOMBIE_END; i++)//...
 	{
 		if(!GameServer()->m_apPlayers[i])//Check if the CID is free
 		{
@@ -1082,7 +1082,7 @@ bool IGameController::EndWave()
 	}
 	if(!PlayerCount)//No Players - reset round
 	{
-		for(int i = ZOMBIE_START; i < ZOMBIE_END; i++)
+		for(int i = ZOMBIE_START+1; i < ZOMBIE_END; i++)
 			GameServer()->OnZombieKill(i);
 		//HandleTop();
 		m_Wave = 0;
@@ -1107,18 +1107,20 @@ void IGameController::DoZombMessage(int Which)
 	char aBuf[64];
 	if(!Which)
 	{
-		GameServer()->SendBroadcast_VL(_("Wave {int:a} started with {int:a} Zombies!"), -1, "a", &m_Wave, "a", &m_ZombLeft);
+		GameServer()->SendBroadcast_VL(_("Wave {int:a} started with {int:a1} Zombies!"), -1, "a", &m_Wave, "a1", &m_ZombLeft);
 		return;
 	}
 	Which -= 1;
 	if(Which > 1 && (Which <= 5 || !(Which%10)))
 	{
-		GameServer()->SendChatTarget(-1, _("Wave {int:a}: {int:a} zombies are left"), "a", &m_Wave, "a", &Which);
+		GameServer()->SendChatTarget(-1, _("Wave {int:a}: {int:a1} zombies are left"), "a", &m_Wave, "a1", &Which);
 	}
 	else if(Which == 1)
 	{
 		GameServer()->SendChatTarget(-1, "Wave {int:i}: 1 zombie is left", "i", &m_Wave);
 	}
+
+	g_Config.m_SvScorelimit = m_ZombLeft;
 }
 
 void IGameController::DoLifeMessage(int Life)

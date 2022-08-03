@@ -750,7 +750,11 @@ void CCharacter::TickPaused()
 
 bool CCharacter::IncreaseHealth(int Amount)
 {
-    int maxHealth = 100;
+	int maxHealth;
+	if(!m_pPlayer->GetZomb())
+		maxHealth = 25;
+	else
+		maxHealth = 100;
 	if(m_Health >= maxHealth)
 		return false;
 	m_Health = clamp(m_Health+Amount, 0, maxHealth);
@@ -1300,7 +1304,8 @@ void CCharacter::DoZombieAim(vec2 VictimPos, int VicCID, vec2 NearZombPos, int N
 		//Zamer
 		if(m_pPlayer->GetZomb(4))
 		{	
-			return;
+			if(m_LatestPrevInput.m_Fire = 1)
+				GameServer()->CreateExplosion(m_Pos, GetCID(), WEAPON_HAMMER, false);
 		}
 
 		//Fire!

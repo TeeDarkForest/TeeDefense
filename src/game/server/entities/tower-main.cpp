@@ -27,6 +27,23 @@ CTowerMain::CTowerMain(CGameWorld *pGameWorld, vec2 StandPos)
     m_Health = g_Config.m_SvMaxTowerHealth;
 }
 
+CTowerMain::~CTowerMain()
+{
+    for (unsigned i = 0; i < sizeof(m_aIDs) / sizeof(int); i ++)
+	{
+		if(m_aIDs[i] >= 0){
+			Server()->SnapFreeID(m_aIDs[i]);
+			m_aIDs[i] = -1;
+		}
+	}
+    Server()->SnapFreeID(m_FlagID);
+
+    for(int i=0; i<NumSide; i++)
+	{
+		Server()->SnapFreeID(m_alIDs[i]);
+	}
+}
+
 void CTowerMain::Tick()
 {
     GameServer()->m_TowerHealth = m_Health;
@@ -59,20 +76,6 @@ void CTowerMain::Tick()
 }
 void CTowerMain::Reset() 
 {
-	for (unsigned i = 0; i < sizeof(m_aIDs) / sizeof(int); i ++)
-	{
-		if(m_aIDs[i] >= 0){
-			Server()->SnapFreeID(m_aIDs[i]);
-			m_aIDs[i] = -1;
-		}
-	}
-    Server()->SnapFreeID(m_FlagID);
-
-    for(int i=0; i<NumSide; i++)
-	{
-		Server()->SnapFreeID(m_alIDs[i]);
-	}
-
     GameServer()->m_World.DestroyEntity(this);
 }
 

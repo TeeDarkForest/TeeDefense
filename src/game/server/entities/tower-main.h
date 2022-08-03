@@ -10,6 +10,7 @@ class CTowerMain : public CEntity
 {
 public:
     CTowerMain(CGameWorld *pGameWorld, vec2 m_StandPos);
+    virtual ~CTowerMain();
     int m_Health;
     int m_Energy;
 

@@ -22,14 +22,11 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 {
 	vec2 At;
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
-	CCharacter *pHit = GameServer()->m_World.IntersectCharacter(m_Pos, To, 0.f, At, pOwnerChar);
+	CCharacter *pHit = GameServer()->m_World.IntersectCharacter(m_Pos, To, 15.f, At, pOwnerChar);
 	if(!pHit)
 		return false;
 
-	if(!pOwnerChar)
-		return false;
-
-	if(pOwnerChar->GetPlayer()->GetTeam() == pHit->GetPlayer()->GetTeam())
+	if(!pHit->GetPlayer()->GetZomb())
 		return false;
 
 	m_From = From;

@@ -421,29 +421,35 @@ void CItemSystem::SendCantMakeItemChat(int To, int* Resource)
     Buffer.append("You need at least ");
     if(Resource[RESOURCE_LOG] > 0)
     {
-        str_format(aBuf, sizeof(aBuf), "%s %d log", aBuf, Resource[RESOURCE_LOG]);
+        str_format(aBuf, sizeof(aBuf), "%s %d log,", aBuf, Resource[RESOURCE_LOG]);
+        Buffer.append(aBuf);
     }
     if(Resource[RESOURCE_COAL] > 0)
     {
-        str_format(aBuf, sizeof(aBuf), "%s %d coal", aBuf, Resource[RESOURCE_COAL]);
+        str_format(aBuf, sizeof(aBuf), "%s %d coal,", aBuf, Resource[RESOURCE_COAL]);
+        Buffer.append(aBuf);
     }
     if(Resource[RESOURCE_COPPER] > 0)
     {
-        str_format(aBuf, sizeof(aBuf), "%s %d copper", aBuf, Resource[RESOURCE_COPPER]);
+        str_format(aBuf, sizeof(aBuf), "%s %d copper,", aBuf, Resource[RESOURCE_COPPER]);
+        Buffer.append(aBuf);
     }
     if(Resource[RESOURCE_IRON] > 0)
     {
-        str_format(aBuf, sizeof(aBuf), "%s %d iron", aBuf, Resource[RESOURCE_IRON]);
+        str_format(aBuf, sizeof(aBuf), "%s %d iron,", aBuf, Resource[RESOURCE_IRON]);
+        Buffer.append(aBuf);
     }
     if(Resource[RESOURCE_DIAMOND] > 0)
     {
-        str_format(aBuf, sizeof(aBuf), "%s %d diamond", aBuf, Resource[RESOURCE_DIAMOND]);
+        str_format(aBuf, sizeof(aBuf), "%s %d diamond,", aBuf, Resource[RESOURCE_DIAMOND]);
+        Buffer.append(aBuf);
     }
     if(Resource[RESOURCE_ENEGRY] > 0)
     {
-        str_format(aBuf, sizeof(aBuf), "%s %d enegry", aBuf, Resource[RESOURCE_ENEGRY]);
+        str_format(aBuf, sizeof(aBuf), "%s %d enegry,", aBuf, Resource[RESOURCE_ENEGRY]);
+        Buffer.append(aBuf);
     }
-    Buffer.append(aBuf);
+    Buffer.append("But you don't have them.");
     m_pGameServer->SendChatTarget(To, Buffer.c_str());
 }
 
@@ -453,7 +459,7 @@ void CItemSystem::SendMakeItemChat(int To, CItem *Item)
 
     Buffer.append("You made a ");
     Buffer.append(Item->m_Name);
-    Buffer.append("!Good Job!");
+    Buffer.append("! Good Job!");
 
     m_pGameServer->SendChatTarget(To, Buffer.c_str());
 }
@@ -468,39 +474,40 @@ void CItemSystem::SendMakeItemFailedChat(int To, int* Resource)
     if(Resource[RESOURCE_LOG] > 0)
     {
         p->m_Knapsack.m_Resource[RESOURCE_LOG]-=Resource[RESOURCE_LOG];
-        str_format(aBuf, sizeof(aBuf), "%d log.", Resource[RESOURCE_LOG]);
+        str_format(aBuf, sizeof(aBuf), "%d log,", Resource[RESOURCE_LOG]);
         Buffer.append(aBuf);
     }
     if(Resource[RESOURCE_COAL] > 0)
     {
         p->m_Knapsack.m_Resource[RESOURCE_COAL]-=Resource[RESOURCE_COAL];
-        str_format(aBuf, sizeof(aBuf), "%d coal.", Resource[RESOURCE_COAL]);
+        str_format(aBuf, sizeof(aBuf), "%d coal,", Resource[RESOURCE_COAL]);
         Buffer.append(aBuf);
     }
     if(Resource[RESOURCE_COPPER] > 0)
     {
         p->m_Knapsack.m_Resource[RESOURCE_COPPER]-=Resource[RESOURCE_COPPER];
-        str_format(aBuf, sizeof(aBuf), "%d copper.", Resource[RESOURCE_COPPER]);
+        str_format(aBuf, sizeof(aBuf), "%d copper,", Resource[RESOURCE_COPPER]);
         Buffer.append(aBuf);
     }
     if(Resource[RESOURCE_IRON] > 0)
     {
         p->m_Knapsack.m_Resource[RESOURCE_IRON]-=Resource[RESOURCE_IRON];
-        str_format(aBuf, sizeof(aBuf), "%d iron.", Resource[RESOURCE_IRON]);
+        str_format(aBuf, sizeof(aBuf), "%d iron,", Resource[RESOURCE_IRON]);
         Buffer.append(aBuf);
     }
     if(Resource[RESOURCE_DIAMOND] > 0)
     {
         p->m_Knapsack.m_Resource[RESOURCE_DIAMOND]-=Resource[RESOURCE_DIAMOND];
-        str_format(aBuf, sizeof(aBuf), "%d diamond.", Resource[RESOURCE_DIAMOND]);
+        str_format(aBuf, sizeof(aBuf), "%d diamond,", Resource[RESOURCE_DIAMOND]);
         Buffer.append(aBuf);
     }
     if(Resource[RESOURCE_ENEGRY] > 0)
     {
         p->m_Knapsack.m_Resource[RESOURCE_DIAMOND]-=Resource[RESOURCE_DIAMOND];
-        str_format(aBuf, sizeof(aBuf), "%d enegry.", Resource[RESOURCE_ENEGRY]);
+        str_format(aBuf, sizeof(aBuf), "%d enegry,", Resource[RESOURCE_ENEGRY]);
         Buffer.append(aBuf);
     }
+    Buffer.append("Bad luck.");
     m_pGameServer->SendChatTarget(To, Buffer.c_str());
 }
 

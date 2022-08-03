@@ -4,6 +4,7 @@ sv_map Mine-Craft
 
 ffs_password
 xc_password
+ed_password
 
 sv_max_clients 48
 sv_register 1
@@ -11,29 +12,29 @@ sv_register 1
 add_vote "跳过热身,开始召唤僵尸（谨慎选择）" "skip_warmup"
 add_command_vote ======= 制作 =======" "null"
 add_command_vote "------ 斧头 ------" "null"
-add_command_vote "制作木斧(消耗10木头)" "log axe"
-add_command_vote "制作铜斧(消耗25铜锭)" "copper axe"
-add_command_vote "制作铁斧(消耗25铁锭)" "iron axe"
-add_command_vote "制作金斧(消耗25金锭)" "gold axe"
-add_command_vote "制作钻石斧(消耗10钻石)" "diamond axe"
+add_command_vote "制作木斧" "log axe"
+add_command_vote "制作铜斧" "copper axe"
+add_command_vote "制作铁斧" "iron axe"
+add_command_vote "制作金斧" "golden axe"
+add_command_vote "制作钻石斧" "diamond axe"
 add_command_vote "------ 镐子 ------" "null"
-add_command_vote "制作木镐(消耗25木头)" "log pickaxe"
-add_command_vote "制作铜镐(消耗25铜锭)" "copper pickaxe"
-add_command_vote "制作铁镐(消耗25铁锭)" "iron pickaxe"
-add_command_vote "制作金镐(消耗25金锭)" "gold pickaxe"
-add_command_vote "制作钻石镐(消耗10钻石)" "diamond pickaxe"
-add_command_vote "制作宇宙无敌终极能量镐(消耗10能量)" "enegry pickaxe"
+add_command_vote "制作木镐" "log pickaxe"
+add_command_vote "制作铜镐" "copper pickaxe"
+add_command_vote "制作铁镐" "iron pickaxe"
+add_command_vote "制作金镐" "golden pickaxe"
+add_command_vote "制作钻石镐" "diamond pickaxe"
+add_command_vote "制作宇宙无敌终极能量镐" "enegry pickaxe"
 add_command_vote "------ 短剑 ------" "null"
-add_command_vote "制作木剑(消耗25木头)" "log sword"
-add_command_vote "制作铁剑(消耗25铁锭)" "iron sword"
-add_command_vote "制作金剑(消耗25金锭)" "gold sword"
-add_command_vote "制作钻石剑(消耗10钻石)" "diamond sword"
-add_command_vote "制作宇宙无敌终极能量剑(消耗10能量)" "enegry sword"
+add_command_vote "制作木剑" "log sword"
+add_command_vote "制作铁剑" "iron sword"
+add_command_vote "制作金剑" "golden sword"
+add_command_vote "制作钻石剑" "diamond sword"
+add_command_vote "制作宇宙无敌终极能量剑" "enegry sword"
 add_command_vote "======= 炮塔 =======" "null"
 add_command_vote "= 会在你所在的位置生成炮塔" "null"
-add_command_vote "制作普通手枪炮塔(消耗20木头和1铜锭)" "gun turret"
-add_command_vote "制作普通散弹枪炮塔(消耗25木头和5铜锭)" "shotgun turret"
-add_command_vote "制作激光枪炮塔(消耗20金子和1钻石)" "laser turret"
-add_command_vote "制作<[激光炮塔:2077]>(消耗20钻石和50能量)" "laser2077 turret"
+add_command_vote "制作普通手枪炮塔" "gun turret"
+add_command_vote "制作普通散弹枪炮塔" "shotgun turret"
+add_command_vote "制作激光枪炮塔" "laser turret"
+add_command_vote "制作<[xX_{激光炮塔:2077}_Xx]>" "laser2077 turret"
 
 sv_timelimit 0

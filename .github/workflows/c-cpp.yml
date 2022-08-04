@@ -1,4 +1,4 @@
-name: C/C++ CI
+name: Test Build Server.
 
 on:
   push:
@@ -13,8 +13,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: build
+    - name: Install
+      run: sudo apt install bam git libfreetype6-dev libsdl2-dev libpnglite-dev libwavpack-dev python3 -y
+    - name: Build
       run: bam
-    - name: make check
-      run: |
-          ./teeworlds_srv_d -f shutdown
+    - name: Check
+      run: ./teeworlds_srv_d -f shutdown

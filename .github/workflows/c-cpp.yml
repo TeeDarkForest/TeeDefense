@@ -1,0 +1,20 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ "tw06mod-main" ]
+  pull_request:
+    branches: [ "tw06mod-main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: build
+      run: bam
+    - name: make check
+      run: |
+          ./teeworlds_srv_d -f shutdown

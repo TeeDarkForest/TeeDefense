@@ -464,7 +464,7 @@ void CItemSystem::SendMakeItemChat(int To, CItem *Item)
     const char *Lang = p->GetLanguage();
 
     m_pGameServer->Server()->Localization()->Format(IName, Lang, _(Item->m_Name));
-    m_pGameServer->Server()->Localization()->Format(Buffer, Lang, _("You made a {str:ItemName}! Good Job!"), "ItemName", IName);
+    m_pGameServer->Server()->Localization()->Format(Buffer, Lang, _("You made a {str:ItemName}! Good Job!"), "ItemName", IName.buffer());
     m_pGameServer->SendChatTarget(To, Buffer.buffer());
 }
 

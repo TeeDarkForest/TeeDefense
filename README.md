@@ -36,7 +36,7 @@ Author: Necropotame, FlowerFell-Sans
 
 Features:
 - Localization System (In InfClass) (Necropotame)
-- Chat command for Switch languages (FlowerFell-Sans)
+- Chat command for Changes language (FlowerFell-Sans)
 - Json Example (FlowerFell-Sans)
 
 tw06server branch

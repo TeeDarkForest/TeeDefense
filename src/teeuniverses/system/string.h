@@ -170,16 +170,16 @@ public:
 };
 
 template<typename BASE>
-class tu_string : public BASE
+class string : public BASE
 {
 public:
-	tu_string() :
+	string() :
 		BASE()
 	{
 		
 	}
 	
-	tu_string(const char* pBuffer) :
+	string(const char* pBuffer) :
 		BASE()
 	{
 		BASE::copy(pBuffer);
@@ -269,13 +269,13 @@ public:
 	}
 };
 
-typedef tu_string<_fixed_string_core<12> > fixed_string12;
-typedef tu_string<_fixed_string_core<16> > fixed_string16;
-typedef tu_string<_fixed_string_core<64> > fixed_string64;
-typedef tu_string<_fixed_string_core<128> > fixed_string128;
-typedef tu_string<_fixed_string_core<256> > fixed_string256;
+typedef string<_fixed_string_core<12> > fixed_string12;
+typedef string<_fixed_string_core<16> > fixed_string16;
+typedef string<_fixed_string_core<64> > fixed_string64;
+typedef string<_fixed_string_core<128> > fixed_string128;
+typedef string<_fixed_string_core<256> > fixed_string256;
 
-typedef tu_string<_dynamic_string_core<128> > dynamic_string;
+typedef string<_dynamic_string_core<128> > dynamic_string;
 
 //Operations on strings
 

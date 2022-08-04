@@ -534,7 +534,13 @@ void CItemSystem::MakeItem(const char* pItemName, int ClientID)
     {
 		SendMakeItemChat(ClientID, MakeItem);
         int ItemLevel = MakeItem->m_Level;
-        dbg_msg("Type, Level","%d %d", MakeItem->m_Type, ItemLevel);
+        
+        for (int i = 0; i < NUM_RESOURCE; i++)
+        {
+            m_pGameServer->m_apPlayers[ClientID]->m_Knapsack.m_Resource[i] -= MakeItem->m_NeedResource[i];
+        }
+        
+
         switch (MakeItem->m_Type)
         {
             case ITYPE_AXE: 

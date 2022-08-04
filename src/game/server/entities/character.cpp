@@ -1177,7 +1177,10 @@ void CCharacter::DoZombieAim(vec2 VictimPos, int VicCID, vec2 NearZombPos, int N
 	m_Input.m_TargetX = 160 * (VictimPos.x - m_Pos.x) / sqrt((VictimPos.x - m_Pos.x)*(VictimPos.x - m_Pos.x) + (VictimPos.y - m_Pos.y)*(VictimPos.y - m_Pos.y));
 	m_LatestInput.m_TargetX = m_Input.m_TargetX;
 	m_LatestInput.m_TargetY = m_Input.m_TargetY;
-	// THIS IS THE FUCKING WORKING KEY, cost me 2 days
+	// THIS IS THE FUCKING WORKING KEY, cost me 2 days -- AssassinTee
+	/* XD assassintee u cost two day for it?? //
+	// I ONLY need one!!                      //
+	// one month...        ------- ST-Chara   */
 	m_LastAction = Server()->Tick();
 	
 	// || 

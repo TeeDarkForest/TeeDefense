@@ -403,53 +403,6 @@ void CPlayer::Respawn()
 
 void CPlayer::SetTeam(int Team, bool DoChatMsg)
 {
-	/*// clamp the team
-	Team = GameServer()->m_pController->ClampTeam(Team);
-	if(m_Team == Team)
-		return;
-
-	char aBuf[512];
-	if(Team == TEAM_ZOMBIE)
-		return;
-
-	if(DoChatMsg)
-	{
-		if(Team == TEAM_SPECTATORS)
-		{
-			GameServer()->SendChatTarget(-1, _("'{str:Player}' joined the spectators"),"Player", Server()->ClientName(m_ClientID));
-		}else if(Team == TEAM_HUMAN && GameServer()->m_pController->IsTeamplay())
-		{
-			GameServer()->SendChatTarget(-1, _("'{str:Player}' joined the redteam"),"Player", Server()->ClientName(m_ClientID));
-		}else if(Team == TEAM_ZOMBIE && GameServer()->m_pController->IsTeamplay())
-		{
-			GameServer()->SendChatTarget(-1, _("'{str:Player}' joined the blueteam"),"Player", Server()->ClientName(m_ClientID));
-		}else
-		{
-			GameServer()->SendChatTarget(-1, _("'{str:Player}' joined the game"),"Player", Server()->ClientName(m_ClientID));
-		}
-	}
-
-	KillCharacter();
-
-	m_Team = Team;
-	m_LastActionTick = Server()->Tick();
-	m_SpectatorID = SPEC_FREEVIEW;
-	// we got to wait 0.5 secs before respawning
-	m_RespawnTick = Server()->Tick()+Server()->TickSpeed()/2;
-	str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' m_Team=%d", m_ClientID, Server()->ClientName(m_ClientID), m_Team);
-	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
-
-	GameServer()->m_pController->OnPlayerInfoChange(GameServer()->m_apPlayers[m_ClientID]);
-
-	if(Team == TEAM_SPECTATORS)
-	{
-		// update spectator modes
-		for(int i = 0; i < MAX_CLIENTS; ++i)
-		{
-			if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->m_SpectatorID == m_ClientID)
-				GameServer()->m_apPlayers[i]->m_SpectatorID = SPEC_FREEVIEW;
-		}
-	}*/
 	return;
 }
 

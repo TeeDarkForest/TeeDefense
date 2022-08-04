@@ -383,15 +383,15 @@ int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 		if(pKiller->GetZomb())
 			return 0;
 
-	if(pVictim->GetPlayer()->GetTeam() == TEAM_ZOMBIE)
+	if(pVictim->GetPlayer()->GetZomb())
 	{
-		int rando = rand()%6 + 1;
-		if(rando <= 3)
+		int rando = rand()%20 + 1;
+		if(rando <= 10)
 		{
 			pKiller->m_Knapsack.m_Resource[RESOURCE_LOG]++;
 			GameServer()->SendChatTarget(pKiller->GetCID(), _("You got 1 Log from the Zombie"));
 		}
-		else if(rando == 4)
+		else if(rando >= 15)
 		{
 			pKiller->m_Knapsack.m_Resource[RESOURCE_COPPER]++;
 			GameServer()->SendChatTarget(pKiller->GetCID(), _("You got 1 Copper from the Zombie"));

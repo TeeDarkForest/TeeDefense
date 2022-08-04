@@ -35,11 +35,11 @@ CKs::CKs(CGameWorld *pGameWorld, int Type, vec2 Pos, int SubType)
 		break;
 
 	case CK_DIAMONAD:
-		m_Health = 10000;
+		m_Health = 50000;
 		break;
 
 	case CK_ENEGRY:
-		m_Health = 30000;
+		m_Health = 300000;
 		break;
 	
 	default:
@@ -96,7 +96,6 @@ void CKs::Tick()
 			}
 			else if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe >= 0)
 			{
-				dbg_msg("SB","Pickaxe: %d Level: %d %d",pChr->GetPlayer()->m_Knapsack.m_Pickaxe, GameServer()->ItemSystem()->GetItem(pChr->GetPlayer()->m_Knapsack.m_Pickaxe)->m_Level, GameServer()->ItemSystem()->GetSpeed(pChr->GetPlayer()->m_Knapsack.m_Pickaxe, ITYPE_PICKAXE));
 				if(m_Type == CK_ENEGRY)
 					PickSpeed = GameServer()->ItemSystem()->GetSpeed(pChr->GetPlayer()->m_Knapsack.m_Pickaxe,ITYPE_PICKAXE) / 2;
 				else
@@ -130,10 +129,10 @@ void CKs::Tick()
 				case CK_DIAMONAD:
 					if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe < LEVEL_GOLD)
 					{
-						if(Server()->Tick()%50 == 0)
+						if(Server()->Tick()%100 == 0)
 						{
 							GameServer()->SendChatTarget(CID, _("You don't have a good pickaxe for Diamond"));
-							GameServer()->SendChatTarget(CID, _("Make a Gold pickaxe or Diamond pickaxe first."));
+							GameServer()->SendChatTarget(CID, _("Make a Gold pickaxe first."));
 						}
 						return;
 					}
@@ -200,12 +199,12 @@ void CKs::Picking(int Time, CPlayer *Player)
 			break;
 		case CK_DIAMONAD:
 			Player->m_Knapsack.m_Resource[RESOURCE_DIAMOND]++;
-			GameServer()->SendChatTarget(CID, _("You picked up a Diamond."));
+			GameServer()->SendChatTarget(CID, _("You picked up a Diamond"));
 			m_Health = 10000;
 			break;
 		case CK_ENEGRY:
 			Player->m_Knapsack.m_Resource[RESOURCE_ENEGRY]++;
-			GameServer()->SendChatTarget(CID, _("You picked up enegry"));
+			GameServer()->SendChatTarget(CID, _("You picked up a Enegry"));
 			m_Health = 15000;
 			break;
 		

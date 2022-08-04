@@ -198,7 +198,7 @@
         },
         {
             "key": "Make a Gold pickaxe first.",
-            "value": "先去造一把金镐！。"
+            "value": "请先去造一把金镐子！"
         },
         {
             "key": "You need Diamond pickaxe for pick Enegry!",
@@ -309,204 +309,152 @@
             "value": "至少4个玩家在线才可以开始游戏"
         },
         {
-            "key": "You made a wooden Axe with 10 logs! Good Job",
-            "value": "你用10木头制作了一个木斧头！干的漂亮（也许并不"
-        },
-        {
             "key": "Bad luck. The production failed...",
             "value": "xswl，笨手笨脚的这都做不出来。"
         },
         {
-            "key": "You lost 10 logs.",
-            "value": "你失去了10个木头"
+            "key": "You picked up a Log",
+            "value": "你砍下了一块木头"
         },
         {
-            "key": "You need at least 10 logs to make a wooden axe.",
-            "value": "你需要至少10个木头来制作木斧头"
+            "key": "You picked up a Coal",
+            "value": "你挖到了一块煤炭"
         },
         {
-            "key": "You made a copper Axe with 25 copper! Good Job",
-            "value": "你用25铜制作了一把铜斧头！太牛辣！"
+            "key": "You picked up a Copper",
+            "value": "你挖到了一块铜锭"
         },
         {
-            "key": "You lost 25 copper.",
-            "value": "你失去了25铜"
+            "key": "You picked up a Gold",
+            "value": "你挖到了一块金锭"
         },
         {
-            "key": "You need at least 25 copper to make a copper axe.",
-            "value": "你需要至少25个铜来制作一把铜斧头"
+            "key": "You picked up a Diamond",
+            "value": "你挖到了一块钻石"
         },
         {
-            "key": "You made a iron Axe with 25 iron! Good Job",
-            "value": "你用25铁制作了一把铁斧头！真厉害~（阴阳怪气"
+            "key": "You picked up a Enegry",
+            "value": "你加载了一点能量，可惜你目前只能用他制作物品..."
         },
         {
-            "key": "You lost 25 iron.",
-            "value": "你失去了25铁"
+            "key": "{int:num} log,",
+            "value": "{int:num}块木头"
         },
         {
-            "key": "You need at least 25 iron to make a iron axe.",
-            "value": "你需要至少25铁来制作一把铁斧头"
+            "key": "{int:num} coal,",
+            "value": "{int:num}块煤炭"
         },
         {
-            "key": "You made a golden Axe with 25 golds! Good Job",
-            "value": "你用25个金子制作了一把金斧头！你真牛逼"
+            "key": "{int:num} copper,",
+            "value": "{int:num}块铁锭"
         },
         {
-            "key": "You lost 25 golds.",
-            "value": "你丢失了25个金子（哈哈哈哈哈哈哈你运气真好，不愧是孕期选手"
+            "key": "{int:num} iron,",
+            "value": "{int:num}块钻石"
         },
         {
-            "key": "You need at least 25 golds to make a golden axe.",
-            "value": "你需要至少25个金子来制作一把金斧头"
+            "key": "{int:num} gold,",
+            "value": "{int:num}块金锭"
         },
         {
-            "key": "You made a diamond Axe with 10 diamonds! Good Job",
-            "value": "你用10个钻石制作了一把钻石斧头！你太牛逼辣！"
+            "key": "{int:num} diamond,",
+            "value": "{int:num}块钻石"
         },
         {
-            "key": "You lost 10 diamonds.",
-            "value": "你丢失了10钻石（哈哈哈哈哈哈哈哈哈哈哈哈哈"
+            "key": "{int:num} enegry,",
+            "value": "{int:num}点能量"
         },
         {
-            "key": "You need at least 10 diamonds to make a diamonds axe.",
-            "value": "你需要至少10个钻石来制作一把钻石斧"
+            "key": "You lost ",
+            "value": "你失去了"
         },
         {
-            "key": "You made a wooden sword with 25 logs! Good Job",
-            "value": "你用25个木头制作了一把木剑！（我的评价是：有屁用，不如铜的"
+            "key": "Bad luck.",
+            "value": "倒霉悲催的。"
         },
         {
-            "key": "You need at least 25 logs to make a wooden sword.",
-            "value": "你需要至少25个木头来制作一把木剑"
+            "key": "No such item.",
+            "value": "没有这个物品（？？？"
         },
         {
-            "key": "You made a iron sword with 25 iron! Good Job",
-            "value": "你用25铁制作了一把铁剑！好！（没想到吧没有铜剑"
+            "key": "You made a {str:ItemName}! Good Job!",
+            "value": "你制造了{str:ItemName}! 真牛逼！"
         },
         {
-            "key": "You need at least 25 iron to make a iron sword.",
-            "value": "你需要至少25铁来制作一把铁剑"
+            "key": "But you don't have them.",
+            "value": "但是你没有！哈哈哈"
         },
         {
-            "key": "You made a golden sword with 25 gold! Good Job",
-            "value": "你用25个金子做了一把金剑！挺好"
+            "key": "You need at least ",
+            "value": "你需要至少"
         },
         {
-            "key": "You need at least 25 gold to make a golden sword.",
-            "value": "你需要至少25个金子来制作一把金剑"
+            "key": "wooden sword",
+            "value": "木剑"
         },
         {
-            "key": "You made a diamond sword with 10 diamonds! Good Job",
-            "value": "你用10钻石做了一把钻石剑！真JB贵我去"
+            "key": "wooden axe",
+            "value": "木斧"
         },
         {
-            "key": "You need at least 10 diamonds to make a diamonds sword.",
-            "value": "你需要至少10个钻石来制作一把钻石剑"
+            "key": "wooden pickaxe",
+            "value": "木镐"
         },
         {
-            "key": "You made a ENEGRY sword with 10 ENEGRY! Good Job",
-            "value": "你用10个能量制作了一把宇宙无敌能力剑！真的太值这个价格了"
+            "key": "copper axe",
+            "value": "铜斧"
         },
         {
-            "key": "You lost 10 ENEGRY.",
-            "value": "你吃了10能量（什"
+            "key": "copper pickaxe",
+            "value": "铜镐"
         },
         {
-            "key": "You need at least 10 ENEGRY to make a ENEGRY sword.",
-            "value": "你需要至少10能量才能制作一把能量剑"
+            "key": "iron sword",
+            "value": "铁剑"
         },
         {
-            "key": "You made a wooden pickaxe with 25 logs! Good Job",
-            "value": "你用25个木头制作了一把木镐！好，不给予评价"
+            "key": "iron axe",
+            "value": "铁斧"
         },
         {
-            "key": "You need at least 25 logs to make a wooden pickaxe.",
-            "value": "你需要至少25个木头来制作一把木镐"
+            "key": "iron pickaxe",
+            "value": "铁镐"
         },
         {
-            "key": "You made a copper pickaxe with 25 copper! Good Job",
-            "value": "你用25铜制作了一把铜镐子！太牛辣！"
+            "key": "gold sword",
+            "value": "金剑"
         },
         {
-            "key": "You need at least 25 copper to make a copper pickaxe.",
-            "value": "你需要至少25个铜来制作一把铜镐子"
+            "key": "gold axe",
+            "value": "金斧"
         },
         {
-            "key": "You made a iron pickaxe with 25 iron! Good Job",
-            "value": "你用25铁制作了一把铁镐子！真厉害~（阴阳怪气"
+            "key": "gold pickaxe",
+            "value": "金镐"
         },
         {
-            "key": "You need at least 25 iron to make a iron pickaxe.",
-            "value": "你需要至少25铁来制作一把铁镐子"
+            "key": "diamond sword",
+            "value": "钻石剑"
         },
         {
-            "key": "You made a golds pickaxe with 25 golds! Good Job",
-            "value": "你用25个金子做了一把金镐子！挺好"
+            "key": "diamond axe",
+            "value": "钻石斧"
         },
         {
-            "key": "You need at least 25 golds to make a golden pickaxe.",
-            "value": "你需要至少25个铜来制作一把铜镐子"
+            "key": "diamond pickaxe",
+            "value": "钻石镐"
         },
         {
-            "key": "You made a diamond pickaxe with 10 diamonds! Good Job",
-            "value": "你用10个钻石制作了一把钻石镐子！你太牛逼辣！"
+            "key": "enegry sword",
+            "value": "能量剑"
         },
         {
-            "key": "You need at least 10 diamonds to make a diamond pickaxe.",
-            "value": "你需要至少10个钻石来制作一把钻石镐子"
+            "key": "enegry pickaxe",
+            "value": "能量镐"
         },
         {
-            "key": "You made a ENEGRY pickaxe with 10 diamonds! Good Job",
-            "value": "你用10个能量制作了一把宇宙无敌能量镐！真的太值这个价格了"
-        },
-        {
-            "key": "You need at least 10 ENEGRY to make a ENEGRY pickaxe.",
-            "value": "你需要至少10能量才能制作一把能量镐"
-        },
-        {
-            "key": "You lost 20 logs and 1 copper.",
-            "value": "你失去了20个木头和1个铜矿"
-        },
-        {
-            "key": "You lost 25 logs and 5 copper.",
-            "value": "你失去了25个木头和5个铜矿"
-        },
-        {
-            "key": "You need at least 20 logs and 1 copper to build a gun turret.",
-            "value": "你需要至少20木头和1铜才能制造手枪炮塔"
-        },
-        {
-            "key": "You built a shotgun turret with 25 logs, 5 copper! Do it again!",
-            "value": "你用25个木头，5个铜制造了手枪炮塔！继续卡死这个服务器！"
-        },
-        {
-            "key": "You need at least 25 logs and 5 copper to build a shotgun turret.",
-            "value": "你需要至少25木头和5铜才能制造散弹枪炮塔"
-        },
-        {
-            "key": "You built a laser turret with 20 Gold, 1 DIAMOND! Do it again!",
-            "value": "你用20个黄金，1个钻石制造了激光炮塔！继续卡死这个服务器！"
-        },
-        {
-            "key": "You lost 20 Gold and 1 diamond..",
-            "value": "你失去了20个金子和1个钻石"
-        },
-        {
-            "key": "You need at least 20 Gold and 1 diamond to build a laser turret.",
-            "value": "你需要至少20个金子和1个钻石才能制造激光炮塔"
-        },
-        {
-            "key": "You built a {[[LA2ER T0RRE7]]} with 50 diamond, 100 Enegry! Do it again!",
-            "value": "你用50个钻石，100能量制造了宇宙无敌激光镭射炮塔2077！继续卡死这个服务器！"
-        },
-        {
-            "key": "You lost 50 diamond and 100 Enegry..",
-            "value": "你丢失了50钻石和100能量"
-        },
-        {
-            "key": "You need at least 50 diamond and 100 Enegry to build a {[LA2ER T0RRE7]}.",
-            "value": "你需要至少50个钻石和100能量才能制造宇宙无敌激光镭射炮塔2077"
+            "key": "space",
+            "value": "空"
         }
     ]
 }

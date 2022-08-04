@@ -169,7 +169,7 @@ void CTurret::Tick()
     if(m_FireDelay >= 0)
         m_FireDelay--;
     
-    if(m_Lifes <= 0)
+    if(m_Lifes <= 0 || (!GameServer()->m_apPlayers[GetOwner()] && !GameServer()->m_apPlayers[GetOwner()]->GetCharacter()))
     {
         Reset();
     }

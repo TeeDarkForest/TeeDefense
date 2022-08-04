@@ -10,6 +10,10 @@ sv_max_clients 48
 sv_register 1
 
 add_vote "跳过热身,开始召唤僵尸（谨慎选择）" "skip_warmup"
+add_vote "地图：我的世界" "sv_map Mine-Craft"
+add_vote "地图：0号地区" "sv_map TDef-Zero"
+
+
 add_command_vote ======= 制作 =======" "null"
 add_command_vote "------ 斧头 ------" "null"
 add_command_vote "制作木斧" "log axe"

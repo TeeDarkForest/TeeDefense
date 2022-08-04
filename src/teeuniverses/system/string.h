@@ -72,8 +72,8 @@ private:
 	char* m_pBuffer;
 	int m_MaxSize;
 
-private:	
-	 //throw a compilation error if the object is copied
+public:	
+	//throw a compilation error if the object is copied
 	_dynamic_string_core(const _dynamic_string_core&);
 	_dynamic_string_core& operator=(const _dynamic_string_core&);
 
@@ -200,7 +200,7 @@ public:
 	}
 	
 	inline void append(const char* pBuffer) { BASE::append_at(length(), pBuffer); }
-	
+
 	template<typename STR>
 	inline void append(const STR& str)
 	{

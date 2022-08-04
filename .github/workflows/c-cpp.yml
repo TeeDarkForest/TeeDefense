@@ -1,0 +1,21 @@
+name: Test Build Server.
+
+on:
+  push:
+    branches: [ "tw06mod-main" ]
+  pull_request:
+    branches: [ "tw06mod-main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install
+      run: sudo apt install bam git libfreetype6-dev libsdl2-dev libpnglite-dev libwavpack-dev python3 -y
+    - name: Build
+      run: bam
+    - name: Check
+      run: ./teeworlds_srv_d -f shutdown

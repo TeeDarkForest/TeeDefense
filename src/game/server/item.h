@@ -3,6 +3,7 @@
 #ifndef GAME_SERVER_ITEM_H
 #define GAME_SERVER_ITEM_H
 #include <base/tl/array.h>
+
 enum
 {
 	RESOURCE_LOG=0, // STEP 1

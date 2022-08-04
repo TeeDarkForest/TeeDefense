@@ -167,8 +167,6 @@ public:
 		
 		return minimum(Pos + Num, m_MaxSize-1);
 	}
-
-	
 };
 
 template<typename BASE>

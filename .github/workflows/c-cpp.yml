@@ -18,4 +18,4 @@ jobs:
     - name: Build
       run: bam
     - name: Check
-      run: ./teeworlds_srv_d -f shutdown
+      run: ./teeworlds_srv_d shutdown

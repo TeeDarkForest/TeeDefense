@@ -844,21 +844,7 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 		{
 			CPlayer *Player = GameServer()->m_apPlayers[From];
 			if(Player->m_Knapsack.m_Sword >= 0)
-			{
-				CItem *Sword = GameServer()->ItemSystem()->GetItem(Player->m_Knapsack.m_Sword);
-				if(Sword->m_Level == LEVEL_ENEGRY)
-					Dmg+=32;
-				if(Sword->m_Level == LEVEL_DIAMOND)
-					Dmg+=20;
-				else if(Sword->m_Level == LEVEL_GOLD)
-					Dmg+=10;
-				else if(Sword->m_Level == LEVEL_IRON)
-					Dmg+=7;
-				else if(Sword->m_Level == LEVEL_COPPER)
-					Dmg+=5;
-				else if(Sword->m_Level == LEVEL_LOG)
-					Dmg+=2;
-			}
+				Dmg+=GameServer()->ItemSystem()->GetDmg(Player->m_Knapsack.m_Sword);
 		}
 	}
 

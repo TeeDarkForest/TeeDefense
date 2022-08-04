@@ -8,7 +8,7 @@
 #include "gamecontroller.h"
 #include "entities/turret.h"
 
-void CItem::Load(int ID, int Log, int Coal, int Copper, int Iron, int Gold, int Diamond, int Enegry)
+CItem::CItem(int ID, int Log, int Coal, int Copper, int Iron, int Gold, int Diamond, int Enegry)
 {
     m_NeedResource[RESOURCE_LOG] = Log;
     m_NeedResource[RESOURCE_COAL] = Coal;
@@ -20,22 +20,353 @@ void CItem::Load(int ID, int Log, int Coal, int Copper, int Iron, int Gold, int 
     m_ID = ID;
 }
 
-CItemSystem::CItemSystem()
+CItemSystem::CItemSystem(CGameContext *GameServer)
 {
+    m_pGameServer = GameServer;
     m_IDs = 0;
-    // unfinish. ED ni lai gao zhe ge.
-    CreateItem("log_sword", m_IDs, ITYPE_SWORD, 0, LEVEL_LOG, -1, 20, 10, 10, 0, 0, 0, 0, 0, 0);
-    CreateItem("log_axe", m_IDs, ITYPE_AXE, 0, LEVEL_LOG, -1, 20, 10, 10, 0, 0, 0, 0, 0, 0);
-    CreateItem("log_pickaxe", m_IDs, ITYPE_PICKAXE, 0, LEVEL_LOG, -1, 20, 500, 25, 0, 0, 0, 0, 0, 0);
-    CreateItem("copper_sword", m_IDs, ITYPE_SWORD, 0, LEVEL_COPPER, -1, 20, 10, 10, 0, 25, 0, 0, 0, 0);
-    CreateItem("copper_axe", m_IDs, ITYPE_AXE, 0, LEVEL_COPPER, -1, 20, 10, 10, 0, 0, 0, 0, 0, 0);
-    CreateItem("copper_pickaxe", m_IDs, ITYPE_PICKAXE, 0, LEVEL_COPPER, -1, 20, 500, 25, 0, 0, 0, 0, 0, 0);
-    CreateItem("iron_sword", m_IDs, ITYPE_SWORD, 0, LEVEL_IRON, -1, 20, 10, 10, 0, 0, 0, 0, 0, 0);
-    CreateItem("iron_axe", m_IDs, ITYPE_AXE, 0, LEVEL_IRON, -1, 20, 10, 10, 0, 0, 0, 0, 0, 0);
-    CreateItem("iron_pickaxe", m_IDs, ITYPE_PICKAXE, 0, LEVEL_IRON, -1, 20, 500, 25, 0, 0, 0, 0, 0, 0);
     
-    CreateItem("gun_turret", m_IDs, ITYPE_TURRET, 0, LEVEL_LOG, TURRET_GUN, 20, 500, 25, 0, 0, 0, 0, 0, 0);
+    // Register Items.
+    CreateItem("wooden sword",// Name
+     m_IDs,// ID
+      ITYPE_SWORD,// ItemType
+       2,// Damage
+        LEVEL_LOG,// Level
+         -1,// TurretType
+          90,// Proba
+           -1,// Speed
+            25,// Log
+             0,// Coal
+              0,//Copper
+               0,// Iron
+                0,// Gold
+                 0,// Diamond
+                  0//Enegry
+    );
+    CreateItem("wooden axe",// Name
+     m_IDs,// ID
+      ITYPE_AXE,// ItemType
+       0,// Damage
+        LEVEL_LOG,// Level
+         -1,// TurretType
+          90,// Proba
+           10,// Speed
+            10,// Log
+             0,// Coal
+              0,//Copper
+               0,// Iron
+                0,// Gold
+                 0,// Diamond
+                  0//Enegry
+    );
+    CreateItem("wooden pickaxe",// Name
+     m_IDs,// ID
+      ITYPE_PICKAXE,// ItemType
+       0,// Damage
+        LEVEL_LOG,// Level
+         -1,// TurretType
+          90,// Proba
+           200,// Speed
+            25,// Log
+             0,// Coal
+              0,//Copper
+               0,// Iron
+                0,// Gold
+                 0,// Diamond
+                  0//Enegry
+    );
+    CreateItem("copper sword",// Name
+     m_IDs,// ID
+      ITYPE_SWORD,// ItemType
+       5,// Damage
+        LEVEL_COPPER,// Level
+         -1,// TurretType
+          90,// Proba
+           0,// Speed
+            10,// Log
+             0,// Coal
+              25,//Copper
+               0,// Iron
+                0,// Gold
+                 0,// Diamond
+                  0//Enegry
+    );
+    CreateItem("copper axe",// Name
+     m_IDs,// ID
+      ITYPE_AXE,// ItemType
+       0,// Damage
+        LEVEL_COPPER,// Level
+         -1,// TurretType
+          90,// Proba
+           17,// Speed
+            10,// Log
+             0,// Coal
+              25,//Copper
+               0,// Iron
+                0,// Gold
+                 0,// Diamond
+                  0//Enegry
+    );
+    CreateItem("copper pickaxe",// Name
+     m_IDs,// ID
+      ITYPE_PICKAXE,// ItemType
+       0,// Damage
+        LEVEL_COPPER,// Level
+         -1,// TurretType
+          90,// Proba
+           500,// Speed
+            10,// Log
+             0,// Coal
+              25,//Copper
+               0,// Iron
+                0,// Gold
+                 0,// Diamond
+                  0//Enegry
+    );
+    CreateItem("iron sword",// Name
+     m_IDs,// ID
+      ITYPE_SWORD,// ItemType
+       7,// Damage
+        LEVEL_IRON,// Level
+         -1,// TurretType
+          90,// Proba
+           0,// Speed
+            10,// Log
+             0,// Coal
+              0,//Copper
+               25,// Iron
+                0,// Gold
+                 0,// Diamond
+                  0//Enegry
+    );
+    CreateItem("iron axe",// Name
+     m_IDs,// ID
+      ITYPE_AXE,// ItemType
+       0,// Damage
+        LEVEL_IRON,// Level
+         -1,// TurretType
+          20,// Proba
+           24,// Speed
+            10,// Log
+             0,// Coal
+              0,//Copper
+               25// Iron
+                0,// Gold
+                 0,// Diamond
+                  0//Enegry
+    );
+    CreateItem("iron pickaxe",// Name
+     m_IDs,// ID
+      ITYPE_PICKAXE,// ItemType
+       0,// Damage
+        LEVEL_IRON,// Level
+         -1,// TurretType
+          90,// Proba
+           500,// Speed
+            10,// Log
+             0,// Coal
+              0,//Copper
+               25,// Iron
+                0,// Gold
+                 0,// Diamond
+                  0//Enegry
+    );
+    CreateItem("golden sword",// Name
+     m_IDs,// ID
+      ITYPE_SWORD,// ItemType
+       10,// Damage
+        LEVEL_GOLD,// Level
+         -1,// TurretType
+          80,// Proba
+           1500,// Speed
+            10,// Log
+             0,// Coal
+              0,//Copper
+               0,// Iron
+                25,// Gold
+                 0,// Diamond
+                  0//Enegry
+    );
+    CreateItem("golden axe",// Name
+     m_IDs,// ID
+      ITYPE_AXE,// ItemType
+       0,// Damage
+        LEVEL_GOLD,// Level
+         -1,// TurretType
+          80,// Proba
+           30,// Speed
+            10,// Log
+             0,// Coal
+              0,//Copper
+               0,// Iron
+                0,// Gold
+                 0,// Diamond
+                  0//Enegry
+    );
+    CreateItem("golden pickaxe",// Name
+     m_IDs,// ID
+      ITYPE_PICKAXE,// ItemType
+       0,// Damage
+        LEVEL_GOLD,// Level
+         -1,// TurretType
+          90,// Proba
+           1500,// Speed
+            10,// Log
+             0,// Coal
+              0,//Copper
+               0,// Iron
+                25,// Gold
+                 0,// Diamond
+                  0//Enegry
+    );
+    CreateItem("diamond sword",// Name
+     m_IDs,// ID
+      ITYPE_SWORD,// ItemType
+       20,// Damage
+        LEVEL_DIAMOND,// Level
+         -1,// TurretType
+        90,// Proba
+           0,// Speed
+            10,// Log
+             0,// Coal
+              0,//Copper
+               0,// Iron
+                0,// Gold
+                 25,// Diamond
+                  0//Enegry
+    );
+    CreateItem("diamond axe",// Name
+     m_IDs,// ID
+      ITYPE_AXE,// ItemType
+       0,// Damage
+        LEVEL_DIAMOND,// Level
+         -1,// TurretType
+          20,// Proba
+           50,// Speed
+            10,// Log
+             0,// Coal
+              0,//Copper
+               0,// Iron
+                0,// Gold
+                 25,// Diamond
+                  0//Enegry
+    );
+    CreateItem("diamond pickaxe",// Name
+     m_IDs,// ID
+      ITYPE_PICKAXE,// ItemType
+       0,// Damage
+        LEVEL_DIAMOND,// Level
+         -1,// TurretType
+            80,// Proba
+           3500,// Speed
+            10,// Log
+             0,// Coal
+              0,//Copper
+               0,// Iron
+                0,// Gold
+                 25,// Diamond
+                  0//Enegry
+    );
+    CreateItem("enegry sword",// Name
+     m_IDs,// ID
+      ITYPE_SWORD,// ItemType
+       38,// Damage
+        LEVEL_ENEGRY,// Level
+         -1,// TurretType
+          90,// Proba
+           0,// Speed
+            10,// Log
+             0,// Coal
+              0,//Copper
+               0,// Iron
+                0,// Gold
+                 50,// Diamond
+                  100//Enegry
+    );
+    CreateItem("enegry pickaxe",// Name
+     m_IDs,// ID
+      ITYPE_PICKAXE,// ItemType
+       0,// Damage
+        LEVEL_ENEGRY,// Level
+         -1,// TurretType
+          100,// Proba
+           5000,// Speed
+            5,// Log
+             0,// Coal
+              0,//Copper
+               0,// Iron
+                0,// Gold
+                 1000,// Diamond
+                  500//Enegry
+    );
     
+    CreateItem("gun turret", // Name
+     m_IDs, // ID
+      ITYPE_TURRET, // ItemType
+       0, // Damage
+        LEVEL_LOG, // Level
+         TURRET_GUN, // TurretType
+          90, // Proba
+           0, // Speed
+            20, // Log
+             0, // Coal
+              1, // Copper
+               0, // Iron
+                0, // Gold
+                 0, // Diamond
+                  0 // Enegry
+    );
+
+    CreateItem("shotgun turret", // Name
+     m_IDs, // ID
+      ITYPE_TURRET, // ItemType
+       0, // Damage
+        LEVEL_LOG, // Level
+         TURRET_SHOTGUN, // TurretType
+          90, // Proba
+           0, // Speed
+            25, // Log
+             0, // Coal
+              5, // Copper
+               0, // Iron
+                0, // Gold
+                 0, // Diamond
+                  0 // Enegry
+    );
+
+    CreateItem("laser turret", // Name
+     m_IDs, // ID
+      ITYPE_TURRET, // ItemType
+       0, // Damage
+        LEVEL_DIAMOND, // Level
+         TURRET_LASER, // TurretType
+          90, // Proba
+           0, // Speed
+            0, // Log
+             0, // Coal
+              0, // Copper
+               0, // Iron
+                20, // Gold
+                 1, // Diamond
+                  0 // Enegry
+    );
+
+    CreateItem("laser2077 turret", // Name
+     m_IDs, // ID
+      ITYPE_TURRET, // ItemType
+       0, // Damage
+        LEVEL_ENEGRY, // Level
+         TURRET_LASER_2077, // TurretType
+          90, // Proba
+           0, // Speed
+            20, // Log
+             0, // Coal
+              1, // Copper
+               0, // Iron
+                0, // Gold
+                 50, // Diamond
+                  20 // Enegry
+    );
+
 }
 
 bool CItemSystem::CheckItemName(const char* pItemName)
@@ -56,8 +387,7 @@ bool CItemSystem::CheckItemName(const char* pItemName)
 bool CItemSystem::CreateItem(const char* pItemName, int ID, int Type, int Damage, int Level, int TurretType, int Proba, 
     int Speed, int Log, int Coal, int Copper, int Iron, int Gold, int Diamond, int Enegry)
 {
-    m_ItemList[ID] = new CItem();
-    m_ItemList[ID]->Load(ID, Log, Coal, Copper, Iron, Gold, Diamond, Enegry);
+    m_ItemList[ID] = new CItem(ID, Log, Coal, Copper, Iron, Gold, Diamond, Enegry);
     m_ItemList[ID]->m_Name = pItemName;
     m_ItemList[ID]->m_Level = Level;
     m_ItemList[ID]->m_Type = Type;
@@ -65,6 +395,7 @@ bool CItemSystem::CreateItem(const char* pItemName, int ID, int Type, int Damage
     m_ItemList[ID]->m_TurretType = TurretType;
     m_ItemList[ID]->m_Proba = Proba;
     m_ItemList[ID]->m_Speed = Speed;
+    dbg_msg("s","%d %d", Speed, m_IDs);
     m_IDs++;
 
     return true;
@@ -74,8 +405,9 @@ int CItemSystem::GetItemId(const char* pItemName)
 {
     for(int i = 0; i < m_IDs; i++)
     {
-        if(str_comp(m_ItemList[i]->m_Name, pItemName))
+        if(str_comp(m_ItemList[i]->m_Name, pItemName) == 0)
         {
+            dbg_msg("s", "%d", i);
             return m_ItemList[i]->m_ID;
         }
     }
@@ -121,7 +453,7 @@ void CItemSystem::SendMakeItemChat(int To, CItem *Item)
 
     Buffer.append("You made a ");
     Buffer.append(Item->m_Name);
-    Buffer.append("Good Job!");
+    Buffer.append("!Good Job!");
 
     m_pGameServer->SendChatTarget(To, Buffer.c_str());
 }
@@ -132,33 +464,40 @@ void CItemSystem::SendMakeItemFailedChat(int To, int* Resource)
     std::string Buffer;
     char aBuf[128];
     Buffer.append("You lost ");
+    CPlayer *p = m_pGameServer->m_apPlayers[To];
     if(Resource[RESOURCE_LOG] > 0)
     {
+        p->m_Knapsack.m_Resource[RESOURCE_LOG]-=Resource[RESOURCE_LOG];
         str_format(aBuf, sizeof(aBuf), "%d log.", Resource[RESOURCE_LOG]);
         Buffer.append(aBuf);
     }
     if(Resource[RESOURCE_COAL] > 0)
     {
+        p->m_Knapsack.m_Resource[RESOURCE_COAL]-=Resource[RESOURCE_COAL];
         str_format(aBuf, sizeof(aBuf), "%d coal.", Resource[RESOURCE_COAL]);
         Buffer.append(aBuf);
     }
     if(Resource[RESOURCE_COPPER] > 0)
     {
+        p->m_Knapsack.m_Resource[RESOURCE_COPPER]-=Resource[RESOURCE_COPPER];
         str_format(aBuf, sizeof(aBuf), "%d copper.", Resource[RESOURCE_COPPER]);
         Buffer.append(aBuf);
     }
     if(Resource[RESOURCE_IRON] > 0)
     {
+        p->m_Knapsack.m_Resource[RESOURCE_IRON]-=Resource[RESOURCE_IRON];
         str_format(aBuf, sizeof(aBuf), "%d iron.", Resource[RESOURCE_IRON]);
         Buffer.append(aBuf);
     }
     if(Resource[RESOURCE_DIAMOND] > 0)
     {
+        p->m_Knapsack.m_Resource[RESOURCE_DIAMOND]-=Resource[RESOURCE_DIAMOND];
         str_format(aBuf, sizeof(aBuf), "%d diamond.", Resource[RESOURCE_DIAMOND]);
         Buffer.append(aBuf);
     }
     if(Resource[RESOURCE_ENEGRY] > 0)
     {
+        p->m_Knapsack.m_Resource[RESOURCE_DIAMOND]-=Resource[RESOURCE_DIAMOND];
         str_format(aBuf, sizeof(aBuf), "%d enegry.", Resource[RESOURCE_ENEGRY]);
         Buffer.append(aBuf);
     }
@@ -170,24 +509,25 @@ void CItemSystem::MakeItem(const char* pItemName, int ClientID)
     if(!CheckItemName(pItemName))
     {
         m_pGameServer->SendChatTarget(ClientID, _("No such item."), NULL);
+        return;
     }
 
     CItem *MakeItem = GetItem(GetItemId(pItemName));
 
     for(int i = 0;i < NUM_RESOURCE;i++)
     {
-        if(MakeItem->m_NeedResource[i] && m_pGameServer->m_apPlayers[ClientID]->m_Knapsack.m_Resource[i])
-            if(m_pGameServer->m_apPlayers[ClientID]->m_Knapsack.m_Resource[i] < MakeItem->m_NeedResource[i])
-            {
-                SendCantMakeItemChat(ClientID, MakeItem->m_NeedResource);
-                return;
-            }
+        if(m_pGameServer->m_apPlayers[ClientID]->m_Knapsack.m_Resource[i] < MakeItem->m_NeedResource[i])
+        {
+            SendCantMakeItemChat(ClientID, MakeItem->m_NeedResource);
+            return;
+        }
     }
 
     if(random_int(0, 100) < MakeItem->m_Proba)
     {
 		SendMakeItemChat(ClientID, MakeItem);
         int ItemLevel = MakeItem->m_Level;
+        dbg_msg("Type, Level","%d %d", MakeItem->m_Type, ItemLevel);
         switch (MakeItem->m_Type)
         {
             case ITYPE_AXE: 

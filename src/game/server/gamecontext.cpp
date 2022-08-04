@@ -40,7 +40,7 @@ void CGameContext::Construct(int Resetting)
 	if(Resetting==NO_RESET)
 		m_pVoteOptionHeap = new CHeap();
 	
-	m_pItemSystem = new CItemSystem;
+	m_pItemSystem = new CItemSystem(this);
 }
 
 CGameContext::CGameContext(int Resetting)
@@ -925,11 +925,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			{
 				char ItemName[128];
 				mem_copy(ItemName, aCmd+4, sizeof(ItemName));
-
-				if(ItemSystem()->CheckItemName(ItemName))
-				{
-					ItemSystem()->MakeItem(ItemName, ClientID);
-				}
+				ItemSystem()->MakeItem(ItemName, ClientID);
 				return;
 			}
 			/*

@@ -38,8 +38,7 @@ enum
 class CItem
 {
 public:
-    CItem(){};
-    void Load(int ID, int Log, int Coal, int Copper, int Iron, int Gold, int Diamond, int Enegry);
+    CItem(int ID, int Log, int Coal, int Copper, int Iron, int Gold, int Diamond, int Enegry);
     const char* m_Name;
     int m_Type;
     int m_NeedResource[NUM_RESOURCE];
@@ -57,7 +56,7 @@ class CItemSystem
     int m_IDs;
 public:
 
-    CItemSystem();
+    CItemSystem(CGameContext *GameServer);
 
     CItem *m_ItemList[128];
 
@@ -68,6 +67,27 @@ public:
 
     CItem *GetItem(int ItemID) { return m_ItemList[ItemID]; };
 
+    int GetSpeed(int Level, int Type)
+    {
+        for (int i = 0;sizeof(m_ItemList);i++)
+        {
+            if(m_ItemList[i]->m_Level == Level && m_ItemList[i]->m_Type == Type)
+            {
+                return m_ItemList[i]->m_Speed;
+            }
+        }
+    }
+
+    int GetDmg(int Level)
+    {
+        for (int i = 0;sizeof(m_ItemList);i++)
+        {
+            if(m_ItemList[i]->m_Level == Level && m_ItemList[i]->m_Type == ITYPE_SWORD)
+            {
+                return m_ItemList[i]->m_Damage;
+            }
+        }
+    }
     void MakeItem(const char* pItemName, int ClientID);
 
     bool CheckItemName(const char* pItemName);

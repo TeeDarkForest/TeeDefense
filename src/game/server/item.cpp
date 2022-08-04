@@ -7,6 +7,7 @@
 #include "gamecontext.h"
 #include "gamecontroller.h"
 #include "entities/turret.h"
+#include <teeuniverses/components/localization.h>
 
 CItem::CItem(int ID, int Log, int Coal, int Copper, int Iron, int Gold, int Diamond, int Enegry)
 {

@@ -459,3 +459,11 @@ void CPlayer::ResetKnapsack()
 	m_Knapsack.m_Pickaxe = -1;
 	m_Knapsack.m_Sword = -1;
 }
+
+int CPlayer::GetTeam()
+{
+	if(GetZomb())
+		return TEAM_ZOMBIE;
+	else
+		return TEAM_HUMAN;
+}

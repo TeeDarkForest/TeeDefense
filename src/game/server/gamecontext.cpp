@@ -631,7 +631,7 @@ void CGameContext::OnClientConnected(int ClientID)
 	if(m_VoteCloseTime)
 		SendVoteSet(ClientID);
 	
-	SetLanguage(ClientID, "zh-cn");
+	SetClientLanguage(ClientID, "zh-cn");
 	SendChatTarget(ClientID, _("Use command '/language en' to change language English"));
 	SendChatTarget(ClientID, _("上面那哥消息是给外国人看的，咱中国人不用管！"));
 	

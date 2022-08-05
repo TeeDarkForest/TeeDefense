@@ -82,6 +82,11 @@ void CPlasma::Explode()
 	{
 		GameServer()->CreateExplosion(m_Pos, m_Owner, WEAPON_GRENADE, false);
 	}
+	else
+	{
+		if(GameServer()->GetPlayerChar(m_TrackedPlayer))
+			GameServer()->GetPlayerChar(m_TrackedPlayer)->TakeDamage(vec2(0,0), 3, m_Owner, m_Weapon);
+	}
 	Reset();
 }
 

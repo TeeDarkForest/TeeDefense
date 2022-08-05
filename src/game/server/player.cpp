@@ -467,3 +467,10 @@ int CPlayer::GetTeam()
 	else
 		return TEAM_HUMAN;
 }
+
+bool CPlayer::PressTab()
+{
+	if(m_PlayerFlags&PLAYERFLAG_SCOREBOARD)
+		return true;
+	return false;
+}

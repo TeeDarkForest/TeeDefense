@@ -166,7 +166,9 @@ public:
 	int m_MiningTick;
 	CTuningParams m_PrevTuningParams;
 	CTuningParams m_NextTuningParams;
-	
+
+	bool PressTab();
+
 private:
 	void HandleTuningParams(); //This function will send the new parameters if needed
 

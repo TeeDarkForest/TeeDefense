@@ -813,7 +813,7 @@ void CCharacter::Die(int Killer, int Weapon)
 	if(!GameServer()->m_apPlayer[Killer])
 		return;
 	
-	if(!GameServer()->GetPlayerCha(Killer))
+	if(!GameServer()->GetPlayerChar(Killer))
 		return;
 
 	// we got to wait 0.5 secs before respawning

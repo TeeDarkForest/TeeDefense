@@ -102,6 +102,10 @@ public:
 
 	void Teleport(vec2 Pos);
 
+	void Freeze(float Time, int Player, int Reason);
+	bool IsFrozen() const;
+	void Unfreeze();
+
 private:
 	// player controlling this character
 	class CPlayer *m_pPlayer;
@@ -137,6 +141,9 @@ private:
 	CCharacterCore m_SendCore; // core that we should send
 	CCharacterCore m_ReckoningCore; // the dead reckoning core
 
+	bool m_IsFrozen;
+	int m_FrozenTime;
+	
 	// fly
 	int m_HitTick;
 	int m_LastHitBy;

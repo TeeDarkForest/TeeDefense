@@ -15,7 +15,7 @@ enum
     TURRET_SHOTGUN, // Normal shotgun
     TURRET_FOLLOW_GRENADE, // Follow grenade
     TURRET_LASER, // Fast laser gun
-    TURRET_FIREBALL, // Fire fireball
+    TURRET_NO_GRAVITY_GUN, // Fire fireball
     TURRET_FREEZE_GUN, // Freeze zombie
     TURRET_GUN_2077, // Follow, fast pistol
     TURRET_SHOTGUN_2077, // Follow, spread, shotgun
@@ -47,5 +47,7 @@ private:
     int m_Degres;
 
     int m_Lifes;
+
+    vec2 TargetPos;
 };
 #endif

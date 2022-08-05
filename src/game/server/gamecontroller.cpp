@@ -376,6 +376,12 @@ int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 	if(Weapon == WEAPON_GAME)
 		return 0;
 
+	if(Weapon == WEAPON_WORLD)
+		return 0;
+	
+	if(Weapon == WEAPON_SELF)
+		return 0;
+
 	if(!pKiller)
 		return 0;
 	

@@ -29,7 +29,9 @@ public:
 	virtual void Snap(int SnappingClient);
 	virtual void Picking(int Time, CPlayer *Player);
 	
+	void HandleLockPlayer();
 	int m_Health;
+	int m_LockPlayer;
 private:
 	int m_Type;
 	int m_Subtype;

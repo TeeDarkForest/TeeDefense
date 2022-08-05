@@ -166,10 +166,10 @@
         },
         {
             "key": "Wave {int:a} started with {int:a1} Zombies!",
-            "value": "第 {int:a} 轮迎来 {int:a1} 只僵尸！"
+            "value": "[第 {int:a} 轮]迎来 {int:a1} 只僵尸！"
         },
         {
-            "key": "Wave {int:a}:{int:a} zombies are left",
+            "key": "Wave {int:a}:{int:a1} zombies are left",
             "value": "[第 {int:a} 轮]:还剩 {int:a1} 只僵尸"
         },
         {
@@ -338,31 +338,31 @@
         },
         {
             "key": "{int:num} log,",
-            "value": "{int:num}块木头"
+            "value": "{int:num}块木头, "
         },
         {
             "key": "{int:num} coal,",
-            "value": "{int:num}块煤炭"
+            "value": "{int:num}块煤炭, "
         },
         {
             "key": "{int:num} copper,",
-            "value": "{int:num}块铁锭"
+            "value": "{int:num}块铁锭, "
         },
         {
             "key": "{int:num} iron,",
-            "value": "{int:num}块钻石"
+            "value": "{int:num}块钻石, "
         },
         {
             "key": "{int:num} gold,",
-            "value": "{int:num}块金锭"
+            "value": "{int:num}块金锭, "
         },
         {
             "key": "{int:num} diamond,",
-            "value": "{int:num}块钻石"
+            "value": "{int:num}块钻石, "
         },
         {
             "key": "{int:num} enegry,",
-            "value": "{int:num}点能量"
+            "value": "{int:num}点能量, "
         },
         {
             "key": "You lost ",

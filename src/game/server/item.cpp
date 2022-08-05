@@ -350,7 +350,57 @@ CItemSystem::CItemSystem(CGameContext *GameServer)
                  100, // Diamond
                   250 // Enegry
     );
+	
+    CreateItem("fgrenade turret", // Name
+     m_IDs, // ID
+      ITYPE_TURRET, // ItemType
+       0, // Damage
+        LEVEL_IRON, // Level
+         TURRET_FOLLOW_GRENADE, // TurretType
+          90, // Proba
+           0, // Speed
+            10, // Log
+             500, // Coal
+              50, // Copper
+               0, // Iron
+                40, // Gold
+                 25, // Diamond
+                  1 // Enegry
+    );
 
+    CreateItem("freeze turret", // Name
+     m_IDs, // ID
+      ITYPE_TURRET, // ItemType
+       0, // Damage
+        LEVEL_ENEGRY, // Level
+         TURRET_LASER_2077, // TurretType
+          90, // Proba
+           0, // Speed
+            10, // Log
+             10, // Coal
+              10, // Copper
+               10, // Iron
+                20, // Gold
+                 1, // Diamond
+                  1 // Enegry
+    );
+
+    CreateItem("shotgun2077 turret", // Name
+     m_IDs, // ID
+      ITYPE_TURRET, // ItemType
+       0, // Damage
+        LEVEL_GOLD, // Level
+         TURRET_SHOTGUN_2077, // TurretType
+          90, // Proba
+           0, // Speed
+            10, // Log
+             10, // Coal
+              10, // Copper
+               10, // Iron
+                30, // Gold
+                 10, // Diamond
+                  25 // Enegry
+    );
 }
 
 bool CItemSystem::CheckItemName(const char* pItemName)

@@ -810,10 +810,10 @@ void CCharacter::Die(int Killer, int Weapon)
 	if(!GetPlayer())
 		return;
 	
-	if(!GameServer()->m_apPlayer[Killer])
+	if(Killer >= ZOMBIE_START)
 		return;
 	
-	if(!GameServer()->GetPlayerChar(Killer))
+	if(Killer < 0)
 		return;
 
 	// we got to wait 0.5 secs before respawning

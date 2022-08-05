@@ -150,14 +150,13 @@ void CTurret::Tick()
                     m_Lifes--;
                 }
                 break;
-            // EDreemurr
-            /*case TURRET_FOLLOW_GRENADE:
+            case TURRET_FOLLOW_GRENADE:
                 if(m_FireDelay <= 0)
                 {
                     new CFGun(GameWorld(), m_Pos, GetOwner(), Direction, WEAPON_GRENADE, 7);
                     m_FireDelay = 50;
                 }
-                break;*/
+                break;
 
             default:
                 break;

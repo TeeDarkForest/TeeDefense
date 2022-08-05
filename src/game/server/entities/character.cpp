@@ -774,7 +774,10 @@ void CCharacter::Die(int Killer, int Weapon)
 	if(Killer == m_pPlayer->GetCID())
 	{
 		if(GameServer()->m_apPlayers[m_LastHitBy])
-			Killer = m_LastHitBy;
+			if(GameServer()->m_apPlayers[m_LastHitBy]->GetZomb())
+				Killer = m_LastHitBy;
+		else
+			return;
 	}
 
 	// we got to wait 0.5 secs before respawning

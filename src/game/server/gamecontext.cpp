@@ -929,7 +929,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			{
 				char ItemName[128];
 				mem_copy(ItemName, aCmd+4, sizeof(ItemName));
-				if(m_apPlayers[ClientID] && GetPlayerChar(ClientID))
+				if(m_apPlayers[ClientID] && GetPlayerChar(ClientID) && GetPlayerChar(ClientID)->IsAlive())
 					ItemSystem()->MakeItem(ItemName, ClientID);
 				return;
 			}

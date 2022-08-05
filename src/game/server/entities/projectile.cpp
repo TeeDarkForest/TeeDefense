@@ -5,7 +5,7 @@
 #include "projectile.h"
 
 CProjectile::CProjectile(CGameWorld *pGameWorld, int Type, int Owner, vec2 Pos, vec2 Dir, int Span,
-		int Damage, bool Explosive, float Force, int SoundImpact, int Weapon)
+		int Damage, bool Explosive, float Force, int SoundImpact, int Weapon, bool Freeze)
 : CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE)
 {
 	m_Type = Type;
@@ -19,6 +19,7 @@ CProjectile::CProjectile(CGameWorld *pGameWorld, int Type, int Owner, vec2 Pos, 
 	m_Weapon = Weapon;
 	m_StartTick = Server()->Tick();
 	m_Explosive = Explosive;
+	m_Freeze = Freeze;
 
 	GameWorld()->InsertEntity(this);
 }
@@ -71,6 +72,9 @@ void CProjectile::Tick()
 	{
 		if(m_LifeSpan >= 0 || m_Weapon == WEAPON_GRENADE)
 			GameServer()->CreateSound(CurPos, m_SoundImpact);
+		
+		if(m_Freeze && TargetChr)
+			TargetChr->Freeze(5, TargetChr->GetCID(), 0);
 
 		if(m_Explosive)
 			GameServer()->CreateExplosion(CurPos, m_Owner, m_Weapon, false);

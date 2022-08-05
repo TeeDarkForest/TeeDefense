@@ -164,11 +164,10 @@ public:
 	
 	int m_MiningType;
 	int m_MiningTick;
-
-private:
 	CTuningParams m_PrevTuningParams;
 	CTuningParams m_NextTuningParams;
-
+	
+private:
 	void HandleTuningParams(); //This function will send the new parameters if needed
 
 public:

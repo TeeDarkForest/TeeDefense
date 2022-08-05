@@ -4,7 +4,7 @@
 #include <new>
 #include <engine/shared/config.h>
 #include "lightning.h"
-#include "follow-gun.h"
+#include "plasma.h"
 #include <base/math.h>
 #define RAD 0.017453292519943295769236907684886f
 CTurret::CTurret(CGameWorld *pGameWorld, vec2 Pos, int Owner, int Type, int Radius, int Lifes)
@@ -94,8 +94,11 @@ void CTurret::Tick()
         if(!pChr->IsAlive() || !pChr->GetPlayer()->GetZomb())
             continue;
 
-        vec2 TargetPos;
         TargetPos = pChr->m_Pos;
+
+        if(GameServer()->Collision()->IntersectLine(m_Pos, TargetPos, NULL, NULL))
+            continue;
+
         float Len = distance(TargetPos, m_Pos);
         vec2 Direction = normalize(TargetPos - m_Pos);
         if(Len < pChr->m_ProximityRadius+GameServer()->Tuning()->m_LaserReach)
@@ -118,8 +121,11 @@ void CTurret::Tick()
 
         			for(int i = -ShotSpread; i <= ShotSpread; ++i)
         			{
-        				float Spreading[] = {-0.185f, -0.070f, 0, 0.070f, 0.185f};
-        				float a = GetAngle(Direction);
+        				float Spreading[20 * 2 + 1];
+        	    		for (int i = 0; i < 20 * 2 + 1; i++)
+		    	        	Spreading[i] = -1.2f + 0.06f * i;
+        				
+                        float a = GetAngle(Direction);
         				a += Spreading[i+2];
         				float v = 1-(absolute(i)/(float)ShotSpread);
         				float Speed = mix((float)GameServer()->Tuning()->m_ShotgunSpeeddiff, 1.0f, v);
@@ -129,6 +135,27 @@ void CTurret::Tick()
         					vec2(cosf(a), sinf(a))*Speed,
         					(int)(Server()->TickSpeed()*GameServer()->Tuning()->m_ShotgunLifetime),
         					1, 0, 0, SOUND_GRENADE_EXPLODE, WEAPON_SHOTGUN);
+        			}
+                    m_FireDelay = 5;
+                    m_Lifes--;
+                }
+                break;
+            case TURRET_SHOTGUN_2077:
+                if(m_FireDelay <= 0)
+                {
+                    int ShotSpread = 7;
+
+        			for(int i = -ShotSpread; i <= ShotSpread; ++i)
+        			{
+        				float Spreading[20 * 2 + 1];
+        	    		for (int i = 0; i < 20 * 2 + 1; i++)
+		    	        	Spreading[i] = -1.2f + 0.06f * i;
+        				
+                        float a = GetAngle(Direction);
+        				a += Spreading[i+2];
+        				float v = 1-(absolute(i)/(float)ShotSpread);
+        				float Speed = mix((float)GameServer()->Tuning()->m_ShotgunSpeeddiff, 1.0f, v);
+        				new CPlasma(GameWorld(), m_Pos, GetOwner(), pChr->GetCID(), vec2(cosf(a), sinf(a))*Speed, false, false, WEAPON_SHOTGUN);
         			}
                     m_FireDelay = 5;
                     m_Lifes--;
@@ -145,7 +172,7 @@ void CTurret::Tick()
             case TURRET_LASER_2077:
                 if(m_FireDelay <= 0)
                 {
-	    			new CLightning(GameWorld(), m_Pos, Direction, 35, 35, GetOwner(), 10);
+	    			new CLightning(GameWorld(), m_Pos, Direction, 100, 400, GetOwner(), 10);
                     m_FireDelay = 5;
                     m_Lifes--;
                 }
@@ -153,8 +180,15 @@ void CTurret::Tick()
             case TURRET_FOLLOW_GRENADE:
                 if(m_FireDelay <= 0)
                 {
-                    new CFGun(GameWorld(), m_Pos, GetOwner(), Direction, WEAPON_GRENADE, 7);
+                    new CPlasma(GameWorld(), m_Pos, GetOwner(), pChr->GetCID(), Direction, false, true, WEAPON_GRENADE);
                     m_FireDelay = 50;
+                }
+                break;
+            case TURRET_FREEZE_GUN:
+                if(m_FireDelay <= 0)
+                {
+                    new CProjectile(GameWorld(), WEAPON_GUN, GetOwner(), m_Pos, Direction, (int)(Server()->TickSpeed()*GameServer()->Tuning()->m_GunLifetime*3), 5, false, 4, SOUND_GRENADE_FIRE, WEAPON_GUN, true);
+                    m_FireDelay = 100;
                 }
                 break;
 
@@ -168,7 +202,7 @@ void CTurret::Tick()
     if(m_FireDelay >= 0)
         m_FireDelay--;
     
-    if(m_Lifes <= 0 || (!GameServer()->m_apPlayers[GetOwner()] && !GameServer()->m_apPlayers[GetOwner()]->GetCharacter()))
+    if(m_Lifes <= 0 || !GameServer()->m_apPlayers[GetOwner()])
     {
         Reset();
     }
@@ -181,6 +215,9 @@ void CTurret::Reset()
 
 void CTurret::Snap(int SnappingClient)
 {
+    if(NetworkClipped(SnappingClient, m_Pos))
+		return;
+
     if ( m_Degres + 1 < 360 )
 		m_Degres += 1;
 	else
@@ -247,6 +284,21 @@ void CTurret::Snap(int SnappingClient)
         {
             float a = frandom() * 360 * RAD;
             new CLightning(GameWorld(), m_Pos, vec2(cosf(a), sinf(a)), 1, 50, GetOwner(), 5, 9);
+        }
+        break;
+    }
+    case TURRET_FREEZE_GUN:
+    {
+        for(int i = 0; i < aIDSize; i++)
+        {
+            CNetObj_Projectile *pEff = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, m_aIDs[i], sizeof(CNetObj_Projectile)));
+	        if(!pEff)
+	        	return;
+            vec2 a = m_Pos + (GetDir((m_Degres-i*22.5)*pi/180*22.5) * 48);
+            pEff->m_X = a.x;
+            pEff->m_Y = a.y;
+            pEff->m_Type = WEAPON_GUN;
+            pEff->m_StartTick = Server()->Tick();
         }
     }
     default:

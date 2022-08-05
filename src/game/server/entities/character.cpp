@@ -9,6 +9,7 @@
 #include "laser.h"
 #include "projectile.h"
 #include "lightning.h"
+#include "turret.h"
 
 #define RAD 0.017453292519943295769236907684886f
 
@@ -48,6 +49,7 @@ CCharacter::CCharacter(CGameWorld *pWorld)
 	m_ProximityRadius = ms_PhysSize;
 	m_Health = 0;
 	m_Armor = 0;
+	m_IsFrozen = false;
 }
 
 void CCharacter::Reset()
@@ -104,6 +106,8 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 		m_Aim.m_Angle = rand()%15*12;//save some CPU, this can result n * 12, for n = 0 until n = 15, n = 0 -> 0�, n = 15 -> 180�
 		m_Aim.m_Explode = false;
 	}
+
+	m_IsFrozen = false;
 
 	return true;
 }
@@ -274,6 +278,9 @@ void CCharacter::FireWeapon()
 	if(m_ReloadTimer != 0)
 		return;
 
+	if(IsFrozen())
+		return;
+
 	DoWeaponSwitch();
 	vec2 Direction = normalize(vec2(m_LatestInput.m_TargetX, m_LatestInput.m_TargetY));
 
@@ -426,12 +433,14 @@ void CCharacter::FireWeapon()
 				Direction,
 				(int)(Server()->TickSpeed()*GameServer()->Tuning()->m_GrenadeLifetime),
 				1, true, 0, SOUND_GRENADE_EXPLODE, WEAPON_GRENADE);
+			//new CTurret(GameWorld(), ProjStartPos, GetCID(), TURRET_FOLLOW_GRENADE);
 
 			GameServer()->CreateSound(m_Pos, SOUND_GRENADE_FIRE);
 		} break;
 
 		case WEAPON_RIFLE:
 		{
+			//new CTurret(GameWorld(), ProjStartPos, GetCID(), TURRET_SHOTGUN_2077);
 			new CLaser(GameWorld(), m_Pos, Direction, GameServer()->Tuning()->m_LaserReach, m_pPlayer->GetCID());
 			GameServer()->CreateSound(m_Pos, SOUND_RIFLE_FIRE);
 		} break;
@@ -463,6 +472,9 @@ void CCharacter::HandleWeapons()
 {
 	//ninja
 	HandleNinja();
+
+	if(IsFrozen())
+		return;
 
 	// check reload timer
 	if(m_ReloadTimer)
@@ -581,7 +593,8 @@ void CCharacter::Tick()
 	if(!m_pPlayer || !IsAlive())//bugfix
 		return;
 	//Zomb2 I thought it would be better to divide this 3 things
-	DoZombieMovement();
+	if(!IsFrozen())
+		DoZombieMovement();
 	if(!IsAlive())//Boomer kills himself
 		return;
 
@@ -646,6 +659,29 @@ void CCharacter::Tick()
 	// Previnput
 	//m_PrevInput = m_Input;
 	//m_PrevPos = m_Core.m_Pos;
+
+	CTuningParams* pTuningParams = &m_pPlayer->m_NextTuningParams;
+
+	if(m_IsFrozen)
+	{
+		--m_FrozenTime;
+		if(m_FrozenTime <= 0)
+			Unfreeze();
+		else
+		{
+			if (m_FrozenTime % Server()->TickSpeed() == Server()->TickSpeed() - 1)
+				GameServer()->CreateDamageInd(m_Pos, 0, (m_FrozenTime + 1) / Server()->TickSpeed());		
+		}
+	}
+
+	if(IsFrozen())
+	{
+		pTuningParams->m_GroundControlAccel = 0.0f;
+		pTuningParams->m_GroundJumpImpulse = 0.0f;
+		pTuningParams->m_AirJumpImpulse = 0.0f;
+		pTuningParams->m_AirControlAccel = 0.0f;
+		pTuningParams->m_HookLength = 0.0f;
+	}
 
 	if(Server()->Tick()%25 == 0 && m_InMining)
 		m_InMining = false;
@@ -1051,6 +1087,9 @@ void CCharacter::DoZombieMovement()
 	if(!m_pPlayer->GetZomb())
 		return;
 
+	if(IsFrozen())
+		return;
+
 	if(m_Move.m_LastX == m_Pos.x)//direction swap caused by a wall
 		m_Move.m_LastXTimer++;
 	else
@@ -1176,6 +1215,9 @@ void CCharacter::DoZombieAim(vec2 VictimPos, int VicCID, vec2 NearZombPos, int N
 
 	if(m_pPlayer->GetZomb(5) && distance(m_Pos, VictimPos) > 100.0f)
 		VictimPos = GetGrenadeAngle(m_Pos, VictimPos, false) + m_Pos;
+	
+	if(IsFrozen())
+		return;
 
 	//Direction is exactly to the player
 	m_Input.m_TargetY = 160 * (VictimPos.y - m_Pos.y) / sqrt((VictimPos.x - m_Pos.x)*(VictimPos.x - m_Pos.x) + (VictimPos.y - m_Pos.y)*(VictimPos.y - m_Pos.y));
@@ -1334,4 +1376,28 @@ void CCharacter::Teleport(vec2 Pos)
 	
 	m_Pos = Pos;
 	m_Core.m_Pos = m_Pos;
+}
+
+void CCharacter::Freeze(float Time, int Player, int Reason)
+{
+	if(m_IsFrozen)
+		return;
+
+	GameServer()->CreateSound(m_Pos, SOUND_PLAYER_PAIN_SHORT);
+	GameServer()->CreatePlayerSpawn(m_Pos);
+	m_IsFrozen = true;
+	m_FrozenTime = Server()->TickSpeed()*Time;	
+}
+
+void CCharacter::Unfreeze()
+{
+	m_IsFrozen = false;
+	m_FrozenTime = -1;
+	
+	GameServer()->CreatePlayerSpawn(m_Pos);
+}
+
+bool CCharacter::IsFrozen() const
+{
+	return m_IsFrozen > 0;
 }

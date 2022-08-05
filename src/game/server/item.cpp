@@ -580,13 +580,7 @@ void CItemSystem::MakeItem(const char* pItemName, int ClientID)
 {
     if(!m_pGameServer)
 	return;
-    
-    if(!m_pGameServer->m_apPlayers[ClientID]->GetCharacter())
-        return;
 
-    if(!m_pGameServer->m_apPlayers[ClientID]->GetCharacter()->IsAlive())
-        return;
-        
     if(!CheckItemName(pItemName))
     {
         m_pGameServer->SendChatTarget(ClientID, _("No such item."), NULL);

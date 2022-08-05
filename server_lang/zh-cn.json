@@ -453,6 +453,36 @@
             "value": "能量镐"
         },
         {
+            "key": "gun turret",
+            "value": "手枪炮塔"
+        },        
+        {
+            "key": "shotgun turret",
+            "value": "散弹枪炮塔"
+        },
+        
+        {
+            "key": "follow grenade turret",
+            "value": "跟踪榴弹炮塔"
+        },        
+        {
+            "key": "laser turret",
+            "value": "激光炮塔"
+        },        
+        {
+            "key": "shotgun2077 turret",
+            "value": "{[散弹|2077]}炮塔"
+        },
+        
+        {
+            "key": "laser2077 turret",
+            "value": "{[激光|2077]}炮塔"
+        },        
+        {
+            "key": "freeze gun turret",
+            "value": "冰冻枪炮塔"
+        },        
+        {
             "key": "space",
             "value": "空"
         }

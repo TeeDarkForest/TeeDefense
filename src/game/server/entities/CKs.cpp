@@ -64,6 +64,9 @@ void CKs::HandleLockPlayer()
 	if(m_LockPlayer == -1)
 		return;
 	
+	if(!GameServer()->GetPlayerChar(m_LockPlayer)->IsAlive())
+		return;
+
 	else
 	{
 		GameServer()->GetPlayerChar(m_LockPlayer)->Teleport(m_Pos);
@@ -89,6 +92,9 @@ void CKs::Tick()
 
 		int RespawnTime = -1;
 		int PickSpeed = 1;
+		
+		if(!GameServer()->GetPlayerChar(m_LockPlayer)->IsAlive())
+			m_LockPlayer = 0;
 		
 		if(pChr->GetPlayer()->PressTab() && m_SpawnTick <= 0)
 		{

@@ -208,22 +208,6 @@ int CServerBan::BanExt(T *pBanPool, const typename T::CDataType *pData, int Seco
 	if(Result != 0)
 		return Result;
 
-	// drop banned clients
-	typename T::CDataType Data = *pData;
-	for(int i = 0; i < MAX_CLIENTS; ++i)
-	{
-		if(Server()->m_aClients[i].m_State == CServer::CClient::STATE_EMPTY)
-			continue;
-
-		if(NetMatch(&Data, Server()->m_NetServer.ClientAddr(i)))
-		{
-			CNetHash NetHash(&Data);
-			char aBuf[256];
-			MakeBanInfo(pBanPool->Find(&Data, &NetHash), aBuf, sizeof(aBuf), MSGTYPE_PLAYER);
-			Server()->m_NetServer.Drop(i, aBuf);
-		}
-	}
-
 	return Result;
 }
 
@@ -398,7 +382,7 @@ void CServer::SetClientScore(int ClientID, int Score)
 
 void CServer::Kick(int ClientID, const char *pReason)
 {
-	if(ClientID > 16)
+	if(ClientID > ZOMBIE_START)
 	{
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "you can't kick zombies");
 		return;

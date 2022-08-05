@@ -85,8 +85,8 @@ void CFGun::FillInfo(CNetObj_Projectile *pProj)
 {
 	pProj->m_X = (int)m_Pos.x;
 	pProj->m_Y = (int)m_Pos.y;
-	pProj->m_VelX = 0;
-	pProj->m_VelY = 0;
+	pProj->m_VelX = m_Direction.x;
+	pProj->m_VelY = m_Direction.y;
 	pProj->m_StartTick = m_StartTick;
 	pProj->m_Type = m_Weapon;
 }

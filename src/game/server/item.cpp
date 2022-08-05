@@ -534,6 +534,9 @@ void CItemSystem::MakeItem(const char* pItemName, int ClientID)
         return;
     }
 
+    if(!m_pGameServer->m_apPlayers[ClientID]->GetCharacter()->IsAlive())
+        return;
+
     CItem *MakeItem = GetItem(GetItemId(pItemName));
 
     for(int i = 0;i < NUM_RESOURCE;i++)

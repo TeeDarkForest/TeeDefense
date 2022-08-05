@@ -22,7 +22,10 @@ public:
 	void TryRespawn();
 	void Respawn();
 	void SetTeam(int Team, bool DoChatMsg=true);
-	int GetTeam() const { return m_Team; };
+	int GetTeam() const { if(GetZomb())
+							return TEAM_ZOMBIE;
+						  else
+						  	return TEAM_HUMAN;                    };
 	int GetCID() const { return m_ClientID; };
 
 	void Tick();

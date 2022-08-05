@@ -1668,7 +1668,7 @@ void CGameContext::ConchainSpecialMotdupdate(IConsole::IResult *pResult, void *p
 void CGameContext::ConHelp(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext* pThis = (CGameContext*) pUserData;
-	int CID = pResult->GetClientID()
+	int CID = pResult->GetClientID();
 	pThis->SendChatTarget(CID, _("Defense Zombies, dont let them touch you base."));
 	pThis->SendChatTarget(CID, _("If you team's Tower no health left, you lose."));
 	pThis->SendChatTarget(CID, _("Don't try complete all wave, be cause it's Infinite!."));

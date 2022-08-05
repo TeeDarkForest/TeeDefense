@@ -17,14 +17,27 @@ CItem::CItem(int ID, int Log, int Coal, int Copper, int Iron, int Gold, int Diam
     m_NeedResource[RESOURCE_GOLD] = Gold;
     m_NeedResource[RESOURCE_DIAMOND] = Diamond;
     m_NeedResource[RESOURCE_ENEGRY] = Enegry;
+    m_Name = 0;
+    m_Damage = 0;
+    m_Level = 0;
+    m_Proba = 0;
     m_ID = ID;
 }
 
 CItemSystem::CItemSystem(CGameContext *GameServer)
 {
     m_pGameServer = GameServer;
+    Reset();
+}
+
+void CItemSystem::Reset()
+{
+    InitItem();
+}
+
+void CItemSystem::InitItem()
+{
     m_IDs = 0;
-    
     // Register Items.
     CreateItem("wooden sword",// Name
      m_IDs,// ID
@@ -350,20 +363,22 @@ CItemSystem::CItemSystem(CGameContext *GameServer)
                  100, // Diamond
                   250 // Enegry
     );
-
 }
 
 bool CItemSystem::CheckItemName(const char* pItemName)
 {  
     for(int i=0;i < m_IDs; i++)
     {
-        if(m_ItemList[i])
+        if(m_ItemList[i] && m_ItemList[i]->m_Name)
         {
+            dbg_msg("s","Check Item Name: %d %s", i, m_ItemList[i]->m_Name);
             if(str_comp(m_ItemList[i]->m_Name, pItemName) == 0)
             {
                 return true;
             }
         }
+        else
+            dbg_msg("s","Check Item Name(NULL): %d", i);
     }
     return false;
 }
@@ -379,8 +394,9 @@ bool CItemSystem::CreateItem(const char* pItemName, int ID, int Type, int Damage
     m_ItemList[ID]->m_TurretType = TurretType;
     m_ItemList[ID]->m_Proba = Proba;
     m_ItemList[ID]->m_Speed = Speed;
-    dbg_msg("s","%d %d", Speed, m_IDs);
     m_IDs++;
+
+    dbg_msg("SB", "%d", m_IDs);
 
     return true;
 }

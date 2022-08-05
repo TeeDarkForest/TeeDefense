@@ -1593,7 +1593,7 @@ int CServer::Run()
 
 			if(GameServer()->m_NeedResetTowers && !GameServer()->GetPaused())
 			{
-				GameServer()->OnShutdown();
+				GameServer()->OnShutdown(true);
 
 				for(int c = 0; c < MAX_CLIENTS; c++)
 				{
@@ -1621,7 +1621,7 @@ int CServer::Run()
 				if(LoadMap(g_Config.m_SvMap))
 				{
 					// new map loaded
-					GameServer()->OnShutdown();
+					GameServer()->OnShutdown(true);
 
 					for(int c = 0; c < MAX_CLIENTS; c++)
 					{
@@ -1723,7 +1723,7 @@ int CServer::Run()
 		m_Econ.Shutdown();
 	}
 
-	GameServer()->OnShutdown();
+	GameServer()->OnShutdown(false);
 	m_pMap->Unload();
 
 	if(m_pCurrentMapData)

@@ -91,8 +91,8 @@ class CGameContext : public IGameServer
 	static void ConMe(IConsole::IResult *pResult, void *pUserData);
 	
 
-	CGameContext(int Resetting);
-	void Construct(int Resetting);
+	CGameContext(int Resetting, bool ChangeMap);
+	void Construct(int Resetting, bool ChangeMap);
 
 	bool m_Resetting;
 
@@ -112,7 +112,7 @@ public:
 	CGameContext();
 	~CGameContext();
 
-	void Clear();
+	void Clear(bool ChangeMap);
 
 	CEventHandler m_Events;
 	CPlayer *m_apPlayers[MAX_CLIENTS];
@@ -190,7 +190,7 @@ public:
 	// engine events
 	virtual void OnInit();
 	virtual void OnConsoleInit();
-	virtual void OnShutdown();
+	virtual void OnShutdown(bool ChangeMap);
 
 	virtual void OnTick();
 	virtual void OnPreSnap();

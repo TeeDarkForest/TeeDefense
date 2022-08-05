@@ -232,7 +232,7 @@ void CGameContext::CreateSoundGlobal(int Sound, int Target)
 void CGameContext::SendChatTarget(int To, const char *pText, ...)
 {
 	int Start = (To < 0 ? 0 : To);
-	int End = (To < 0 ? MAX_CLIENTS : To+1);
+	int End = (To < 0 ? ZOMBIE_START : To+1);
 	
 	CNetMsg_Sv_Chat Msg;
 	Msg.m_Team = 0;
@@ -262,7 +262,7 @@ void CGameContext::SendChatTarget(int To, const char *pText, ...)
 void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText)
 {
 	char aBuf[256];
-	if(ChatterClientID >= 0 && ChatterClientID < MAX_CLIENTS)
+	if(ChatterClientID >= 0 && ChatterClientID < ZOMBIE_START)
 		str_format(aBuf, sizeof(aBuf), "%d:%d:%s: %s", ChatterClientID, Team, Server()->ClientName(ChatterClientID), pText);
 	else
 		str_format(aBuf, sizeof(aBuf), "*** %s", pText);
@@ -325,7 +325,7 @@ void CGameContext::SendBroadcast_VL(const char *pText, int ClientID, ...)
 {
 	CNetMsg_Sv_Broadcast Msg;
 	int Start = (ClientID < 0 ? 0 : ClientID);
-	int End = (ClientID < 0 ? MAX_CLIENTS : ClientID+1);
+	int End = (ClientID < 0 ? ZOMBIE_START : ClientID+1);
 	
 	dynamic_string Buffer;
 	

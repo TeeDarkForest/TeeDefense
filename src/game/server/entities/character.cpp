@@ -818,11 +818,13 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 
 	m_Core.m_Vel += Force;
 
-	if(!GetPlayer()->GetZomb() && !GameServer()->m_apPlayers[From]->GetZomb())
-		return false;
+	if(GetPlayer() && GameServer()->m_apPlayers[From])
+		if(!GetPlayer()->GetZomb() && !GameServer()->m_apPlayers[From]->GetZomb())
+			return false;
 
-	if(GetPlayer()->GetZomb() && GameServer()->m_apPlayers[From]->GetZomb())
-		return false;
+	if(GetPlayer() && GameServer()->m_apPlayers[From])
+		if(GetPlayer()->GetZomb() && GameServer()->m_apPlayers[From]->GetZomb())
+			return false;
 
 	// m_pPlayer only inflicts half damage on self
 	if(From == m_pPlayer->GetCID())

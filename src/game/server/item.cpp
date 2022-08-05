@@ -351,7 +351,7 @@ CItemSystem::CItemSystem(CGameContext *GameServer)
                   250 // Enegry
     );
 	
-    CreateItem("fgrenade turret", // Name
+    CreateItem("follow grenade turret", // Name
      m_IDs, // ID
       ITYPE_TURRET, // ItemType
        0, // Damage
@@ -368,7 +368,7 @@ CItemSystem::CItemSystem(CGameContext *GameServer)
                   1 // Enegry
     );
 
-    CreateItem("freeze turret", // Name
+    CreateItem("freeze gun turret", // Name
      m_IDs, // ID
       ITYPE_TURRET, // ItemType
        0, // Damage

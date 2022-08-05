@@ -580,9 +580,6 @@ void CItemSystem::MakeItem(const char* pItemName, int ClientID)
 {
     if(!m_pGameServer)
 	return;
-
-    if(!m_pGameServer->m_apPlayers[ClientID])
-        return;
     
     if(!m_pGameServer->m_apPlayers[ClientID]->GetCharacter())
         return;

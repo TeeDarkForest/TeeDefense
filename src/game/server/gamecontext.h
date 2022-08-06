@@ -18,6 +18,10 @@
 #include "player.h"
 #include "item.h"
 
+#ifdef CONF_SQL
+#include "OnTime/sql.h"
+#endif
+
 #ifdef _MSC_VER
 typedef __int32 int32_t;
 typedef unsigned __int32 uint32_t;
@@ -57,6 +61,12 @@ class CGameContext : public IGameServer
 	CItemSystem *m_pItemSystem;
 	CNetObjHandler m_NetObjHandler;
 	CTuningParams m_Tuning;
+
+	#ifdef CONF_SQL
+	/* SQL */
+	CSQL *m_Sql;
+	CAccountData *m_AccountData;
+	#endif
 
 	static void ConsoleOutputCallback_Chat(const char *pLine, void *pUser);
 
@@ -109,6 +119,12 @@ public:
 	CTuningParams *Tuning() { return &m_Tuning; }
 	virtual class CLayers *Layers() { return &m_Layers; }
 
+	#ifdef CONF_SQL
+	/* SQL */
+	CSQL *Sql() const { return m_Sql; };
+	CAccountData *AccountData() {return m_AccountData; };
+	#endif
+	
 	CGameContext();
 	~CGameContext();
 

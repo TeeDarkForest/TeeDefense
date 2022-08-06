@@ -106,7 +106,7 @@ void CKs::Tick()
 			m_SpawnTick = 50;
 		}
 
-		if(m_LockPlayer >= 0 && GameServer()->GetPlayerChar(m_LockPlayer) && GameServer()->GetPlayerChar(m_LockPlayer)->m_LatestInput.m_Jump || !GameServer()->GetPlayerChar(m_LockPlayer)->GetPlayer()->m_LockedCK)
+		if(GameServer()->m_apPlayers[m_LockPlayer] && m_LockPlayer >= 0 && GameServer()->GetPlayerChar(m_LockPlayer) && GameServer()->GetPlayerChar(m_LockPlayer)->m_LatestInput.m_Jump || GameServer()->m_apPlayers[m_LockPlayer] && !GameServer()->m_apPlayers[m_LockPlayer]->m_LockedCK)
 		{
 			GameServer()->GetPlayerChar(m_LockPlayer)->GetPlayer()->m_LockedCK = false;
 			m_LockPlayer = -1;

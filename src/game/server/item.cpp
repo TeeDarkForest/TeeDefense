@@ -639,7 +639,7 @@ void CItemSystem::MakeItem(const char* pItemName, int ClientID)
         SendMakeItemFailedChat(ClientID, MakeItem->m_NeedResource);
         return;
     }
-    #ifdef CONF_DEBUG
+    #ifdef CONF_SQL
     m_pGameServer->Sql()->update(ClientID);
     #endif
 }

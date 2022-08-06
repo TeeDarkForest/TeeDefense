@@ -246,7 +246,7 @@ void CKs::Picking(int Time, CPlayer *Player)
 		default:
 			break;
 		}
-		#ifdef CONF_DEBUG
+		#ifdef CONF_SQL
 		if(Player->LoggedIn)
 			GameServer()->Sql()->update(CID);
 		#endif

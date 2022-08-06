@@ -99,16 +99,15 @@ void CKs::Tick()
 		if(GameServer()->GetPlayerChar(m_LockPlayer) && !GameServer()->GetPlayerChar(m_LockPlayer)->IsAlive())
 			m_LockPlayer = 0;
 		
-		if(pChr->GetPlayer()->PressTab() && m_SpawnTick <= 0 && !GameServer()->GetPlayerChar(m_LockPlayer)->GetPlayer()->m_LockedCK)
+		if(pChr->GetPlayer()->PressTab() && m_SpawnTick <= 0)
 		{
-			GameServer()->GetPlayerChar(m_LockPlayer)->GetPlayer()->m_LockedCK = true;
 			m_LockPlayer = pChr->GetCID();
 			m_SpawnTick = 50;
 		}
 
-		if(GameServer()->m_apPlayers[m_LockPlayer] && m_LockPlayer >= 0 && GameServer()->GetPlayerChar(m_LockPlayer) && GameServer()->GetPlayerChar(m_LockPlayer)->m_LatestInput.m_Jump || GameServer()->m_apPlayers[m_LockPlayer] && !GameServer()->m_apPlayers[m_LockPlayer]->m_LockedCK)
+		if(m_LockPlayer >= 0 && GameServer()->GetPlayerChar(m_LockPlayer) && GameServer()->GetPlayerChar(m_LockPlayer)->m_LatestInput.m_Jump)
 		{
-			GameServer()->GetPlayerChar(m_LockPlayer)->GetPlayer()->m_LockedCK = false;
+			GameServer()->GetPlayerChar(m_LockPlayer);
 			m_LockPlayer = -1;
 			m_SpawnTick = 50;
 		}

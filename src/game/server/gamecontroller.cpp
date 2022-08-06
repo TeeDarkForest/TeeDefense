@@ -43,9 +43,11 @@ IGameController::IGameController(class CGameContext *pGameServer)
 	m_Wave = 0;
 	mem_zero(m_Zombie, sizeof(m_Zombie));
 
+	#ifdef CONF_SQL
 	/* SQL */
 	// create tables
 	GameServer()->Sql()->create_tables();
+	#endif
 }
 
 IGameController::~IGameController()

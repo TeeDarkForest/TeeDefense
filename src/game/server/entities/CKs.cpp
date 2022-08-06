@@ -71,7 +71,7 @@ void CKs::HandleLockPlayer()
 	if(!GameServer()->GetPlayerChar(m_LockPlayer)->IsAlive())
 		return;
 
-	if(GameServer()->m_apPlayers[m_LockPlayer]->m_LockedCK != m_CKID)
+	if(!GameServer()->m_apPlayers[m_LockPlayer]->m_LockedCK)
 	{
 		m_LockPlayer = -1;
 		return;
@@ -86,6 +86,12 @@ void CKs::Tick()
 		m_SpawnTick--;
 	if(GameServer()->GetPlayerChar(m_LockPlayer) && !GameServer()->GetPlayerChar(m_LockPlayer)->IsAlive())
 		m_LockPlayer = 0;
+	if((m_LockPlayer >= 0 && GameServer()->GetPlayerChar(m_LockPlayer) && GameServer()->GetPlayerChar(m_LockPlayer)->m_LatestInput.m_Jump))
+	{
+		GameServer()->GetPlayerChar(m_LockPlayer)->GetPlayer()->m_LockedCK = false;
+		m_LockPlayer = -1;
+		m_SpawnTick = 50;
+	}
 	// Check if a player intersected us
 	CCharacter *pChr = GameServer()->m_World.ClosestCharacter(m_Pos, 20.0f, 0);
 	if(pChr && pChr->IsAlive() && !pChr->GetPlayer()->GetZomb())
@@ -102,16 +108,10 @@ void CKs::Tick()
 		int RespawnTime = -1;
 		int PickSpeed = 1;
 		
-		if(pChr->GetPlayer()->PressTab() && m_SpawnTick <= 0 && !pChr->GetPlayer()->m_LockedCK)
+		if(pChr->GetPlayer()->PressTab() && m_SpawnTick <= 0 && !GameServer()->GetPlayerChar(m_LockPlayer)->GetPlayer()->m_LockedCK)
 		{
+			GameServer()->GetPlayerChar(m_LockPlayer)->GetPlayer()->m_LockedCK = true;
 			m_LockPlayer = pChr->GetCID();
-			pChr->GetPlayer()->m_LockedCK = m_CKID;
-			m_SpawnTick = 50;
-		}
-
-		if((m_LockPlayer >= 0 && GameServer()->GetPlayerChar(m_LockPlayer) && GameServer()->GetPlayerChar(m_LockPlayer)->m_LatestInput.m_Jump) || pChr->GetPlayer()->m_LockedCK != m_CKID)
-		{
-			m_LockPlayer = -1;
 			m_SpawnTick = 50;
 		}
 		if(pChr->m_LatestInput.m_Fire&1 && pChr->m_ActiveWeapon == WEAPON_HAMMER && pChr->GetPlayer()->m_MiningTick <= 0)

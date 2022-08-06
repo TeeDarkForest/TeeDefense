@@ -169,7 +169,7 @@
             "value": "[第 {int:a} 轮]迎来 {int:a1} 只僵尸！"
         },
         {
-            "key": "Wave {int:a}:{int:a1} zombies are left",
+            "key": "Wave {int:a}: {int:a1} zombies are left",
             "value": "[第 {int:a} 轮]:还剩 {int:a1} 只僵尸"
         },
         {
@@ -185,7 +185,7 @@
             "value": "你从僵尸手上拿到 1 个木头"
         },
         {
-            "key": "\n\n\n\n\n\n\n主塔血量: {int:Health}/{int:MaxHealth}",
+            "key": "\n\n\n\n\n\n\nHealth: {int:Health}/{int:MaxHealth}",
             "value": "\n\n\n\n\n\n\n主塔血量: {int:Health}/{int:MaxHealth}"
         },
         {
@@ -325,6 +325,10 @@
             "value": "你挖到了一块铜锭"
         },
         {
+            "key": "You picked up a Iron",
+            "value": "你挖到了一块铜锭"
+        },
+        {
             "key": "You picked up a Gold",
             "value": "你挖到了一块金锭"
         },
@@ -334,7 +338,7 @@
         },
         {
             "key": "You picked up a Enegry",
-            "value": "你加载了一点能量，可惜你目前只能用他制作物品..."
+            "value": "你加载了一点能量，可惜你**目前**只能用他制作物品..."
         },
         {
             "key": "{int:num} log,",
@@ -346,11 +350,11 @@
         },
         {
             "key": "{int:num} copper,",
-            "value": "{int:num}块铁锭, "
+            "value": "{int:num}块铜锭, "
         },
         {
             "key": "{int:num} iron,",
-            "value": "{int:num}块钻石, "
+            "value": "{int:num}块铁锭, "
         },
         {
             "key": "{int:num} gold,",
@@ -370,7 +374,7 @@
         },
         {
             "key": "Bad luck.",
-            "value": "倒霉悲催的。"
+            "value": "倒霉悲催的。（笑死我啦哈哈哈哈"
         },
         {
             "key": "No such item.",
@@ -452,6 +456,36 @@
             "key": "enegry pickaxe",
             "value": "能量镐"
         },
+        {
+            "key": "gun turret",
+            "value": "手枪炮塔"
+        },        
+        {
+            "key": "shotgun turret",
+            "value": "散弹枪炮塔"
+        },
+        
+        {
+            "key": "follow grenade turret",
+            "value": "跟踪榴弹炮塔"
+        },        
+        {
+            "key": "laser turret",
+            "value": "激光炮塔"
+        },        
+        {
+            "key": "shotgun2077 turret",
+            "value": "{[散弹|2077]}炮塔"
+        },
+        
+        {
+            "key": "laser2077 turret",
+            "value": "{[激光|2077]}炮塔"
+        },        
+        {
+            "key": "freeze gun turret",
+            "value": "冰冻枪炮塔"
+        },        
         {
             "key": "space",
             "value": "空"

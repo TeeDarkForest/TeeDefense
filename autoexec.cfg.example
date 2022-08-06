@@ -12,6 +12,7 @@ sv_register 1
 add_vote "跳过热身,开始召唤僵尸（谨慎选择）" "skip_warmup"
 add_vote "地图：我的世界" "sv_map Mine-Craft"
 add_vote "地图：0号地区" "sv_map TDef-Zero"
+add_vote "地图：深层矿井"sv_map TDeF-Shwar"
 
 
 add_command_vote ======= 制作 =======" "null"
@@ -38,7 +39,10 @@ add_command_vote "======= 炮塔 =======" "null"
 add_command_vote "= 会在你所在的位置生成炮塔" "null"
 add_command_vote "制作普通手枪炮塔" "gun turret"
 add_command_vote "制作普通散弹枪炮塔" "shotgun turret"
+add_command_vote "制作跟踪榴弹炮塔" "follow grenade turret"
 add_command_vote "制作激光枪炮塔" "laser turret"
+add_command_vote "制作<[xX_{散弹:2077}_Xx]>炮塔" "shotgun2077 turret"
+add_command_vote "制作冰冻枪炮塔" "freeze gun turret"
 add_command_vote "制作<[xX_{激光炮塔:2077}_Xx]>" "laser2077 turret"
 
 sv_timelimit 0

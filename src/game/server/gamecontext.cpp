@@ -232,7 +232,7 @@ void CGameContext::CreateSoundGlobal(int Sound, int Target)
 void CGameContext::SendChatTarget(int To, const char *pText, ...)
 {
 	int Start = (To < 0 ? 0 : To);
-	int End = (To < 0 ? MAX_CLIENTS : To+1);
+	int End = (To < 0 ? ZOMBIE_START : To+1);
 	
 	CNetMsg_Sv_Chat Msg;
 	Msg.m_Team = 0;
@@ -262,7 +262,7 @@ void CGameContext::SendChatTarget(int To, const char *pText, ...)
 void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText)
 {
 	char aBuf[256];
-	if(ChatterClientID >= 0 && ChatterClientID < MAX_CLIENTS)
+	if(ChatterClientID >= 0 && ChatterClientID < ZOMBIE_START)
 		str_format(aBuf, sizeof(aBuf), "%d:%d:%s: %s", ChatterClientID, Team, Server()->ClientName(ChatterClientID), pText);
 	else
 		str_format(aBuf, sizeof(aBuf), "*** %s", pText);
@@ -325,7 +325,7 @@ void CGameContext::SendBroadcast_VL(const char *pText, int ClientID, ...)
 {
 	CNetMsg_Sv_Broadcast Msg;
 	int Start = (ClientID < 0 ? 0 : ClientID);
-	int End = (ClientID < 0 ? MAX_CLIENTS : ClientID+1);
+	int End = (ClientID < 0 ? ZOMBIE_START : ClientID+1);
 	
 	dynamic_string Buffer;
 	
@@ -630,7 +630,11 @@ void CGameContext::OnClientConnected(int ClientID)
 	// send active vote
 	if(m_VoteCloseTime)
 		SendVoteSet(ClientID);
-
+	
+	SetClientLanguage(ClientID, "zh-cn");
+	SendChatTarget(ClientID, _("Use command '/language en' to change language English"));
+	SendChatTarget(ClientID, _("上面那哥消息是给外国人看的，咱中国人不用管！"));
+	
 	// send motd
 	CNetMsg_Sv_Motd Msg;
 	Msg.m_pMessage = g_Config.m_SvMotd;
@@ -925,7 +929,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			{
 				char ItemName[128];
 				mem_copy(ItemName, aCmd+4, sizeof(ItemName));
-				ItemSystem()->MakeItem(ItemName, ClientID);
+				if(m_apPlayers[ClientID] && GetPlayerChar(ClientID) && GetPlayerChar(ClientID)->IsAlive())
+					ItemSystem()->MakeItem(ItemName, ClientID);
 				return;
 			}
 
@@ -1664,16 +1669,17 @@ void CGameContext::ConchainSpecialMotdupdate(IConsole::IResult *pResult, void *p
 void CGameContext::ConHelp(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext* pThis = (CGameContext*) pUserData;
-	pThis->SendChatTarget(-1, _("Defense Zombies, dont let them touch you base."));
-	pThis->SendChatTarget(-1, _("If you team's Tower no health left, you lose."));
-	pThis->SendChatTarget(-1, _("Don't try complete all wave, be cause it's Infinite!."));
-	pThis->SendChatTarget(-1, _("Zombies made by AssassinTee."));
-	pThis->SendChatTarget(-1, _("-------"));
-	pThis->SendChatTarget(-1, _("In the map have many 'CKs'."));
-	pThis->SendChatTarget(-1, _("The 'heart' is 'CK' log"));
-	pThis->SendChatTarget(-1, _("Others I have point at map."));
-	pThis->SendChatTarget(-1, _("Just find them then check!"));
-	pThis->SendChatTarget(-1, _("You can make tools in Vote, check them."));
+	int CID = pResult->GetClientID();
+	pThis->SendChatTarget(CID, _("Defense Zombies, dont let them touch you base."));
+	pThis->SendChatTarget(CID, _("If you team's Tower no health left, you lose."));
+	pThis->SendChatTarget(CID, _("Don't try complete all wave, be cause it's Infinite!."));
+	pThis->SendChatTarget(CID, _("Zombies made by AssassinTee."));
+	pThis->SendChatTarget(CID, _("-------"));
+	pThis->SendChatTarget(CID, _("In the map have many 'CKs'."));
+	pThis->SendChatTarget(CID, _("The 'heart' is 'CK' log"));
+	pThis->SendChatTarget(CID, _("Others I have point at map."));
+	pThis->SendChatTarget(CID, _("Just find them then check!"));
+	pThis->SendChatTarget(CID, _("You can make tools in Vote, check them."));
 }
 
 void CGameContext::ConAbout(IConsole::IResult *pResult, void *pUserData)

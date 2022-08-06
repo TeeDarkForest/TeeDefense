@@ -810,12 +810,10 @@ void CCharacter::Die(int Killer, int Weapon)
 	if(!GetPlayer())
 		return;
 	
-	if(Killer >= ZOMBIE_START)
-		return;
-	
 	if(Killer < 0)
 		return;
 
+	m_pPlayer->m_LockedCK = -1;
 	// we got to wait 0.5 secs before respawning
 	m_pPlayer->m_RespawnTick = Server()->Tick()+Server()->TickSpeed()/2;
 	int ModeSpecial = GameServer()->m_pController->OnCharacterDeath(this, GameServer()->m_apPlayers[Killer], Weapon);
@@ -1372,7 +1370,8 @@ void CCharacter::Teleport(vec2 Pos)
 	m_Pos = Pos;
 	m_Core.m_Pos = m_Pos;
 
-	m_Core.Reset();
+	m_Core.m_HookPos = m_Pos;
+	m_Core.m_HookedPlayer = -1;
 	
 	m_Pos = Pos;
 	m_Core.m_Pos = m_Pos;

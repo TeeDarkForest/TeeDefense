@@ -167,6 +167,8 @@ public:
 	void HandleTop();
 	void SetWaveAlg(int modulus, int wavedrittel);
 	int GetZombieReihenfolge(int wavedrittel);
+
+	int m_CKsID;
 };
 
 #endif

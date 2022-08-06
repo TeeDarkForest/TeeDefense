@@ -213,32 +213,32 @@ void CKs::Picking(int Time, CPlayer *Player)
 		case CK_COAL:
 			Player->m_Knapsack.m_Resource[RESOURCE_COAL]++;
 			GameServer()->SendChatTarget(CID, _("You picked up a Coal"));
-			m_Health = 800;
+			m_Health = 8000;
 			break;
 		case CK_COPPER:
 			Player->m_Knapsack.m_Resource[RESOURCE_COPPER]++;
 			GameServer()->SendChatTarget(CID, _("You picked up a Copper"));
-			m_Health = 1600;
+			m_Health = 16000;
 			break;
 		case CK_IRON:
 			Player->m_Knapsack.m_Resource[RESOURCE_IRON]++;
 			GameServer()->SendChatTarget(CID, _("You picked up a Iron"));
-			m_Health = 4000;
+			m_Health = 40000;
 			break;
 		case CK_GOLD:
 			Player->m_Knapsack.m_Resource[RESOURCE_GOLD]++;
 			GameServer()->SendChatTarget(CID, _("You picked up a Gold"));
-			m_Health = 6000;
+			m_Health = 60000;
 			break;
 		case CK_DIAMONAD:
 			Player->m_Knapsack.m_Resource[RESOURCE_DIAMOND]++;
 			GameServer()->SendChatTarget(CID, _("You picked up a Diamond"));
-			m_Health = 10000;
+			m_Health = 500000;
 			break;
 		case CK_ENEGRY:
 			Player->m_Knapsack.m_Resource[RESOURCE_ENEGRY]++;
 			GameServer()->SendChatTarget(CID, _("You picked up a Enegry"));
-			m_Health = 15000;
+			m_Health = 3000000;
 			break;
 		
 		default:

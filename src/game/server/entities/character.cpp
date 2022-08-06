@@ -1372,6 +1372,7 @@ void CCharacter::Teleport(vec2 Pos)
 
 	m_Core.m_HookPos = m_Pos;
 	m_Core.m_HookedPlayer = -1;
+	m_Core.Reset();
 	
 	m_Pos = Pos;
 	m_Core.m_Pos = m_Pos;

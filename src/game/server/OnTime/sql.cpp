@@ -147,7 +147,7 @@ static void create_account_thread(void *user)
 					dbg_msg("SQL", "Account '%s' was successfully created", Data->name);
 					
 					GameServer()->SendChatTarget(Data->m_ClientID, "Acoount was created successfully.");
-					GameServer()->SendChatTarget(Data->m_ClientID, "You may login now. (/login <user> <pass>)");
+					Data->m_SqlData->login(Data->name, Data->pass, Data->m_ClientID);
 				}
 				
 				// delete statement

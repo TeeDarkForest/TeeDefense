@@ -19,27 +19,27 @@ CKs::CKs(CGameWorld *pGameWorld, int Type, vec2 Pos, int SubType)
 		break;
 	
 	case CK_COAL:
-		m_Health = 800;
+		m_Health = 8000;
 		break;
 	
 	case CK_COPPER:
-		m_Health = 1600;
+		m_Health = 16000;
 		break;
 
 	case CK_IRON:
-		m_Health = 4000;
+		m_Health = 40000;
 		break;
 
 	case CK_GOLD:
-		m_Health = 6000;
+		m_Health = 60000;
 		break;
 
 	case CK_DIAMONAD:
-		m_Health = 50000;
+		m_Health = 500000;
 		break;
 
 	case CK_ENEGRY:
-		m_Health = 300000;
+		m_Health = 3000000;
 		break;
 	
 	default:
@@ -243,6 +243,9 @@ void CKs::Picking(int Time, CPlayer *Player)
 		default:
 			break;
 		}
+		#ifdef CONF_DEBUG
+		GameServer()->Sql()->update(CID);
+		#endif
 	}
 	GameServer()->SendBroadcast_VL(_("{int:Health} left. Keep hit!"), CID, "Health", &m_Health);
 	Player->m_MiningTick = 25;

@@ -18,7 +18,8 @@ enum
 	RESOURCE_GOLD, // STEP 5
 	RESOURCE_DIAMOND, // STEP 6
 	RESOURCE_ENEGRY,
-	NUM_RESOURCE,
+	RESOURCE_ZOMBIEHEART,
+    NUM_RESOURCE,
 };
 
 enum
@@ -78,27 +79,10 @@ public:
 
     CItem *GetItem(int ItemID) { return m_ItemList[ItemID]; };
 
-    int GetSpeed(int Level, int Type)
-    {
-        for (int i = 0;sizeof(m_ItemList);i++)
-        {
-            if(m_ItemList[i]->m_Level == Level && m_ItemList[i]->m_Type == Type)
-            {
-                return m_ItemList[i]->m_Speed;
-            }
-        }
-    }
+    int GetSpeed(int Level, int Type);
 
-    int GetDmg(int Level)
-    {
-        for (int i = 0;sizeof(m_ItemList);i++)
-        {
-            if(m_ItemList[i]->m_Level == Level && m_ItemList[i]->m_Type == ITYPE_SWORD)
-            {
-                return m_ItemList[i]->m_Damage;
-            }
-        }
-    }
+    int GetDmg(int Level);
+
     void MakeItem(const char* pItemName, int ClientID);
 
     bool CheckItemName(const char* pItemName);

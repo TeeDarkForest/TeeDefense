@@ -4,7 +4,7 @@
 #include <game/server/gamecontext.h>
 #include "CKs.h"
 
-CKs::CKs(CGameWorld *pGameWorld, int Type, vec2 Pos, int SubType)
+CKs::CKs(CGameWorld *pGameWorld, int Type, vec2 Pos, int ID, int SubType)
 : CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP)
 {
 	m_Type = Type;
@@ -47,6 +47,7 @@ CKs::CKs(CGameWorld *pGameWorld, int Type, vec2 Pos, int SubType)
 		break;
 	}
 
+	m_ID = ID;
 	m_LockPlayer = -1;
 
 	Reset();
@@ -70,16 +71,21 @@ void CKs::HandleLockPlayer()
 	if(!GameServer()->GetPlayerChar(m_LockPlayer)->IsAlive())
 		return;
 
-	else
+	if(GameServer()->m_apPlayers[m_LockPlayer]->m_LockedCK != m_CKID)
 	{
-		GameServer()->GetPlayerChar(m_LockPlayer)->Teleport(m_Pos);
+		m_LockPlayer = -1;
+		return;
 	}
+	
+	GameServer()->GetPlayerChar(m_LockPlayer)->Teleport(m_Pos);
 }
 
 void CKs::Tick()
 {
 	if(m_SpawnTick >= 0)
 		m_SpawnTick--;
+	if(GameServer()->GetPlayerChar(m_LockPlayer) && !GameServer()->GetPlayerChar(m_LockPlayer)->IsAlive())
+		m_LockPlayer = 0;
 	// Check if a player intersected us
 	CCharacter *pChr = GameServer()->m_World.ClosestCharacter(m_Pos, 20.0f, 0);
 	if(pChr && pChr->IsAlive() && !pChr->GetPlayer()->GetZomb())
@@ -96,26 +102,22 @@ void CKs::Tick()
 		int RespawnTime = -1;
 		int PickSpeed = 1;
 		
-		if(GameServer()->GetPlayerChar(m_LockPlayer) && !GameServer()->GetPlayerChar(m_LockPlayer)->IsAlive())
-			m_LockPlayer = 0;
-		
-		if(pChr->GetPlayer()->PressTab() && m_SpawnTick <= 0)
+		if(pChr->GetPlayer()->PressTab() && m_SpawnTick <= 0 && !pChr->GetPlayer()->m_LockedCK)
 		{
 			m_LockPlayer = pChr->GetCID();
+			pChr->GetPlayer()->m_LockedCK = m_CKID;
 			m_SpawnTick = 50;
 		}
 
-		if(m_LockPlayer >= 0 &&GameServer()->GetPlayerChar(m_LockPlayer) && GameServer()->GetPlayerChar(m_LockPlayer)->m_LatestInput.m_Jump)
+		if((m_LockPlayer >= 0 && GameServer()->GetPlayerChar(m_LockPlayer) && GameServer()->GetPlayerChar(m_LockPlayer)->m_LatestInput.m_Jump) || pChr->GetPlayer()->m_LockedCK != m_CKID)
 		{
 			m_LockPlayer = -1;
 			m_SpawnTick = 50;
 		}
-		HandleLockPlayer();
-		if(pChr->m_LatestInput.m_Fire&1&& pChr->m_ActiveWeapon == WEAPON_HAMMER && pChr->GetPlayer()->m_MiningTick <= 0)
+		if(pChr->m_LatestInput.m_Fire&1 && pChr->m_ActiveWeapon == WEAPON_HAMMER && pChr->GetPlayer()->m_MiningTick <= 0)
 		{
 			if(pChr->GetPlayer()->m_Knapsack.m_Axe >= 0 && m_Type == CK_WOOD)
 			{
-
 				pChr->m_InMining = true;
 				GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP);
 				Picking(GameServer()->ItemSystem()->GetSpeed(pChr->GetPlayer()->m_Knapsack.m_Axe,ITYPE_AXE), pChr->GetPlayer());
@@ -194,6 +196,7 @@ void CKs::Tick()
 			
 		}
 	}
+	HandleLockPlayer();
 }
 
 void CKs::Picking(int Time, CPlayer *Player)
@@ -244,7 +247,8 @@ void CKs::Picking(int Time, CPlayer *Player)
 			break;
 		}
 		#ifdef CONF_DEBUG
-		GameServer()->Sql()->update(CID);
+		if(Player->LoggedIn)
+			GameServer()->Sql()->update(CID);
 		#endif
 	}
 	GameServer()->SendBroadcast_VL(_("{int:Health} left. Keep hit!"), CID, "Health", &m_Health);

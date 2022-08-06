@@ -37,6 +37,7 @@ IGameController::IGameController(class CGameContext *pGameServer)
 	m_aNumSpawnPoints[1] = 0;
 	m_aNumSpawnPoints[2] = 0;
 
+	m_CKsID = 0;
 	//Zomb2
 //	m_pTop = new CTop(m_pGameServer);
 	m_Wave = 0;
@@ -171,25 +172,32 @@ bool IGameController::OnEntity(int Index, vec2 Pos)
 		}
 		break;
 	case ENTITY_LOG:
-		new CKs(&GameServer()->m_World, CK_WOOD, Pos);
+		new CKs(&GameServer()->m_World, CK_WOOD, Pos, m_CKsID);
+		m_CKsID++;
 		break;
 	case ENTITY_COAL:
-		new CKs(&GameServer()->m_World, CK_COAL, Pos);
+		new CKs(&GameServer()->m_World, CK_COAL, Pos, m_CKsID);
+		m_CKsID++;
 		break;
 	case ENTITY_COPPER:
-		new CKs(&GameServer()->m_World, CK_COPPER, Pos);
+		new CKs(&GameServer()->m_World, CK_COPPER, Pos, m_CKsID);
+		m_CKsID++;
 		break;
 	case ENTITY_IRON:
-		new CKs(&GameServer()->m_World, CK_IRON, Pos);
+		new CKs(&GameServer()->m_World, CK_IRON, Pos, m_CKsID);
+		m_CKsID++;
 		break;
 	case ENTITY_GOLD:
-		new CKs(&GameServer()->m_World, CK_GOLD, Pos);
+		new CKs(&GameServer()->m_World, CK_GOLD, Pos, m_CKsID);
+		m_CKsID++;
 		break;
 	case ENTITY_DIAMOND:
-		new CKs(&GameServer()->m_World, CK_DIAMONAD, Pos);
+		new CKs(&GameServer()->m_World, CK_DIAMONAD, Pos, m_CKsID);
+		m_CKsID++;
 		break;
 	case ENTITY_ENERGY:
-		new CKs(&GameServer()->m_World, CK_ENEGRY, Pos);
+		new CKs(&GameServer()->m_World, CK_ENEGRY, Pos, m_CKsID);
+		m_CKsID++;
 		break;
 	case ENTITY_MAIN_TOWER:
 		new CTowerMain(&GameServer()->m_World, Pos);

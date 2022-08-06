@@ -21,7 +21,7 @@ enum
 class CKs : public CEntity
 {
 public:
-	CKs(CGameWorld *pGameWorld, int Type, vec2 Pos, int SubType = 0);
+	CKs(CGameWorld *pGameWorld, int Type, vec2 Pos, int ID, int SubType = 0);
 
 	virtual void Reset();
 	virtual void Tick();
@@ -33,6 +33,7 @@ public:
 	int m_Health;
 	int m_LockPlayer;
 private:
+	int m_CKID;
 	int m_Type;
 	int m_Subtype;
 	int m_SpawnTick;

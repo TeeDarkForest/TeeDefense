@@ -373,7 +373,7 @@ CItemSystem::CItemSystem(CGameContext *GameServer)
       ITYPE_TURRET, // ItemType
        0, // Damage
         LEVEL_ENEGRY, // Level
-         TURRET_LASER_2077, // TurretType
+         TURRET_FREEZE_GUN, // TurretType
           90, // Proba
            0, // Speed
             10, // Log

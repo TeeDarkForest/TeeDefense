@@ -142,8 +142,17 @@ private:
 
 	char m_aLanguage[16];
 
+
+private:
+	void HandleTuningParams(); //This function will send the new parameters if needed
+
 public:
-	// Tee Dark Forest.
+	CTuningParams* GetNextTuningParams() { return &m_NextTuningParams; };
+	CTuningParams m_PrevTuningParams;
+	CTuningParams m_NextTuningParams;
+
+// 
+public:
 	struct // knapsack
 	{
 		int m_Resource[NUM_RESOURCE];
@@ -160,20 +169,27 @@ public:
 		int m_FFS; // it me, FlowerFell-Sans. lmao(why my name is soo long...)
 	} m_Knapsack;
 
-	void ResetKnapsack();
-	
+	// Mine
 	int m_MiningType;
 	int m_MiningTick;
-	CTuningParams m_PrevTuningParams;
-	CTuningParams m_NextTuningParams;
 
+	// Check
 	bool PressTab();
 
-private:
-	void HandleTuningParams(); //This function will send the new parameters if needed
+	#ifdef CONF_SQL
+	// Account
+	bool LoggedIn;
+	struct
+	{
+		int m_UserID;
+		char m_Username[20];
+		char m_Password[20];
 
-public:
-	CTuningParams* GetNextTuningParams() { return &m_NextTuningParams; };
+		
+	} m_AccData;
+	#endif
+
+	void ResetKnapsack();
 };
 
 #endif

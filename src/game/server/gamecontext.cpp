@@ -21,7 +21,7 @@ enum
 	NO_RESET
 };
 
-void CGameContext::Construct(int Resetting)
+void CGameContext::Construct(int Resetting, bool ChangeMap)
 {
 	m_Resetting = 0;
 	m_pServer = 0;
@@ -41,16 +41,17 @@ void CGameContext::Construct(int Resetting)
 		m_pVoteOptionHeap = new CHeap();
 	
 	m_pItemSystem = new CItemSystem(this);
+	m_pItemSystem->Reset();
 }
 
-CGameContext::CGameContext(int Resetting)
+CGameContext::CGameContext(int Resetting, bool ChangeMap)
 {
-	Construct(Resetting);
+	Construct(Resetting, ChangeMap);
 }
 
 CGameContext::CGameContext()
 {
-	Construct(NO_RESET);
+	Construct(NO_RESET, false);
 }
 
 CGameContext::~CGameContext()
@@ -59,6 +60,7 @@ CGameContext::~CGameContext()
 		delete m_apPlayers[i];
 	if(!m_Resetting)
 		delete m_pVoteOptionHeap;
+	delete m_pItemSystem;
 }
 
 void CGameContext::OnSetAuthed(int ClientID, int Level)
@@ -67,7 +69,7 @@ void CGameContext::OnSetAuthed(int ClientID, int Level)
 		m_apPlayers[ClientID]->m_Authed = Level;
 }
 
-void CGameContext::Clear()
+void CGameContext::Clear(bool ChangeMap)
 {
 	CHeap *pVoteOptionHeap = m_pVoteOptionHeap;
 	CVoteOptionServer *pVoteOptionFirst = m_pVoteOptionFirst;
@@ -78,15 +80,13 @@ void CGameContext::Clear()
 	m_Resetting = true;
 	this->~CGameContext();
 	mem_zero(this, sizeof(*this));
-	new (this) CGameContext(RESET);
+	new (this) CGameContext(RESET, ChangeMap);
 
 	m_pVoteOptionHeap = pVoteOptionHeap;
 	m_pVoteOptionFirst = pVoteOptionFirst;
 	m_pVoteOptionLast = pVoteOptionLast;
 	m_NumVoteOptions = NumVoteOptions;
 	m_Tuning = Tuning;
-
-	delete m_pItemSystem;
 }
 
 
@@ -1932,11 +1932,11 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 }
 
 
-void CGameContext::OnShutdown()
+void CGameContext::OnShutdown(bool ChangeMap)
 {
 	delete m_pController;
 	m_pController = 0;
-	Clear();
+	Clear(ChangeMap);
 }
 
 void CGameContext::OnSnap(int ClientID)

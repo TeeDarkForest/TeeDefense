@@ -18,6 +18,10 @@
 #include "player.h"
 #include "item.h"
 
+#ifdef CONF_SQL
+#include "OnTime/sql.h"
+#endif
+
 #ifdef _MSC_VER
 typedef __int32 int32_t;
 typedef unsigned __int32 uint32_t;
@@ -58,6 +62,12 @@ class CGameContext : public IGameServer
 	CNetObjHandler m_NetObjHandler;
 	CTuningParams m_Tuning;
 
+	#ifdef CONF_SQL
+	/* SQL */
+	CSQL *m_Sql;
+	CAccountData *m_AccountData;
+	#endif
+
 	static void ConsoleOutputCallback_Chat(const char *pLine, void *pUser);
 
 	static void ConTuneParam(IConsole::IResult *pResult, void *pUserData);
@@ -91,8 +101,8 @@ class CGameContext : public IGameServer
 	static void ConMe(IConsole::IResult *pResult, void *pUserData);
 	
 
-	CGameContext(int Resetting);
-	void Construct(int Resetting);
+	CGameContext(int Resetting, bool ChangeMap);
+	void Construct(int Resetting, bool ChangeMap);
 
 	bool m_Resetting;
 
@@ -109,10 +119,16 @@ public:
 	CTuningParams *Tuning() { return &m_Tuning; }
 	virtual class CLayers *Layers() { return &m_Layers; }
 
+	#ifdef CONF_SQL
+	/* SQL */
+	CSQL *Sql() const { return m_Sql; };
+	CAccountData *AccountData() {return m_AccountData; };
+	#endif
+	
 	CGameContext();
 	~CGameContext();
 
-	void Clear();
+	void Clear(bool ChangeMap);
 
 	CEventHandler m_Events;
 	CPlayer *m_apPlayers[MAX_CLIENTS];
@@ -190,7 +206,7 @@ public:
 	// engine events
 	virtual void OnInit();
 	virtual void OnConsoleInit();
-	virtual void OnShutdown();
+	virtual void OnShutdown(bool ChangeMap);
 
 	virtual void OnTick();
 	virtual void OnPreSnap();

@@ -178,7 +178,7 @@ protected:
 public:
 	virtual void OnInit() = 0;
 	virtual void OnConsoleInit() = 0;
-	virtual void OnShutdown() = 0;
+	virtual void OnShutdown(bool ChangeMap) = 0;
 
 	virtual void OnTick() = 0;
 	virtual void OnPreSnap() = 0;

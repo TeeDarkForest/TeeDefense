@@ -93,6 +93,14 @@ MACRO_CONFIG_INT(SvMaxZombieSpawn, sv_max_zombie_spawn, 1, 1, 20, CFGFLAG_SERVER
 // TeeDefense
 MACRO_CONFIG_INT(SvMaxTowerHealth, sv_max_tower_health, 100, 1, 1000, CFGFLAG_SERVER, "Main max tower health")
 
+// OnTime
+/* SQL */
+MACRO_CONFIG_STR(SvSqlUser, sv_sql_user, 32, "nameless", CFGFLAG_SERVER, "SQL User")
+MACRO_CONFIG_STR(SvSqlPw, sv_sql_pw, 32, "tee", CFGFLAG_SERVER, "SQL Password")
+MACRO_CONFIG_STR(SvSqlIp, sv_sql_ip, 32, "127.0.0.1", CFGFLAG_SERVER, "SQL Database IP")
+MACRO_CONFIG_INT(SvSqlPort, sv_sql_port, 0, 65535, 3306, CFGFLAG_SERVER, "SQL Database port")
+MACRO_CONFIG_STR(SvSqlDatabase, sv_sql_database, 16, "goaway", CFGFLAG_SERVER, "SQL Database name")
+MACRO_CONFIG_STR(SvSqlPrefix, sv_sql_prefix, 16, "tw", CFGFLAG_SERVER, "SQL Database table prefix")
 
 // debug
 #ifdef CONF_DEBUG // this one can crash the server if not used correctly

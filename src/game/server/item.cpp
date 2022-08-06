@@ -10,7 +10,6 @@
 
 CItem::CItem(int ID, int Log, int Coal, int Copper, int Iron, int Gold, int Diamond, int Enegry)
 {
-    Reset();
     m_NeedResource[RESOURCE_LOG] = Log;
     m_NeedResource[RESOURCE_COAL] = Coal;
     m_NeedResource[RESOURCE_COPPER] = Copper;
@@ -21,38 +20,11 @@ CItem::CItem(int ID, int Log, int Coal, int Copper, int Iron, int Gold, int Diam
     m_ID = ID;
 }
 
-void CItem::Reset()
-{
-    for(int i = 0; i < NUM_RESOURCE; i ++)
-    {
-        m_NeedResource[i] = 0;
-    }
-    m_Name = 0;
-    m_Damage = 0;
-    m_Level = 0;
-    m_Proba = 0;
-    m_ID = 0;
-    m_Speed = 0;
-    m_TurretType = 0;
-    m_Type = 0;
-}
-
 CItemSystem::CItemSystem(CGameContext *GameServer)
 {
     m_pGameServer = GameServer;
     m_IDs = 0;
-}
-
-void CItemSystem::Reset()
-{
-    for(int i = 0; i < CURRENT_ITEM_NUM; i++)
-        if(m_ItemList[i])
-            m_ItemList[i]->Reset();
-    InitItem();
-}
-
-void CItemSystem::InitItem()
-{
+    
     // Register Items.
     CreateItem("wooden sword",// Name
      m_IDs,// ID
@@ -378,22 +350,70 @@ void CItemSystem::InitItem()
                  100, // Diamond
                   250 // Enegry
     );
+	
+    CreateItem("follow grenade turret", // Name
+     m_IDs, // ID
+      ITYPE_TURRET, // ItemType
+       0, // Damage
+        LEVEL_IRON, // Level
+         TURRET_FOLLOW_GRENADE, // TurretType
+          90, // Proba
+           0, // Speed
+            10, // Log
+             500, // Coal
+              50, // Copper
+               0, // Iron
+                40, // Gold
+                 25, // Diamond
+                  1 // Enegry
+    );
+
+    CreateItem("freeze gun turret", // Name
+     m_IDs, // ID
+      ITYPE_TURRET, // ItemType
+       0, // Damage
+        LEVEL_ENEGRY, // Level
+         TURRET_LASER_2077, // TurretType
+          90, // Proba
+           0, // Speed
+            10, // Log
+             10, // Coal
+              10, // Copper
+               10, // Iron
+                20, // Gold
+                 1, // Diamond
+                  1 // Enegry
+    );
+
+    CreateItem("shotgun2077 turret", // Name
+     m_IDs, // ID
+      ITYPE_TURRET, // ItemType
+       0, // Damage
+        LEVEL_GOLD, // Level
+         TURRET_SHOTGUN_2077, // TurretType
+          90, // Proba
+           0, // Speed
+            10, // Log
+             10, // Coal
+              10, // Copper
+               10, // Iron
+                30, // Gold
+                 10, // Diamond
+                  25 // Enegry
+    );
 }
 
 bool CItemSystem::CheckItemName(const char* pItemName)
 {  
     for(int i=0;i < m_IDs; i++)
     {
-        if(m_ItemList[i] && m_ItemList[i]->m_Name)
+        if(m_ItemList[i])
         {
-            dbg_msg("s","Check Item Name: %d %s", i, m_ItemList[i]->m_Name);
             if(str_comp(m_ItemList[i]->m_Name, pItemName) == 0)
             {
                 return true;
             }
         }
-        else
-            dbg_msg("s","Check Item Name(NULL): %d", i);
     }
     return false;
 }
@@ -409,6 +429,7 @@ bool CItemSystem::CreateItem(const char* pItemName, int ID, int Type, int Damage
     m_ItemList[ID]->m_TurretType = TurretType;
     m_ItemList[ID]->m_Proba = Proba;
     m_ItemList[ID]->m_Speed = Speed;
+    dbg_msg("s","%d %d", Speed, m_IDs);
     m_IDs++;
 
     return true;
@@ -557,15 +578,9 @@ void CItemSystem::SendMakeItemFailedChat(int To, int* Resource)
 
 void CItemSystem::MakeItem(const char* pItemName, int ClientID)
 {
-    if(!m_pGameServer->m_apPlayers[ClientID])
-        return;
-    
-    if(!m_pGameServer->m_apPlayers[ClientID]->GetCharacter())
-        return;
+    if(!m_pGameServer)
+	return;
 
-    if(!m_pGameServer->m_apPlayers[ClientID]->GetCharacter()->IsAlive())
-        return;
-        
     if(!CheckItemName(pItemName))
     {
         m_pGameServer->SendChatTarget(ClientID, _("No such item."), NULL);

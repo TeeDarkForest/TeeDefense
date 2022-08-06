@@ -20,12 +20,12 @@ endif()
 if(POLICY CMP0048)
   cmake_policy(SET CMP0048 NEW)
   if(VERSION_PATCH STREQUAL "0")
-    project(GoaWay VERSION ${VERSION_MAJOR}.${VERSION_MINOR})
+    project(TeeDefense VERSION ${VERSION_MAJOR}.${VERSION_MINOR})
   else()
-    project(GoaWay VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
+    project(TeeDefense VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
   endif()
 else()
-  project(GoaWay)
+  project(TeeDefense)
   set(PROJECT_VERSION_MAJOR ${VERSION_MAJOR})
   set(PROJECT_VERSION_MINOR ${VERSION_MINOR})
   set(PROJECT_VERSION_PATCH ${VERSION_PATCH})
@@ -261,8 +261,12 @@ find_package(SDL)
 find_package(Threads)
 find_package(Wavpack)
 find_package(MaxMindDB REQUIRED)
-find_package(MySQL)
-
+find_package(OpenSSL)
+if(MYSQL)
+  find_package(MySQL)
+else()
+  set(MYSQL_LIBRARIES)
+endif()
 if(TARGET_OS AND TARGET_OS STREQUAL "mac")
   find_program(DMG dmg)
   find_program(HFSPLUS hfsplus)
@@ -276,7 +280,7 @@ if(TARGET_OS AND TARGET_OS STREQUAL "mac")
   find_program(HDIUTIL hdiutil)
 endif()
 
-message(STATUS "******** Go-aWay MOD ********")
+message(STATUS "******** TeeDefense MOD ********")
 message(STATUS "Target OS: ${TARGET_OS} ${TARGET_BITS}bit")
 message(STATUS "Compiler: ${CMAKE_CXX_COMPILER}")
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
@@ -294,6 +298,9 @@ function(show_dependency_status OUTPUT_NAME NAME)
   endif()
 endfunction()
 
+if(SERVER_COMPILE)
+  show_dependency_status("OpenSSL" OPENSSL FALSE)
+endif()
 if(TARGET_OS AND TARGET_OS STREQUAL "mac")
   show_dependency_status("Dmg tools" DMGTOOLS)
 endif()
@@ -301,6 +308,7 @@ show_dependency_status("Freetype" FREETYPE)
 if(TARGET_OS AND TARGET_OS STREQUAL "mac")
   show_dependency_status("Hdiutil" HDIUTIL)
 endif()
+show_dependency_status("OpenSSL Crypto" CRYPTO)
 show_dependency_status("Pnglite" PNGLITE)
 show_dependency_status("PythonInterp" PYTHONINTERP)
 show_dependency_status("SDL" SDL)
@@ -311,7 +319,7 @@ if(MYSQL)
 endif()
 
 if(NOT(PYTHONINTERP_FOUND))
-  message(SEND_ERROR "You must install Python to compile GoaWay")
+  message(SEND_ERROR "You must install Python to compile TeeDefense")
 endif()
 if(NOT(MYSQL_FOUND))
   message(SEND_ERROR "You must install MySQL to compile the ${PROJECT_NAME}")
@@ -355,6 +363,7 @@ set(COPY_FILES
   ${FREETYPE_COPY_FILES}
   ${SDL_COPY_FILES}
   ${MYSQL_COPY_FILES}
+  ${OPENSSL_COPY_FILES}
 )
 file(COPY ${COPY_FILES} DESTINATION .)
 
@@ -540,6 +549,7 @@ set(LIBS
   ${PLATFORM_LIBS}
   ICU::i18n
   ICU::uc
+  ${CRYPTO_LIBRARIES}
 )
 
 # Targets
@@ -553,6 +563,8 @@ list(APPEND TARGETS_OWN engine-shared game-shared)
 
 # Sources
 set_glob(ENGINE_SERVER GLOB src/engine/server
+  crypt.cpp
+  crypt.h
   register.cpp
   register.h
   server.cpp
@@ -618,7 +630,7 @@ else()
 endif()
 
 # Libraries
-set(LIBS_SERVER ${LIBS} ${MYSQL_LIBRARIES})
+set(LIBS_SERVER ${LIBS} ${MYSQL_LIBRARIES} ${OPENSSL_LIBRARIES})
 
 # Target
 set(TARGET_SERVER ${SERVER_EXECUTABLE})
@@ -1028,7 +1040,18 @@ foreach(target ${TARGETS_OWN})
   target_compile_definitions(${target} PRIVATE $<$<CONFIG:Debug>:CONF_DEBUG>)
   target_include_directories(${target} PRIVATE ${CURL_INCLUDE_DIRS})
   target_include_directories(${target} PRIVATE ${ZLIB_INCLUDE_DIRS})
-endforeach()
+
+  if(MYSQL)
+    target_compile_definitions(${target} PRIVATE CONF_SQL)
+    target_include_directories(${target} SYSTEM PRIVATE ${MYSQL_INCLUDE_DIRS})
+  endif()
+
+  if(OPENSSL_FOUND)
+	target_compile_definitions(${target} PRIVATE CONF_OPENSSL)
+	target_include_directories(${target} PRIVATE ${OPENSSL_INCLUDE_DIRS})
+  endif()
+
+  endforeach()
 
 foreach(target ${TARGETS_DEP})
   if(MSVC)
@@ -1036,8 +1059,5 @@ foreach(target ${TARGETS_DEP})
   endif()
   if(OUR_FLAGS_DEP)
     target_compile_options(${target} PRIVATE ${OUR_FLAGS_DEP})
-  endif()
-  if(MYSQL)
-    target_compile_definitions(${target} PRIVATE CONF_SQL)
   endif()
 endforeach()

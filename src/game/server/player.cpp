@@ -311,6 +311,8 @@ void CPlayer::FakeSnap(int SnappingClient)
 
 void CPlayer::OnDisconnect(const char *pReason)
 {
+	if(!GetZomb() && LoggedIn)
+		GameServer()->Sql()->update(m_ClientID);
 	ResetKnapsack();
 	KillCharacter();
 
@@ -474,3 +476,10 @@ bool CPlayer::PressTab()
 		return true;
 	return false;
 }
+#ifdef CONF_SQL
+void CPlayer::Logout()
+{
+	m_AccData.m_UserID = 0;
+	LoggedIn = false;
+}
+#endif

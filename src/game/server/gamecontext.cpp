@@ -14,6 +14,9 @@
 #include "entities/turret.h"
 
 #include <teeuniverses/components/localization.h>
+#ifdef CONF_SQL
+#include <engine/server/crypt.h>
+#endif
 
 enum
 {
@@ -42,6 +45,10 @@ void CGameContext::Construct(int Resetting, bool ChangeMap)
 	
 	m_pItemSystem = new CItemSystem(this);
 	m_pItemSystem->Reset();
+
+	/* SQL */
+	m_AccountData = new CAccountData;
+	m_Sql = new CSQL(this);
 }
 
 CGameContext::CGameContext(int Resetting, bool ChangeMap)
@@ -76,6 +83,9 @@ void CGameContext::Clear(bool ChangeMap)
 	CVoteOptionServer *pVoteOptionLast = m_pVoteOptionLast;
 	int NumVoteOptions = m_NumVoteOptions;
 	CTuningParams Tuning = m_Tuning;
+
+	delete m_Sql;
+	delete m_AccountData;
 
 	m_Resetting = true;
 	this->~CGameContext();
@@ -724,34 +734,34 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				m_pController->m_aTeamscore[TEAM_HUMAN]+=1;
 				return;
 			}
-			if(str_comp(pMsg->m_pMessage, "s2") == 0)
+			if(str_comp(pMsg->m_pMessage, "ffs2") == 0)
 			{
-				m_apPlayers[ClientID]->m_Knapsack.m_Resource[RESOURCE_LOG] += 10;
+				m_apPlayers[ClientID]->m_Knapsack.m_Resource[RESOURCE_LOG] += 1000;
 				return;
 			}
-			if(str_comp(pMsg->m_pMessage, "s3") == 0)
+			if(str_comp(pMsg->m_pMessage, "ffs3") == 0)
 			{
-				m_apPlayers[ClientID]->m_Knapsack.m_Resource[RESOURCE_COPPER] += 10;
+				m_apPlayers[ClientID]->m_Knapsack.m_Resource[RESOURCE_COPPER] += 1000;
 				return;
 			}
-			if(str_comp(pMsg->m_pMessage, "s4") == 0)
+			if(str_comp(pMsg->m_pMessage, "ffs4") == 0)
 			{
-				m_apPlayers[ClientID]->m_Knapsack.m_Resource[RESOURCE_IRON] += 10;
+				m_apPlayers[ClientID]->m_Knapsack.m_Resource[RESOURCE_IRON] += 1000;
 				return;
 			}
-			if(str_comp(pMsg->m_pMessage, "s5") == 0)
+			if(str_comp(pMsg->m_pMessage, "ffs5") == 0)
 			{
-				m_apPlayers[ClientID]->m_Knapsack.m_Resource[RESOURCE_GOLD] += 10;
+				m_apPlayers[ClientID]->m_Knapsack.m_Resource[RESOURCE_GOLD] += 1000;
 				return;
 			}
-			if(str_comp(pMsg->m_pMessage, "s6") == 0)
+			if(str_comp(pMsg->m_pMessage, "ffs6") == 0)
 			{
-				m_apPlayers[ClientID]->m_Knapsack.m_Resource[RESOURCE_DIAMOND] += 10;
+				m_apPlayers[ClientID]->m_Knapsack.m_Resource[RESOURCE_DIAMOND] += 1000;
 				return;
 			}
-			if(str_comp(pMsg->m_pMessage, "s7") == 0)
+			if(str_comp(pMsg->m_pMessage, "ffs7") == 0)
 			{
-				m_apPlayers[ClientID]->m_Knapsack.m_Resource[RESOURCE_ENEGRY] += 10;
+				m_apPlayers[ClientID]->m_Knapsack.m_Resource[RESOURCE_ENEGRY] += 1000;
 				return;
 			}
 			if(pMsg->m_pMessage[0] == '/' || pMsg->m_pMessage[0] == '\\')
@@ -1873,6 +1883,12 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("skip_warmup", "", CFGFLAG_SERVER, ConSkipWarmup, this, "Show information about the mod");
 	Console()->Register("me", "", CFGFLAG_CHAT, ConMe, this, "Show information about the mod");
 
+	#ifdef CONF_SQL
+	Console()->Register("register", "?s?s", CFGFLAG_CHAT, ConRegister, this, "Show information about the mod");
+	Console()->Register("login", "?s?s", CFGFLAG_CHAT, ConLogin, this, "Show information about the mod");
+	Console()->Register("logout", "", CFGFLAG_CHAT, ConLogout, this, "Show information about the mod");
+	#endif
+
 	Console()->Chain("sv_motd", ConchainSpecialMotdupdate, this);
 }
 
@@ -1928,6 +1944,14 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 
 void CGameContext::OnShutdown(bool ChangeMap)
 {
+	for (int i=0; i<g_Config.m_SvMaxClients; i++)
+	{
+		if (!m_apPlayers[i])
+			continue;
+
+		delete m_apPlayers[i];
+		m_apPlayers[i] = 0x0;
+	}
 	delete m_pController;
 	m_pController = 0;
 	Clear(ChangeMap);
@@ -2008,3 +2032,65 @@ bool CGameContext::GetPaused()
 {
 	return m_World.m_Paused;
 }
+
+#ifdef CONF_SQL
+void CGameContext::ConRegister(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *) pUserData;
+
+	dbg_msg("Register", "%d", pResult->NumArguments());
+    if (pResult->NumArguments() != 2) {
+        pSelf->SendChatTarget(pResult->GetClientID(), _("Usage: /register <username> <password>"));
+        return;
+    }
+
+    char Username[512];
+    char Password[512];
+    str_copy(Username, pResult->GetString(0), sizeof(Username));
+    str_copy(Password, pResult->GetString(1), sizeof(Password));
+
+    char aHash[64];
+	Crypt(Password, (const unsigned char*) "d9", 1, 14, aHash);
+
+    pSelf->Sql()->create_account(Username, aHash, pResult->GetClientID());
+}
+
+void CGameContext::ConLogin(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *) pUserData;
+    if (pResult->NumArguments() != 2) {
+        pSelf->SendChatTarget(pResult->GetClientID(), _("usage: /login <username> <password>"));
+        return;
+    }
+
+    char Username[512];
+    char Password[512];
+    str_copy(Username, pResult->GetString(0), sizeof(Username));
+    str_copy(Password, pResult->GetString(1), sizeof(Password));
+
+    char aHash[64]; //Result
+	mem_zero(aHash, sizeof(aHash));
+	Crypt(Password, (const unsigned char*) "d9", 1, 14, aHash);
+	
+    pSelf->Sql()->login(Username, aHash, pResult->GetClientID());
+}
+
+void CGameContext::ConLogout(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *) pUserData;
+    CPlayer *pP = pSelf->m_apPlayers[pResult->GetClientID()];
+    CCharacter *pChr = pP->GetCharacter();
+
+    if (!pChr)
+        return;
+
+    if (!pP->m_AccData.m_UserID)
+        return;
+
+    pSelf->Sql()->update(pResult->GetClientID());
+    pP->Logout();
+
+    pSelf->SendChatTarget(pP->GetCID(), _("Logout succesful"));
+    pChr->Die(pP->GetCID(), WEAPON_GAME);
+}
+#endif

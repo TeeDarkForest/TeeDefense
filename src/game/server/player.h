@@ -190,6 +190,7 @@ public:
 	#endif
 
 	void ResetKnapsack();
+	void Logout();
 };
 
 #endif

@@ -99,6 +99,9 @@ class CGameContext : public IGameServer
 	static void ConAddCommandVote(IConsole::IResult *pResult, void *pUserData);
 	static void ConSkipWarmup(IConsole::IResult *pResult, void *pUserData);
 	static void ConMe(IConsole::IResult *pResult, void *pUserData);
+	static void ConLogout(IConsole::IResult *pResult, void *pUserData);
+	static void ConRegister(IConsole::IResult *pResult, void *pUserData);
+	static void ConLogin(IConsole::IResult *pResult, void *pUserData);
 	
 
 	CGameContext(int Resetting, bool ChangeMap);
@@ -121,7 +124,7 @@ public:
 
 	#ifdef CONF_SQL
 	/* SQL */
-	CSQL *Sql() const { return m_Sql; };
+	virtual class CSQL *Sql() const { return m_Sql; };
 	CAccountData *AccountData() {return m_AccountData; };
 	#endif
 	

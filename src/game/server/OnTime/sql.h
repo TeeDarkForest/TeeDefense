@@ -53,6 +53,11 @@ struct CSqlData
 	int UserID[MAX_CLIENTS];
 	char name[32];
 	char pass[32];
+	int m_Resource[NUM_RESOURCE][MAX_CLIENTS];
+	int m_Sword[MAX_CLIENTS];
+	int m_Pickaxe[MAX_CLIENTS];
+	int m_Axe[MAX_CLIENTS];
+	int m_Wave[MAX_CLIENTS];
 	int m_ClientID;
 };
 

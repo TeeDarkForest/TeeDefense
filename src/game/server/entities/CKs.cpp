@@ -88,7 +88,7 @@ void CKs::Tick()
 		m_LockPlayer = 0;
 	if((m_LockPlayer >= 0 && GameServer()->GetPlayerChar(m_LockPlayer) && GameServer()->GetPlayerChar(m_LockPlayer)->m_LatestInput.m_Jump))
 	{
-		GameServer()->GetPlayerChar(m_LockPlayer)->GetPlayer()->m_LockedCK = false;
+		//GameServer()->GetPlayerChar(m_LockPlayer)->GetPlayer()->m_LockedCK = false;
 		m_LockPlayer = -1;
 		m_SpawnTick = 50;
 	}
@@ -108,9 +108,9 @@ void CKs::Tick()
 		int RespawnTime = -1;
 		int PickSpeed = 1;
 		
-		if(pChr->GetPlayer()->PressTab() && m_SpawnTick <= 0 && !GameServer()->GetPlayerChar(m_LockPlayer)->GetPlayer()->m_LockedCK)
+		if(pChr->GetPlayer()->PressTab() && m_SpawnTick <= 0/* && !GameServer()->GetPlayerChar(m_LockPlayer)->GetPlayer()->m_LockedCK*/)
 		{
-			GameServer()->GetPlayerChar(m_LockPlayer)->GetPlayer()->m_LockedCK = true;
+			//GameServer()->GetPlayerChar(m_LockPlayer)->GetPlayer()->m_LockedCK = true;
 			m_LockPlayer = pChr->GetCID();
 			m_SpawnTick = 50;
 		}

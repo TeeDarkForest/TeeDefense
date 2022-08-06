@@ -10,6 +10,7 @@
 
 CItem::CItem(int ID, int Log, int Coal, int Copper, int Iron, int Gold, int Diamond, int Enegry)
 {
+    Reset();
     m_NeedResource[RESOURCE_LOG] = Log;
     m_NeedResource[RESOURCE_COAL] = Coal;
     m_NeedResource[RESOURCE_COPPER] = Copper;
@@ -17,27 +18,41 @@ CItem::CItem(int ID, int Log, int Coal, int Copper, int Iron, int Gold, int Diam
     m_NeedResource[RESOURCE_GOLD] = Gold;
     m_NeedResource[RESOURCE_DIAMOND] = Diamond;
     m_NeedResource[RESOURCE_ENEGRY] = Enegry;
+    m_ID = ID;
+}
+
+void CItem::Reset()
+{
+    for(int i = 0; i < NUM_RESOURCE; i ++)
+    {
+        m_NeedResource[i] = 0;
+    }
     m_Name = 0;
     m_Damage = 0;
     m_Level = 0;
     m_Proba = 0;
-    m_ID = ID;
+    m_ID = 0;
+    m_Speed = 0;
+    m_TurretType = 0;
+    m_Type = 0;
 }
 
 CItemSystem::CItemSystem(CGameContext *GameServer)
 {
     m_pGameServer = GameServer;
-    Reset();
+    m_IDs = 0;
 }
 
 void CItemSystem::Reset()
 {
+    for(int i = 0; i < CURRENT_ITEM_NUM; i++)
+        if(m_ItemList[i])
+            m_ItemList[i]->Reset();
     InitItem();
 }
 
 void CItemSystem::InitItem()
 {
-    m_IDs = 0;
     // Register Items.
     CreateItem("wooden sword",// Name
      m_IDs,// ID
@@ -395,8 +410,6 @@ bool CItemSystem::CreateItem(const char* pItemName, int ID, int Type, int Damage
     m_ItemList[ID]->m_Proba = Proba;
     m_ItemList[ID]->m_Speed = Speed;
     m_IDs++;
-
-    dbg_msg("SB", "%d", m_IDs);
 
     return true;
 }

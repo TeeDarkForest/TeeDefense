@@ -40,7 +40,8 @@ void CGameContext::Construct(int Resetting, bool ChangeMap)
 	if(Resetting==NO_RESET)
 		m_pVoteOptionHeap = new CHeap();
 	
-		m_pItemSystem = new CItemSystem(this);
+	m_pItemSystem = new CItemSystem(this);
+	m_pItemSystem->Reset();
 }
 
 CGameContext::CGameContext(int Resetting, bool ChangeMap)
@@ -59,6 +60,7 @@ CGameContext::~CGameContext()
 		delete m_apPlayers[i];
 	if(!m_Resetting)
 		delete m_pVoteOptionHeap;
+	delete m_pItemSystem;
 }
 
 void CGameContext::OnSetAuthed(int ClientID, int Level)
@@ -85,8 +87,6 @@ void CGameContext::Clear(bool ChangeMap)
 	m_pVoteOptionLast = pVoteOptionLast;
 	m_NumVoteOptions = NumVoteOptions;
 	m_Tuning = Tuning;
-
-	delete m_pItemSystem;
 }
 
 

@@ -45,6 +45,7 @@ class CItem
 {
 public:
     CItem(int ID, int Log, int Coal, int Copper, int Iron, int Gold, int Diamond, int Enegry);
+    void Reset();
     const char* m_Name;
     int m_Type;
     int m_NeedResource[NUM_RESOURCE];

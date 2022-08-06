@@ -311,7 +311,7 @@ void CPlayer::FakeSnap(int SnappingClient)
 
 void CPlayer::OnDisconnect(const char *pReason)
 {
-	#ifdef CONF_DEBUG
+	#ifdef CONF_SQL
 	if(!GetZomb() && LoggedIn)
 		GameServer()->Sql()->update(m_ClientID);
 	#endif

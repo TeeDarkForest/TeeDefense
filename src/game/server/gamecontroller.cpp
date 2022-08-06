@@ -43,9 +43,11 @@ IGameController::IGameController(class CGameContext *pGameServer)
 	m_Wave = 0;
 	mem_zero(m_Zombie, sizeof(m_Zombie));
 
+	#ifdef CONF_SQL
 	/* SQL */
 	// create tables
 	GameServer()->Sql()->create_tables();
+	#endif
 }
 
 IGameController::~IGameController()
@@ -419,7 +421,7 @@ int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 			// Give Player zombie's heart.
 			GameServer()->SendChatTarget(pKiller->GetCID(), _("You picked up Zombie's Heart"));
 		}
-		#ifdef CONF_DEBUG
+		#ifdef CONF_SQL
 		if(pKiller->LoggedIn)
 			GameServer()->Sql()->update(pKiller->GetCID());
 		#endif

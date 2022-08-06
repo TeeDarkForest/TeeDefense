@@ -813,7 +813,7 @@ void CCharacter::Die(int Killer, int Weapon)
 	if(Killer < 0)
 		return;
 
-	m_pPlayer->m_LockedCK = -1;
+	m_pPlayer->m_LockedCK = false;
 	// we got to wait 0.5 secs before respawning
 	m_pPlayer->m_RespawnTick = Server()->Tick()+Server()->TickSpeed()/2;
 	int ModeSpecial = GameServer()->m_pController->OnCharacterDeath(this, GameServer()->m_apPlayers[Killer], Weapon);

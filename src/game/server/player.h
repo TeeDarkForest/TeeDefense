@@ -173,7 +173,7 @@ public:
 	int m_MiningType;
 	int m_MiningTick;
 
-	int m_LockedCK;
+	bool m_LockedCK;
 
 	// Check
 	bool PressTab();

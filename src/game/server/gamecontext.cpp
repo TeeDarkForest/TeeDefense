@@ -46,9 +46,11 @@ void CGameContext::Construct(int Resetting, bool ChangeMap)
 	m_pItemSystem = new CItemSystem(this);
 	m_pItemSystem->Reset();
 
+	#ifdef CONF_SQL
 	/* SQL */
 	m_AccountData = new CAccountData;
 	m_Sql = new CSQL(this);
+	#endif
 }
 
 CGameContext::CGameContext(int Resetting, bool ChangeMap)
@@ -84,9 +86,11 @@ void CGameContext::Clear(bool ChangeMap)
 	int NumVoteOptions = m_NumVoteOptions;
 	CTuningParams Tuning = m_Tuning;
 
+	#ifdef CONF_SQL
 	delete m_Sql;
 	delete m_AccountData;
-
+	#endif
+	
 	m_Resetting = true;
 	this->~CGameContext();
 	mem_zero(this, sizeof(*this));

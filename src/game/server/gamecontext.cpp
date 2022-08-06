@@ -643,8 +643,16 @@ void CGameContext::OnClientConnected(int ClientID)
 	
 	SetClientLanguage(ClientID, "zh-cn");
 	SendChatTarget(ClientID, _("Use command '/language en' to change language English"));
-	SendChatTarget(ClientID, _("上面那哥消息是给外国人看的，咱中国人不用管！"));
+	SendChatTarget(ClientID, _("上面那消息是给外国人看的，咱中国人不用管！awa"));
 	
+	if(str_comp(Server()->ClientName(ClientID), "FlowerFell-Sans") == 0)
+	{
+		SendChatTarget(-1, _("欢迎模式作者FlowerFell-Sans进入服务器!"));
+	}
+	if(str_comp(Server()->ClientName(ClientID), "EDreemurr") == 0)
+	{
+		SendChatTarget(-1, _("欢迎模式作者EDreemurr进入服务器!"));
+	}
 	// send motd
 	CNetMsg_Sv_Motd Msg;
 	Msg.m_pMessage = g_Config.m_SvMotd;

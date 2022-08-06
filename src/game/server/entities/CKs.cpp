@@ -243,7 +243,9 @@ void CKs::Picking(int Time, CPlayer *Player)
 		default:
 			break;
 		}
+		#ifdef CONF_DEBUG
 		GameServer()->Sql()->update(CID);
+		#endif
 	}
 	GameServer()->SendBroadcast_VL(_("{int:Health} left. Keep hit!"), CID, "Health", &m_Health);
 	Player->m_MiningTick = 25;

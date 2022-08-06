@@ -639,7 +639,9 @@ void CItemSystem::MakeItem(const char* pItemName, int ClientID)
         SendMakeItemFailedChat(ClientID, MakeItem->m_NeedResource);
         return;
     }
+    #ifdef CONF_DEBUG
     m_pGameServer->Sql()->update(ClientID);
+    #endif
 }
 
 int CItemSystem::GetDmg(int Level)

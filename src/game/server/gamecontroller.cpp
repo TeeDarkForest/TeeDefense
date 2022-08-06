@@ -411,6 +411,10 @@ int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 			// Give Player zombie's heart.
 			GameServer()->SendChatTarget(pKiller->GetCID(), _("You picked up Zombie's Heart"));
 		}
+		#ifdef CONF_DEBUG
+		if(pKiller->LoggedIn)
+			GameServer()->Sql()->update(pKiller->GetCID());
+		#endif
 		pKiller->m_Score++;
 		DoZombMessage(m_ZombLeft--);
 	}

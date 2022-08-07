@@ -529,7 +529,7 @@ void CSQL::update_all()
 		}
 		catch (sql::SQLException &e)
 		{
-			dbg_msg("SQL", "ERROR: Could not update Account (Why: %s) (ClientID: %d, UserID: %d)", e.what(), Data->m_ClientID, Data->UserID);
+			dbg_msg("SQL", "ERROR: Could not update Account (Why: %s)");
 		}
 		
 		// disconnect from Database

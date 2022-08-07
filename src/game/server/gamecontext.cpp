@@ -69,7 +69,8 @@ CGameContext::~CGameContext()
 		delete m_apPlayers[i];
 	if(!m_Resetting)
 		delete m_pVoteOptionHeap;
-	delete m_pItemSystem;
+	if(m_pItemSystem)
+		delete m_pItemSystem;
 }
 
 void CGameContext::OnSetAuthed(int ClientID, int Level)

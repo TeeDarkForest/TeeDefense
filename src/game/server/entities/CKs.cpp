@@ -245,7 +245,8 @@ void CKs::Picking(int Time, CPlayer *Player)
 			break;
 		}
 		#ifdef CONF_SQL
-		GameServer()->Sql()->update(CID);
+		if(Player->LoggedIn)
+			GameServer()->Sql()->update(CID);
 		#endif
 	}
 	GameServer()->SendBroadcast_VL(_("{int:Health} left. Keep hit!"), CID, "Health", &m_Health);

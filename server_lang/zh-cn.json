@@ -173,7 +173,7 @@
             "value": "[第 {int:a} 轮]:还剩 {int:a1} 只僵尸"
         },
         {
-            "key": "Wave {int:i}:1 zombie is left",
+            "key": "Wave {int:i}: 1 zombie is left",
             "value": "[第 {int:i} 轮]:还剩 1 只僵尸"
         },
         {

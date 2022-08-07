@@ -43,7 +43,6 @@ bool CSQL::connect()
 		
 		// Connect to specific Database
 		connection->setSchema(Database);
-		dbg_msg("SQL", "SQL connection established");
 		return true;
 	} 
 	catch (sql::SQLException &e)
@@ -62,7 +61,7 @@ void CSQL::disconnect()
 	}
 	catch (sql::SQLException &e)
 	{
-		dbg_msg("SQL", "ERROR: No SQL connection");
+		dbg_msg("SQL", "ERROR: No SQL connection (%s)", e.what());
 	}
 }
 
@@ -103,7 +102,7 @@ void CSQL::create_tables()
 		}
 		catch (sql::SQLException &e)
 		{
-			dbg_msg("SQL", "ERROR: Tables were NOT created");
+			dbg_msg("SQL", "ERROR: Tables were NOT created (%s)", e.what());
 		}
 		
 		// disconnect from Database
@@ -132,9 +131,9 @@ static void create_account_thread(void *user)
 				if(Data->m_SqlData->results->next())
 				{
 					// Account found
-					dbg_msg("SQL", "Account '%s' allready exists", Data->name);
+					dbg_msg("SQL", "Account '%s' already exists", Data->name);
 					
-					GameServer()->SendChatTarget(Data->m_ClientID, "This acoount allready exists!");
+					GameServer()->SendChatTarget(Data->m_ClientID, "This acoount already exists!");
 				}
 				else
 				{
@@ -236,7 +235,7 @@ static void change_password_thread(void *user)
 		}
 		catch (sql::SQLException &e)
 		{
-			dbg_msg("SQL", "ERROR: Could not update Account");
+			dbg_msg("SQL", "ERROR: Could not update Account (%s)", e.what());
 		}
 		
 		// disconnect from Database
@@ -530,7 +529,7 @@ void CSQL::update_all()
 		}
 		catch (sql::SQLException &e)
 		{
-			dbg_msg("SQL", "ERROR: Could not update Account");
+			dbg_msg("SQL", "ERROR: Could not update Account (%s)", e.what());
 		}
 		
 		// disconnect from Database

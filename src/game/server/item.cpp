@@ -691,7 +691,8 @@ void CItemSystem::MakeItem(const char* pItemName, int ClientID)
         return;
     }
     #ifdef CONF_SQL
-    m_pGameServer->Sql()->update(ClientID);
+    if(m_pGameServer->m_apPlayers[ClientID]->LoggedIn)
+       m_pGameServer->Sql()->update(ClientID);
     #endif
 }
 

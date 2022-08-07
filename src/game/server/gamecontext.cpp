@@ -1967,14 +1967,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 
 void CGameContext::OnShutdown(bool ChangeMap)
 {
-	for (int i=0; i<g_Config.m_SvMaxClients; i++)
-	{
-		if (!m_apPlayers[i])
-			continue;
 
-		delete m_apPlayers[i];
-		m_apPlayers[i] = 0x0;
-	}
 	delete m_pController;
 	m_pController = 0;
 	Clear(ChangeMap);

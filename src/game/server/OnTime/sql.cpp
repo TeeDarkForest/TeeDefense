@@ -1,5 +1,6 @@
 #ifdef CONF_SQL
-/* SQL class by Sushi */
+/* SQL class 0.5 by Sushi */
+/* SQL class 0.6 by FFS   */
 #include "../gamecontext.h"
 
 #include <engine/shared/config.h>
@@ -113,6 +114,7 @@ void CSQL::create_tables()
 // create Account
 static void create_account_thread(void *user)
 {
+	lock_unlock(SQLLock);
 	lock_wait(SQLLock);
 	
 	CSqlData *Data = (CSqlData *)user;
@@ -185,6 +187,7 @@ void CSQL::create_account(const char* name, const char* pass, int m_ClientID)
 // change password
 static void change_password_thread(void *user)
 {
+	lock_unlock(SQLLock);
 	lock_wait(SQLLock);
 	
 	CSqlData *Data = (CSqlData *)user;
@@ -264,11 +267,12 @@ void CSQL::change_password(int m_ClientID, const char* new_pass)
 // login stuff
 static void login_thread(void *user)
 {
+	lock_unlock(SQLLock);
 	lock_wait(SQLLock);
 	
 	CSqlData *Data = (CSqlData *)user;
-	
-	if(GameServer()->m_apPlayers[Data->m_ClientID] && !GameServer()->m_apPlayers[Data->m_ClientID]->m_AccData.m_UserID)
+
+	if(GameServer()->m_apPlayers[Data->m_ClientID] && !GameServer()->m_apPlayers[Data->m_ClientID]->LoggedIn)
 	{
 		// Connect to Database
 		if(Data->m_SqlData->connect())
@@ -379,11 +383,13 @@ static void login_thread(void *user)
 
 void CSQL::login(const char* name, const char* pass, int m_ClientID)
 {
+	dbg_msg("..","sasdaw");
 	CSqlData *tmp = new CSqlData();
 	str_copy(tmp->name, name, sizeof(tmp->name));
 	str_copy(tmp->pass, pass, sizeof(tmp->pass));
 	tmp->m_ClientID = m_ClientID;
 	tmp->m_SqlData = this;
+	dbg_msg("..","sadawaaa");
 	
 	void *login_account_thread = thread_init(login_thread, tmp);
 #if defined(CONF_FAMILY_UNIX)
@@ -397,7 +403,7 @@ static void update_thread(void *user)
 	lock_wait(SQLLock);
 	
 	CSqlData *Data = (CSqlData *)user;
-	
+
 	// Connect to Database
 	if(Data->m_SqlData->connect())
 	{
@@ -423,10 +429,10 @@ static void update_thread(void *user)
 				p->m_Knapsack.m_Axe,p->m_Knapsack.m_Pickaxe,Data->UserID[Data->m_ClientID] \
 				);
 				Data->m_SqlData->statement->execute(buf);
-				
+				// get Account name from database
+				str_format(buf, sizeof(buf), "SELECT Username FROM %s_Account WHERE UserID=%d;", Data->m_SqlData->prefix, Data->UserID[Data->m_ClientID]);
 				// create results
 				Data->m_SqlData->results = Data->m_SqlData->statement->executeQuery(buf);
-
 				// jump to result
 				Data->m_SqlData->results->next();
 				
@@ -444,7 +450,7 @@ static void update_thread(void *user)
 		}
 		catch (sql::SQLException &e)
 		{
-			dbg_msg("SQL", "ERROR: Could not update Account (Why: %s) (ClientID: %d, UserID: %d)", e.what(), Data->m_ClientID, Data->UserID);
+			dbg_msg("SQL", "ERROR: Could not update Account (Why: %s) (ClientID: %d, UserID: %d)", e.what(), Data->m_ClientID, Data->UserID[Data->m_ClientID]);
 		}
 		
 		// disconnect from Database
@@ -473,6 +479,7 @@ void CSQL::update(int m_ClientID)
 // update all
 void CSQL::update_all()
 {
+	lock_unlock(SQLLock);
 	lock_wait(SQLLock);
 	
 	// Connect to Database

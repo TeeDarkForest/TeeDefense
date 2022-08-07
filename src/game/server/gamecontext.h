@@ -124,8 +124,9 @@ public:
 
 	#ifdef CONF_SQL
 	/* SQL */
-	virtual class CSQL *Sql() const { return m_Sql; };
+	CSQL *Sql() const { return m_Sql; };
 	CAccountData *AccountData() {return m_AccountData; };
+	void LogoutAccount(int ClientID);
 	#endif
 	
 	CGameContext();

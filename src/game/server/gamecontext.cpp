@@ -2100,19 +2100,19 @@ void CGameContext::ConLogin(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConLogout(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
-    CPlayer *pP = pSelf->m_apPlayers[pResult->GetClientID()];
+    pSelf->LogoutAccount(pResult->GetClientID());
+}
+
+void CGameContext::LogoutAccount(int ClientID)
+{
+	CPlayer *pP = m_apPlayers[ClientID];
     CCharacter *pChr = pP->GetCharacter();
 
-    if (!pChr)
-        return;
-
-    if (!pP->m_AccData.m_UserID)
-        return;
-
-    pSelf->Sql()->update(pResult->GetClientID());
+	dbg_msg("s","%d %d", ClientID, pP->m_AccData.m_UserID);
+    Sql()->update(ClientID);
     pP->Logout();
+	dbg_msg("s","%d %d", ClientID, pP->m_AccData.m_UserID);
 
-    pSelf->SendChatTarget(pP->GetCID(), _("Logout succesful"));
-    pChr->Die(pP->GetCID(), WEAPON_GAME);
+    SendChatTarget(pP->GetCID(), _("Logout succesful"));
 }
 #endif

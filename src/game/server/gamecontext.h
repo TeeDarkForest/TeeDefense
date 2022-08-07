@@ -238,6 +238,7 @@ public:
 	void OnZombie(int ClientID, int Zomb);
 	void OnZombieKill(int ClientID);
 
+	// Tee Defense
 	bool m_NeedResetTower;
 	bool GetPaused();
 	int m_TowerHealth;

@@ -53,6 +53,23 @@ void CItemSystem::Reset()
 
 void CItemSystem::InitItem()
 {
+    // Dont move this item!!!
+    CreateItem("checkpoint",// Name
+     m_IDs,// ID
+      ITYPE_SWORD,// ItemType
+       2,// Damage
+        LEVEL_LOG,// Level
+         -1,// TurretType
+          90,// Proba
+           -1,// Speed
+            25,// Log
+             0,// Coal
+              0,//Copper
+               0,// Iron
+                0,// Gold
+                 0,// Diamond
+                  0//Enegry
+    );
     // Register Items.
     CreateItem("wooden sword",// Name
      m_IDs,// ID
@@ -301,7 +318,7 @@ void CItemSystem::InitItem()
         LEVEL_ENEGRY,// Level
          -1,// TurretType
           100,// Proba
-           7000,// Speed
+           10000,// Speed
             5,// Log
              0,// Coal
               0,//Copper

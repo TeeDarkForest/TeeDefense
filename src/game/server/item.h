@@ -6,7 +6,7 @@
 
 enum
 {
-    CURRENT_ITEM_NUM = 20,
+    CURRENT_ITEM_NUM = 21,
 };
 
 enum

@@ -43,17 +43,14 @@ void CGameContext::Construct(int Resetting, bool ChangeMap)
 	if(Resetting==NO_RESET)
 		m_pVoteOptionHeap = new CHeap();
 
-	if(!ChangeMap)
-	{	
-		m_pItemSystem = new CItemSystem(this);
-		m_pItemSystem->Reset();
-	}
-	
 	#ifdef CONF_SQL
 	/* SQL */
 	m_AccountData = new CAccountData;
 	m_Sql = new CSQL(this);
 	#endif
+
+	m_pItemSystem = new CItemSystem(this);
+	m_pItemSystem->Reset();
 }
 
 CGameContext::CGameContext(int Resetting, bool ChangeMap)
@@ -72,7 +69,7 @@ CGameContext::~CGameContext()
 		delete m_apPlayers[i];
 	if(!m_Resetting)
 		delete m_pVoteOptionHeap;
-	//delete m_pItemSystem;
+	delete m_pItemSystem;
 }
 
 void CGameContext::OnSetAuthed(int ClientID, int Level)
@@ -93,7 +90,7 @@ void CGameContext::Clear(bool ChangeMap)
 	delete m_Sql;
 	delete m_AccountData;
 	#endif
-	
+
 	m_Resetting = true;
 	this->~CGameContext();
 	mem_zero(this, sizeof(*this));

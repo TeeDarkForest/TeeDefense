@@ -1734,7 +1734,7 @@ void CGameContext::ConMe(IConsole::IResult *pResult, void *pUserData)
 	#endif
 	pThis->SendChatTarget(pResult->GetClientID(), _("Log: {int:Log}, Copper: {int:Copper}, Coal: {int:Coal},"), "Log", &Log, "Copper", &Copper, "Coal", &Coal, NULL);
 	pThis->SendChatTarget(pResult->GetClientID(), _("Iron: {int:Iron}, Gold: {int:Gold}, Diamond: {int:Diamond},"), "Iron", &Iron, "Gold", &Gold, "Diamond", &Diamond, NULL);
-	pThis->SendChatTarget(pResult->GetClientID(), _("Enegry: {int:Enegry}, Zombie's Heart: {int:ZombieHeart}"), "Enegry", &Enegry, "ZombieHeart", ZombieHeart, NULL);
+	pThis->SendChatTarget(pResult->GetClientID(), _("Enegry: {int:Enegry}, Zombie's Heart: {int:ZombieHeart}"), "Enegry", &Enegry, "ZombieHeart", &ZombieHeart, NULL);
 }
 
 void CGameContext::ConLanguage(IConsole::IResult *pResult, void *pUserData)

@@ -94,7 +94,10 @@ void CSQL::create_tables()
 			"Pickaxe BIGINT DEFAULT 0, "
 			"SName VARCHAR(32) DEFAULT 0, "
 			"Skill BIGINT DEFAULT 0, "
-			"Wave BIGINT DEFAULT 0);", prefix);
+			"Wave BIGINT DEFAULT 0, "
+			"qq VARCHAR(32) DEFAULT -1, "
+			"checktime date DEFAULT 1000-01-01, "
+			"checkhead TINYINT(1) DEFAULT 0);", prefix);
 			statement->execute(buf);
 			dbg_msg("SQL", "Tables were created successfully");
 
@@ -114,7 +117,6 @@ void CSQL::create_tables()
 // create Account
 static void create_account_thread(void *user)
 {
-	lock_unlock(SQLLock);
 	lock_wait(SQLLock);
 	
 	CSqlData *Data = (CSqlData *)user;
@@ -187,7 +189,6 @@ void CSQL::create_account(const char* name, const char* pass, int m_ClientID)
 // change password
 static void change_password_thread(void *user)
 {
-	lock_unlock(SQLLock);
 	lock_wait(SQLLock);
 	
 	CSqlData *Data = (CSqlData *)user;

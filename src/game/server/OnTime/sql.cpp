@@ -96,7 +96,7 @@ void CSQL::create_tables()
 			"Skill BIGINT DEFAULT 0, "
 			"Wave BIGINT DEFAULT 0, "
 			"qq VARCHAR(32) DEFAULT -1, "
-			"checktime date DEFAULT 1000-01-01, "
+			"checktime date DEFAULT '1000-01-01', "
 			"checkhead TINYINT(1) DEFAULT 0);", prefix);
 			statement->execute(buf);
 			dbg_msg("SQL", "Tables were created successfully");
@@ -268,7 +268,6 @@ void CSQL::change_password(int m_ClientID, const char* new_pass)
 // login stuff
 static void login_thread(void *user)
 {
-	lock_unlock(SQLLock);
 	lock_wait(SQLLock);
 	
 	CSqlData *Data = (CSqlData *)user;
@@ -384,13 +383,11 @@ static void login_thread(void *user)
 
 void CSQL::login(const char* name, const char* pass, int m_ClientID)
 {
-	dbg_msg("..","sasdaw");
 	CSqlData *tmp = new CSqlData();
 	str_copy(tmp->name, name, sizeof(tmp->name));
 	str_copy(tmp->pass, pass, sizeof(tmp->pass));
 	tmp->m_ClientID = m_ClientID;
 	tmp->m_SqlData = this;
-	dbg_msg("..","sadawaaa");
 	
 	void *login_account_thread = thread_init(login_thread, tmp);
 #if defined(CONF_FAMILY_UNIX)
@@ -480,7 +477,6 @@ void CSQL::update(int m_ClientID)
 // update all
 void CSQL::update_all()
 {
-	lock_unlock(SQLLock);
 	lock_wait(SQLLock);
 	
 	// Connect to Database

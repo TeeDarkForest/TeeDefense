@@ -2107,12 +2107,7 @@ void CGameContext::LogoutAccount(int ClientID)
 {
 	CPlayer *pP = m_apPlayers[ClientID];
     CCharacter *pChr = pP->GetCharacter();
-
-	dbg_msg("s","%d %d", ClientID, pP->m_AccData.m_UserID);
-    Sql()->update(ClientID);
     pP->Logout();
-	dbg_msg("s","%d %d", ClientID, pP->m_AccData.m_UserID);
-
     SendChatTarget(pP->GetCID(), _("Logout succesful"));
 }
 #endif

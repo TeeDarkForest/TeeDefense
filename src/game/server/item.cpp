@@ -8,6 +8,9 @@
 #include "gamecontroller.h"
 #include "entities/turret.h"
 
+class CGameContext *m_pGS;
+CGameContext *GS() { return m_pGS; }
+
 CItem::CItem(int ID, int Log, int Coal, int Copper, int Iron, int Gold, int Diamond, int Enegry)
 {
     Reset();
@@ -37,9 +40,9 @@ void CItem::Reset()
     m_Type = 0;
 }
 
-CItemSystem::CItemSystem(CGameContext *GameServer)
+CItemSystem::CItemSystem(class CGameContext *pGameServer)
 {
-    m_pGameServer = GameServer;
+    m_pGS = pGameServer;
     m_IDs = 0;
 }
 
@@ -495,144 +498,144 @@ void CItemSystem::SendCantMakeItemChat(int To, int* Resource)
 {
     std::string Buffer;
     dynamic_string Buffre;
-    CPlayer *p = m_pGameServer->m_apPlayers[To];
+    CPlayer *p = GS()->m_apPlayers[To];
     const char *Lang = p->GetLanguage();
     Buffre.clear();
-    m_pGameServer->Server()->Localization()->Format_L(Buffre, Lang, _("You need at least "), NULL);
+    GS()->Server()->Localization()->Format_L(Buffre, Lang, _("You need at least "), NULL);
 
     Buffer.append(Buffre.buffer());
     if(Resource[RESOURCE_LOG] > 0)
     {
         Buffre.clear();
-        m_pGameServer->Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} log,"), "num", &Resource[RESOURCE_LOG]);
+        GS()->Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} log,"), "num", &Resource[RESOURCE_LOG]);
         Buffer.append(Buffre.buffer());
     }
     if(Resource[RESOURCE_COAL] > 0)
     {
         Buffre.clear();
-        m_pGameServer->Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} coal,"), "num", &Resource[RESOURCE_COAL]);
+        GS()->Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} coal,"), "num", &Resource[RESOURCE_COAL]);
         Buffer.append(Buffre.buffer());
     }
     if(Resource[RESOURCE_COPPER] > 0)
     {
         Buffre.clear();
-        m_pGameServer->Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} copper,"), "num", &Resource[RESOURCE_COPPER]);
+        GS()->Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} copper,"), "num", &Resource[RESOURCE_COPPER]);
         Buffer.append(Buffre.buffer());
     }
     if(Resource[RESOURCE_IRON] > 0)
     {
         Buffre.clear();
-        m_pGameServer->Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} iron,"), "num", &Resource[RESOURCE_IRON]);
+        GS()->Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} iron,"), "num", &Resource[RESOURCE_IRON]);
         Buffer.append(Buffre.buffer());
     }
     if(Resource[RESOURCE_GOLD] > 0)
     {
         Buffre.clear();
-        m_pGameServer->Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} gold,"), "num", &Resource[RESOURCE_GOLD]);
+        GS()->Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} gold,"), "num", &Resource[RESOURCE_GOLD]);
         Buffer.append(Buffre.buffer());
     }
     if(Resource[RESOURCE_DIAMOND] > 0)
     {
         Buffre.clear();
-        m_pGameServer->Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} diamond,"), "num", &Resource[RESOURCE_DIAMOND]);
+        GS()->Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} diamond,"), "num", &Resource[RESOURCE_DIAMOND]);
         Buffer.append(Buffre.buffer());
     }
     if(Resource[RESOURCE_ENEGRY] > 0)
     {
         Buffre.clear();
-        m_pGameServer->Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} enegry,"), "num", &Resource[RESOURCE_ENEGRY]);
+        GS()->Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} enegry,"), "num", &Resource[RESOURCE_ENEGRY]);
         Buffer.append(Buffre.buffer());
     }
     Buffre.clear();
-    m_pGameServer->Server()->Localization()->Format_L(Buffre, Lang, _("But you don't have them."), NULL);    
+    GS()->Server()->Localization()->Format_L(Buffre, Lang, _("But you don't have them."), NULL);    
     Buffer.append(Buffre.buffer());
-    m_pGameServer->SendChatTarget(To, Buffer.c_str());
+    GS()->SendChatTarget(To, Buffer.c_str());
 }
 
 void CItemSystem::SendMakeItemChat(int To, CItem *Item)
 {
     dynamic_string Buffer;
     dynamic_string IName;
-    CPlayer *p = m_pGameServer->m_apPlayers[To];
+    CPlayer *p = GS()->m_apPlayers[To];
     const char *Lang = p->GetLanguage();
 
-    m_pGameServer->Server()->Localization()->Format_L(IName, Lang, _(Item->m_Name));
-    m_pGameServer->Server()->Localization()->Format_L(Buffer, Lang, _("You made a {str:ItemName}! Good Job!"), "ItemName", IName.buffer());
-    m_pGameServer->SendChatTarget(To, Buffer.buffer());
+    GS()->Server()->Localization()->Format_L(IName, Lang, _(Item->m_Name));
+    GS()->Server()->Localization()->Format_L(Buffer, Lang, _("You made a {str:ItemName}! Good Job!"), "ItemName", IName.buffer());
+    GS()->SendChatTarget(To, Buffer.buffer());
 }
 
 void CItemSystem::SendMakeItemFailedChat(int To, int* Resource)
 {
-    m_pGameServer->SendChatTarget(To, _("Bad luck. The production failed..."));
+    GS()->SendChatTarget(To, _("Bad luck. The production failed..."));
     std::string Buffer;
     dynamic_string Buffre;
-    CPlayer *p = m_pGameServer->m_apPlayers[To];
+    CPlayer *p = GS()->m_apPlayers[To];
     const char *Lang = p->GetLanguage();
     Buffre.clear();
-    m_pGameServer->Server()->Localization()->Format_L(Buffre, Lang, _("You lost "), NULL);
+    GS()->Server()->Localization()->Format_L(Buffre, Lang, _("You lost "), NULL);
     Buffer.append(Buffre.buffer());
     if(Resource[RESOURCE_LOG] > 0)
     {
         Buffre.clear();
         p->m_Knapsack.m_Resource[RESOURCE_LOG]-=Resource[RESOURCE_LOG];
-        m_pGameServer->Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} log,"), "num", &Resource[RESOURCE_LOG]);
+        GS()->Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} log,"), "num", &Resource[RESOURCE_LOG]);
         Buffer.append(Buffre.buffer());
     }
     if(Resource[RESOURCE_COAL] > 0)
     {
         Buffre.clear();
         p->m_Knapsack.m_Resource[RESOURCE_COAL]-=Resource[RESOURCE_COAL];
-        m_pGameServer->Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} coal,"), "num", &Resource[RESOURCE_COAL]);
+        GS()->Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} coal,"), "num", &Resource[RESOURCE_COAL]);
         Buffer.append(Buffre.buffer());
     }
     if(Resource[RESOURCE_COPPER] > 0)
     {
         Buffre.clear();
         p->m_Knapsack.m_Resource[RESOURCE_COPPER]-=Resource[RESOURCE_COPPER];
-        m_pGameServer->Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} copper,"), "num", &Resource[RESOURCE_COPPER]);
+        GS()->Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} copper,"), "num", &Resource[RESOURCE_COPPER]);
         Buffer.append(Buffre.buffer());
     }
     if(Resource[RESOURCE_IRON] > 0)
     {
         Buffre.clear();
         p->m_Knapsack.m_Resource[RESOURCE_IRON]-=Resource[RESOURCE_IRON];
-        m_pGameServer->Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} gold,"), "num", &Resource[RESOURCE_GOLD]);
+        GS()->Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} gold,"), "num", &Resource[RESOURCE_GOLD]);
         Buffer.append(Buffre.buffer());
     }
     if(Resource[RESOURCE_DIAMOND] > 0)
     {
         Buffre.clear();
         p->m_Knapsack.m_Resource[RESOURCE_DIAMOND]-=Resource[RESOURCE_DIAMOND];
-        m_pGameServer->Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} diamond,"), "num", &Resource[RESOURCE_DIAMOND]);
+        GS()->Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} diamond,"), "num", &Resource[RESOURCE_DIAMOND]);
         Buffer.append(Buffre.buffer());
     }
     if(Resource[RESOURCE_ENEGRY] > 0)
     {
         Buffre.clear();
         p->m_Knapsack.m_Resource[RESOURCE_DIAMOND]-=Resource[RESOURCE_DIAMOND];
-        m_pGameServer->Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} enegry,"), "num", &Resource[RESOURCE_ENEGRY]);
+        GS()->Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} enegry,"), "num", &Resource[RESOURCE_ENEGRY]);
         Buffer.append(Buffre.buffer());
     }
     Buffre.clear();
-    m_pGameServer->Server()->Localization()->Format_L(Buffre, Lang, _("Bad luck."), NULL);
+    GS()->Server()->Localization()->Format_L(Buffre, Lang, _("Bad luck."), NULL);
     Buffer.append(Buffre.buffer());
-    m_pGameServer->SendChatTarget(To, Buffer.c_str());
+    GS()->SendChatTarget(To, Buffer.c_str());
 }
 
 void CItemSystem::MakeItem(const char* pItemName, int ClientID)
 {
-    if(!m_pGameServer->m_apPlayers[ClientID])
+    if(!GS()->m_apPlayers[ClientID])
         return;
     
-    if(!m_pGameServer->m_apPlayers[ClientID]->GetCharacter())
+    if(!GS()->m_apPlayers[ClientID]->GetCharacter())
         return;
 
-    if(!m_pGameServer->m_apPlayers[ClientID]->GetCharacter()->IsAlive())
+    if(!GS()->m_apPlayers[ClientID]->GetCharacter()->IsAlive())
         return;
         
     if(!CheckItemName(pItemName))
     {
-        m_pGameServer->SendChatTarget(ClientID, _("No such item."), NULL);
+        GS()->SendChatTarget(ClientID, _("No such item."), NULL);
         return;
     }
 
@@ -640,7 +643,7 @@ void CItemSystem::MakeItem(const char* pItemName, int ClientID)
 
     for(int i = 0;i < NUM_RESOURCE;i++)
     {
-        if(m_pGameServer->m_apPlayers[ClientID]->m_Knapsack.m_Resource[i] < MakeItem->m_NeedResource[i])
+        if(GS()->m_apPlayers[ClientID]->m_Knapsack.m_Resource[i] < MakeItem->m_NeedResource[i])
         {
             SendCantMakeItemChat(ClientID, MakeItem->m_NeedResource);
             return;
@@ -654,25 +657,25 @@ void CItemSystem::MakeItem(const char* pItemName, int ClientID)
         
         for (int i = 0; i < NUM_RESOURCE; i++)
         {
-            m_pGameServer->m_apPlayers[ClientID]->m_Knapsack.m_Resource[i] -= MakeItem->m_NeedResource[i];
+            GS()->m_apPlayers[ClientID]->m_Knapsack.m_Resource[i] -= MakeItem->m_NeedResource[i];
         }
         
 
         switch (MakeItem->m_Type)
         {
             case ITYPE_AXE: 
-                if(m_pGameServer->m_apPlayers[ClientID]->m_Knapsack.m_Axe < ItemLevel)
-                    m_pGameServer->m_apPlayers[ClientID]->m_Knapsack.m_Axe = ItemLevel;
+                if(GS()->m_apPlayers[ClientID]->m_Knapsack.m_Axe < ItemLevel)
+                    GS()->m_apPlayers[ClientID]->m_Knapsack.m_Axe = ItemLevel;
                 break;
             
             case ITYPE_PICKAXE:
-                if(m_pGameServer->m_apPlayers[ClientID]->m_Knapsack.m_Pickaxe < ItemLevel)
-                   m_pGameServer->m_apPlayers[ClientID]->m_Knapsack.m_Pickaxe = ItemLevel;
+                if(GS()->m_apPlayers[ClientID]->m_Knapsack.m_Pickaxe < ItemLevel)
+                   GS()->m_apPlayers[ClientID]->m_Knapsack.m_Pickaxe = ItemLevel;
                 break;
             
             case ITYPE_SWORD:
-                if(m_pGameServer->m_apPlayers[ClientID]->m_Knapsack.m_Sword < ItemLevel)
-                    m_pGameServer->m_apPlayers[ClientID]->m_Knapsack.m_Sword = ItemLevel;
+                if(GS()->m_apPlayers[ClientID]->m_Knapsack.m_Sword < ItemLevel)
+                    GS()->m_apPlayers[ClientID]->m_Knapsack.m_Sword = ItemLevel;
                 break;
             
             case ITYPE_TURRET:
@@ -699,7 +702,7 @@ void CItemSystem::MakeItem(const char* pItemName, int ClientID)
                 default:
                     break;
                 }
-                new CTurret(&m_pGameServer->m_World, m_pGameServer->GetPlayerChar(ClientID)->m_Pos, ClientID, MakeItem->m_TurretType, 64, Lifes);
+                new CTurret(&GS()->m_World, GS()->GetPlayerChar(ClientID)->m_Pos, ClientID, MakeItem->m_TurretType, 64, Lifes);
             }
         }
     }else
@@ -708,8 +711,8 @@ void CItemSystem::MakeItem(const char* pItemName, int ClientID)
         return;
     }
     #ifdef CONF_SQL
-    if(m_pGameServer->m_apPlayers[ClientID]->LoggedIn)
-       m_pGameServer->Sql()->update(ClientID);
+    if(GS()->m_apPlayers[ClientID]->LoggedIn)
+       GS()->Sql()->update(ClientID);
     #endif
 }
 

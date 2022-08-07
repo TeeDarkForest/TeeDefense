@@ -60,17 +60,16 @@ public:
 
 class CItemSystem
 {
-    class CGameContext *m_pGameServer;
     int m_IDs;
 public:
 
-    CItemSystem(CGameContext *GameServer);
+    CItemSystem(class CGameContext *pGameServer);
 
     CItem *m_ItemList[CURRENT_ITEM_NUM];
 
     bool CreateItem(const char* pItemName, int ID, int Type, int Damage, int Level, int TurretType, int Proba, 
         int Speed, int Log, int Coal, int Copper, int Iron, int Gold, int Diamond, int Enegry);
-    
+
     void InitItem();
 
     void Reset();

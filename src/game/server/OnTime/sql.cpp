@@ -384,7 +384,6 @@ void CSQL::login(const char* name, const char* pass, int m_ClientID)
 	str_copy(tmp->pass, pass, sizeof(tmp->pass));
 	tmp->m_ClientID = m_ClientID;
 	tmp->m_SqlData = this;
-	tmp->UserID[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_UserID;
 	
 	void *login_account_thread = thread_init(login_thread, tmp);
 #if defined(CONF_FAMILY_UNIX)

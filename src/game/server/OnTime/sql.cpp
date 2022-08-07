@@ -204,11 +204,11 @@ static void change_password_thread(void *user)
 			if(Data->m_SqlData->results->next())
 			{
 				// update Account data
-				str_format(buf, sizeof(buf), "UPDATE %s_Account SET Password='%s' WHERE UserID='%d'", Data->m_SqlData->prefix, Data->pass, Data->UserID[Data->m_ClientID]);
+				str_format(buf, sizeof(buf), "UPDATE %s_Account SET Password='%s' WHERE UserID=%d", Data->m_SqlData->prefix, Data->pass, Data->UserID[Data->m_ClientID]);
 				Data->m_SqlData->statement->execute(buf);
 				
 				// get Account name from Database
-				str_format(buf, sizeof(buf), "SELECT Username FROM %s_Account WHERE UserID='%d';", Data->m_SqlData->prefix, Data->UserID[Data->m_ClientID]);
+				str_format(buf, sizeof(buf), "SELECT Username FROM %s_Account WHERE UserID=%d;", Data->m_SqlData->prefix, Data->UserID[Data->m_ClientID]);
 				
 				// create results
 				Data->m_SqlData->results = Data->m_SqlData->statement->executeQuery(buf);
@@ -406,7 +406,7 @@ static void update_thread(void *user)
 		{
 			// check if Account exists
 			char buf[1024];
-			str_format(buf, sizeof(buf), "SELECT * FROM %s_Account WHERE UserID='%d';", Data->m_SqlData->prefix, Data->UserID[Data->m_ClientID]);
+			str_format(buf, sizeof(buf), "SELECT * FROM %s_Account WHERE UserID=%d;", Data->m_SqlData->prefix, Data->UserID[Data->m_ClientID]);
 			Data->m_SqlData->results = Data->m_SqlData->statement->executeQuery(buf);
 			if(Data->m_SqlData->results->next())
 			{
@@ -492,7 +492,7 @@ void CSQL::update_all()
 					continue;
 				
 				// check if Account exists
-				str_format(buf, sizeof(buf), "SELECT * FROM %s_Account WHERE UserID='%d';", prefix, GameServer()->m_apPlayers[i]->m_AccData.m_UserID);
+				str_format(buf, sizeof(buf), "SELECT * FROM %s_Account WHERE UserID=%d;", prefix, GameServer()->m_apPlayers[i]->m_AccData.m_UserID);
 				results = statement->executeQuery(buf);
 				if(results->next())
 				{

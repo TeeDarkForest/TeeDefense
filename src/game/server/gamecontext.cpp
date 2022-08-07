@@ -42,10 +42,13 @@ void CGameContext::Construct(int Resetting, bool ChangeMap)
 
 	if(Resetting==NO_RESET)
 		m_pVoteOptionHeap = new CHeap();
-	
-	m_pItemSystem = new CItemSystem(this);
-	m_pItemSystem->Reset();
 
+	if(!ChangeMap)
+	{	
+		m_pItemSystem = new CItemSystem(this);
+		m_pItemSystem->Reset();
+	}
+	
 	#ifdef CONF_SQL
 	/* SQL */
 	m_AccountData = new CAccountData;

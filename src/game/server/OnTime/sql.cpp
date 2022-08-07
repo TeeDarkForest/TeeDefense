@@ -336,7 +336,7 @@ static void login_thread(void *user)
 						GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Pickaxe = Data->m_SqlData->results->getInt("Pickaxe");
 						
 						// login should be the last thing
-						GameServer()->AccountData()->m_LoggedIn[Data->m_ClientID] = true;
+						GameServer()->m_apPlayers[Data->m_ClientID]->LoggedIn = true;
 						dbg_msg("SQL", "Account '%s' logged in sucessfully", Data->name);
 						
 						GameServer()->SendChatTarget(Data->m_ClientID, _("You are now logged in."));

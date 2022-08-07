@@ -1727,9 +1727,14 @@ void CGameContext::ConMe(IConsole::IResult *pResult, void *pUserData)
 	int Gold = Player->m_Knapsack.m_Resource[RESOURCE_GOLD];
 	int Diamond = Player->m_Knapsack.m_Resource[RESOURCE_DIAMOND];
 	int Enegry = Player->m_Knapsack.m_Resource[RESOURCE_ENEGRY];
+	int ZombieHeart = Player->m_Knapsack.m_Resource[RESOURCE_ZOMBIEHEART];
+	#ifdef CONF_SQL
+	if(!Player->LoggedIn)
+		pThis->SendChatTarget(pResult->GetClientID(), _("[Warning]: If you dont login or register a account, then when you left. you will lose EVERYTHING in this mod!"));
+	#endif
 	pThis->SendChatTarget(pResult->GetClientID(), _("Log: {int:Log}, Copper: {int:Copper}, Coal: {int:Coal},"), "Log", &Log, "Copper", &Copper, "Coal", &Coal, NULL);
 	pThis->SendChatTarget(pResult->GetClientID(), _("Iron: {int:Iron}, Gold: {int:Gold}, Diamond: {int:Diamond},"), "Iron", &Iron, "Gold", &Gold, "Diamond", &Diamond, NULL);
-	pThis->SendChatTarget(pResult->GetClientID(), _("Enegry: {int:Enegry}"), "Enegry", &Enegry, NULL);
+	pThis->SendChatTarget(pResult->GetClientID(), _("Enegry: {int:Enegry}, Zombie's Heart: {int:ZombieHeart}"), "Enegry", &Enegry, "ZombieHeart", ZombieHeart, NULL);
 }
 
 void CGameContext::ConLanguage(IConsole::IResult *pResult, void *pUserData)
@@ -1870,7 +1875,7 @@ void CGameContext::OnConsoleInit()
 	m_pServer = Kernel()->RequestInterface<IServer>();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 
-	m_ChatPrintCBIndex = Console()->RegisterPrintCallback(IConsole::OUTPUT_LEVEL_STANDARD, ConsoleOutputCallback_Chat, this);
+	m_ChatPrintCBIndex = Console()->RegisterPrintCallback(IConsole::OUTPUT_LEVEL_CHAT, ConsoleOutputCallback_Chat, this);
 	
 	Console()->Register("tune", "si", CFGFLAG_SERVER, ConTuneParam, this, "Tune variable to value");
 	Console()->Register("tune_reset", "", CFGFLAG_SERVER, ConTuneReset, this, "Reset tuning");

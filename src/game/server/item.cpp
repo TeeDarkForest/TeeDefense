@@ -156,7 +156,7 @@ void CItemSystem::InitItem()
        0,// Damage
         LEVEL_IRON,// Level
          -1,// TurretType
-          20,// Proba
+          70,// Proba
            24,// Speed
             10,// Log
              0,// Coal
@@ -252,7 +252,7 @@ void CItemSystem::InitItem()
        0,// Damage
         LEVEL_DIAMOND,// Level
          -1,// TurretType
-          20,// Proba
+          90,// Proba
            50,// Speed
             10,// Log
              0,// Coal
@@ -377,6 +377,57 @@ void CItemSystem::InitItem()
                 0, // Gold
                  100, // Diamond
                   250 // Enegry
+    );
+
+    CreateItem("follow grenade turret", // Name
+     m_IDs, // ID
+      ITYPE_TURRET, // ItemType
+       0, // Damage
+        LEVEL_IRON, // Level
+         TURRET_FOLLOW_GRENADE, // TurretType
+          90, // Proba
+           0, // Speed
+            10, // Log
+             500, // Coal
+              50, // Copper
+               0, // Iron
+                40, // Gold
+                 25, // Diamond
+                  1 // Enegry
+    );
+
+    CreateItem("freeze gun turret", // Name
+     m_IDs, // ID
+      ITYPE_TURRET, // ItemType
+       0, // Damage
+        LEVEL_ENEGRY, // Level
+         TURRET_LASER_2077, // TurretType
+          90, // Proba
+           0, // Speed
+            10, // Log
+             10, // Coal
+              10, // Copper
+               10, // Iron
+                20, // Gold
+                 1, // Diamond
+                  1 // Enegry
+    );
+
+    CreateItem("shotgun2077 turret", // Name
+     m_IDs, // ID
+      ITYPE_TURRET, // ItemType
+       0, // Damage
+        LEVEL_GOLD, // Level
+         TURRET_SHOTGUN_2077, // TurretType
+          90, // Proba
+           0, // Speed
+            10, // Log
+             10, // Coal
+              10, // Copper
+               10, // Iron
+                30, // Gold
+                 10, // Diamond
+                  1 // Enegry
     );
 }
 

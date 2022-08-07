@@ -69,7 +69,6 @@ CGameContext::~CGameContext()
 		delete m_apPlayers[i];
 	if(!m_Resetting)
 		delete m_pVoteOptionHeap;
-	delete m_pItemSystem;
 }
 
 void CGameContext::OnSetAuthed(int ClientID, int Level)
@@ -92,7 +91,7 @@ void CGameContext::Clear(bool ChangeMap)
 	#endif
 
 	m_Resetting = true;
-	this->~CGameContext();
+	delete m_pItemSystem;
 	mem_zero(this, sizeof(*this));
 	new (this) CGameContext(RESET, ChangeMap);
 

@@ -301,14 +301,14 @@ void CItemSystem::InitItem()
         LEVEL_ENEGRY,// Level
          -1,// TurretType
           100,// Proba
-           5000,// Speed
+           7000,// Speed
             5,// Log
              0,// Coal
               0,//Copper
                0,// Iron
                 0,// Gold
                  1000,// Diamond
-                  500//Enegry
+                  20//Enegry
     );
     
     CreateItem("gun turret", // Name

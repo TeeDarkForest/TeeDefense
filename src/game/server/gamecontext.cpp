@@ -1727,9 +1727,9 @@ void CGameContext::ConMe(IConsole::IResult *pResult, void *pUserData)
 	int Gold = Player->m_Knapsack.m_Resource[RESOURCE_GOLD];
 	int Diamond = Player->m_Knapsack.m_Resource[RESOURCE_DIAMOND];
 	int Enegry = Player->m_Knapsack.m_Resource[RESOURCE_ENEGRY];
-	pThis->SendChatTarget(pResult->GetClientID(), _("Log: {int:Log}, Copper: {int:Copper}, Coal: {int:Coal},"), "Log", &Log, "Copper", &Copper, "Coal", &Coal);
-	pThis->SendChatTarget(pResult->GetClientID(), _("Iron: {int:Iron}, Gold: {int:Gold}, Diamond: {int:Diamond},"), "Iron", &Iron, "Gold", &Gold, "Diamond", &Diamond);
-	pThis->SendChatTarget(pResult->GetClientID(), _("Enegry: {int:Enegry}"), "Enegry", &Enegry);
+	pThis->SendChatTarget(pResult->GetClientID(), _("Log: {int:Log}, Copper: {int:Copper}, Coal: {int:Coal},"), "Log", &Log, "Copper", &Copper, "Coal", &Coal, NULL);
+	pThis->SendChatTarget(pResult->GetClientID(), _("Iron: {int:Iron}, Gold: {int:Gold}, Diamond: {int:Diamond},"), "Iron", &Iron, "Gold", &Gold, "Diamond", &Diamond, NULL);
+	pThis->SendChatTarget(pResult->GetClientID(), _("Enegry: {int:Enegry}"), "Enegry", &Enegry, NULL);
 }
 
 void CGameContext::ConLanguage(IConsole::IResult *pResult, void *pUserData)
@@ -2056,7 +2056,6 @@ void CGameContext::ConRegister(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
 
-	dbg_msg("Register", "%d", pResult->NumArguments());
     if (pResult->NumArguments() != 2) {
         pSelf->SendChatTarget(pResult->GetClientID(), _("Usage: /register <username> <password>"));
         return;

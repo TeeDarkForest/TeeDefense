@@ -48,7 +48,7 @@ bool CSQL::connect()
 	} 
 	catch (sql::SQLException &e)
 	{
-		dbg_msg("SQL", "ERROR: SQL connection failed");
+		dbg_msg("SQL", "ERROR: SQL connection failed (%s)", e.what());
 		return false;
 	}
 }
@@ -156,7 +156,7 @@ static void create_account_thread(void *user)
 			}
 			catch (sql::SQLException &e)
 			{
-				dbg_msg("SQL", "ERROR: Could not create Account");
+				dbg_msg("SQL", "ERROR: Could not create Account (%s)", e.what());
 			}
 			
 			// disconnect from Database
@@ -298,7 +298,10 @@ static void login_thread(void *user)
 						// check if Account allready is logged in
 						for(int i = 0; i < ZOMBIE_START; i++)
 						{
-							if(GameServer()->AccountData()->UserID[i] == Data->m_SqlData->results->getInt("UserID"))
+							if(!GameServer()->m_apPlayers[i])
+								continue;
+
+							if(GameServer()->m_apPlayers[i]->m_AccData.m_UserID == Data->m_SqlData->results->getInt("UserID"))
 							{								
 								GameServer()->SendChatTarget(Data->m_ClientID, _("This Account is already logged in."));
 								

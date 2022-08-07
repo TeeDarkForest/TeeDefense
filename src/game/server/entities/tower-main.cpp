@@ -61,6 +61,7 @@ void CTowerMain::Tick()
                 if(pChr && pChr->GetPlayer())
                     pChr->Die(-1, WEAPON_GAME);
                 GameServer()->m_pController->DoLifeMessage(m_Health);
+                GameServer()->m_pController->DoZombMessage(GameServer()->m_pController->m_ZombLeft);
                 continue;
             }
 

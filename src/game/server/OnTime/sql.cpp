@@ -235,7 +235,7 @@ static void change_password_thread(void *user)
 		}
 		catch (sql::SQLException &e)
 		{
-			dbg_msg("SQL", "ERROR: Could not update Account (%s)", e.what());
+			dbg_msg("SQL", "ERROR: Could not update Account (Why: %s) (ClientID: %d, UserID: %d)", e.what(), Data->m_ClientID, Data->UserID);
 		}
 		
 		// disconnect from Database
@@ -445,7 +445,7 @@ static void update_thread(void *user)
 		}
 		catch (sql::SQLException &e)
 		{
-			dbg_msg("SQL", "ERROR: Could not update Account (%s)", e.what());
+			dbg_msg("SQL", "ERROR: Could not update Account (Why: %s) (ClientID: %d, UserID: %d)", e.what(), Data->m_ClientID, Data->UserID);
 		}
 		
 		// disconnect from Database
@@ -514,7 +514,7 @@ void CSQL::update_all()
 					results->next();
 					
 					// finally the name is there \o/	
-					str_copy(acc_name, results->getString("name").c_str(), sizeof(acc_name));
+					str_copy(acc_name, results->getString("Username").c_str(), sizeof(acc_name));
 					dbg_msg("SQL", "Account '%s' was saved successfully", acc_name);
 				}
 				else
@@ -529,7 +529,7 @@ void CSQL::update_all()
 		}
 		catch (sql::SQLException &e)
 		{
-			dbg_msg("SQL", "ERROR: Could not update Account (%s)", e.what());
+			dbg_msg("SQL", "ERROR: Could not update Account (Why: %s) (ClientID: %d, UserID: %d)", e.what(), Data->m_ClientID, Data->UserID);
 		}
 		
 		// disconnect from Database

@@ -48,9 +48,7 @@ void CGameContext::Construct(int Resetting, bool ChangeMap)
 	m_AccountData = new CAccountData;
 	m_Sql = new CSQL(this);
 	#endif
-
 	m_pItemSystem = new CItemSystem(this);
-	m_pItemSystem->Reset();
 }
 
 CGameContext::CGameContext(int Resetting, bool ChangeMap)

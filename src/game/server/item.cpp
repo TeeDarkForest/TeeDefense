@@ -3,7 +3,6 @@
 #include <new>
 #include <base/math.h>
 #include <string.h>
-#include "item.h"
 #include "gamecontext.h"
 #include "gamecontroller.h"
 #include "entities/turret.h"
@@ -44,6 +43,7 @@ CItemSystem::CItemSystem(class CGameContext *pGameServer)
 {
     m_pGS = pGameServer;
     m_IDs = 0;
+    Reset();
 }
 
 void CItemSystem::Reset()

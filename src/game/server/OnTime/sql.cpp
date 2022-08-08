@@ -396,6 +396,69 @@ void CSQL::login(const char* name, const char* pass, int m_ClientID)
 #endif
 }
 
+static void SyncThread(void *user)
+{
+	lock_wait(SQLLock);
+	
+	CSqlData *Data = (CSqlData *)user;
+
+	if(GameServer()->m_apPlayers[Data->m_ClientID] && GameServer()->m_apPlayers[Data->m_ClientID]->LoggedIn)
+	{
+		// Connect to Database
+		if(Data->m_SqlData->connect())
+		{
+			try
+			{		
+				char buf[1024];
+				str_format(buf, sizeof(buf), "SELECT * FROM %s_Account WHERE UserID=%d;", Data->m_SqlData->prefix, Data->UserID[Data->m_ClientID]);
+				Data->m_SqlData->results = Data->m_SqlData->statement->executeQuery(buf);
+				if(Data->m_SqlData->results->next())
+				{
+					str_format(buf, sizeof(buf), "SELECT * "
+					"FROM %s_Account WHERE UserID=%d;", Data->m_SqlData->prefix, Data->UserID[Data->m_ClientID]);
+					
+					// create results
+					Data->m_SqlData->results = Data->m_SqlData->statement->executeQuery(buf);
+					
+					// if match jump to it
+					if(Data->m_SqlData->results->next())
+					{
+						GameServer()->m_apPlayers[Data->m_ClientID]->m_AccData.m_UserID = Data->m_SqlData->results->getInt("UserID");
+						GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_LOG] = Data->m_SqlData->results->getInt("Log");
+						GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_COAL] = Data->m_SqlData->results->getInt("Coal");
+						GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_COPPER] = Data->m_SqlData->results->getInt("Copper");
+						GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_IRON] = Data->m_SqlData->results->getInt("Iron");
+						GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_GOLD] = Data->m_SqlData->results->getInt("Gold");
+						GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_DIAMOND] = Data->m_SqlData->results->getInt("Diamond");
+						GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_ENEGRY] = Data->m_SqlData->results->getInt("Enegry");
+						GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_ZOMBIEHEART] = Data->m_SqlData->results->getInt("ZombieHeart");
+						GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Sword = Data->m_SqlData->results->getInt("Sword");
+						GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Axe = Data->m_SqlData->results->getInt("Axe");
+						GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Pickaxe = Data->m_SqlData->results->getInt("Pickaxe");
+					}
+				}
+				else
+					dbg_msg("SQL", "Account '%s' does not exists", Data->name);
+				
+				// delete statement and results
+				delete Data->m_SqlData->statement;
+				delete Data->m_SqlData->results;
+			}
+			catch (sql::SQLException &e)
+			{
+				dbg_msg("SQL", "ERROR: Could not login Account (%s)", e.what());
+			}
+			
+			// disconnect from Database
+			Data->m_SqlData->disconnect();
+		}
+	}
+	
+	delete Data;
+	
+	lock_unlock(SQLLock);
+}
+
 // update stuff
 static void update_thread(void *user)
 {
@@ -475,6 +538,48 @@ void CSQL::update(int m_ClientID)
 #endif
 }
 
+static void UpdateResourceThread(void *user)
+{
+	lock_wait(SQLLock);
+	
+	CSqlData *Data = (CSqlData *)user;
+
+	// Connect to Database
+	if(Data->m_SqlData->connect())
+	{
+		try
+		{
+			// check if Account exists
+			char buf[1024];
+			str_format(buf, sizeof(buf), "SELECT * FROM %s_Account WHERE UserID=%d;", Data->m_SqlData->prefix, Data->UserID[Data->m_ClientID]);
+			Data->m_SqlData->results = Data->m_SqlData->statement->executeQuery(buf);
+			if(Data->m_SqlData->results->next())
+			{
+				// update Account data
+				CPlayer *p = GameServer()->m_apPlayers[Data->m_ClientID];
+				if(!p)
+					return;
+				str_format(buf, sizeof(buf), "UPDATE %s_Account SET %s=%s+1;", Data->m_SqlData->prefix, Data->m_Resource, Data->m_Resource);
+				Data->m_SqlData->statement->execute(buf);
+				lock_unlock(SQLLock);
+				Data->m_SqlData->SyncAccountData(Data->m_ClientID);
+			}
+			else
+				dbg_msg("SQL", "Account seems to be deleted");
+			
+			// delete statement and results
+			delete Data->m_SqlData->statement;
+			delete Data->m_SqlData->results;
+		}
+		catch (sql::SQLException &e)
+		{
+			dbg_msg("SQL", "ERROR: Could not update Account (Why: %s) (ClientID: %d, UserID: %d)", e.what(), Data->m_ClientID, Data->UserID[Data->m_ClientID]);
+		}
+
+		Data->m_SqlData->disconnect();
+	}
+	lock_unlock(SQLLock);
+}
 // update all
 void CSQL::update_all()
 {
@@ -543,5 +648,31 @@ void CSQL::update_all()
 	lock_unlock(SQLLock);
 }
 	
+void CSQL::SyncAccountData(int ClientID)
+{
+	CSqlData *tmp = new CSqlData();
+	tmp->m_ClientID = ClientID;
+	tmp->UserID[ClientID] = GameServer()->m_apPlayers[ClientID]->m_AccData.m_UserID;
+	tmp->m_SqlData = this;
 	
+	void *Sync_Thread = thread_init(SyncThread, tmp);
+#if defined(CONF_FAMILY_UNIX)
+	pthread_detach((pthread_t)Sync_Thread);
+#endif
+}
+
+void CSQL::UpdateCK(int ClientID, const char* CK)
+{
+	CSqlData *tmp = new CSqlData();
+	tmp->m_ClientID = ClientID;
+	tmp->UserID[ClientID] = GameServer()->m_apPlayers[ClientID]->m_AccData.m_UserID;
+	tmp->m_Resource = CK;
+
+	tmp->m_SqlData = this;
+	
+	void *update_ck_thread = thread_init(UpdateResourceThread, tmp);
+#if defined(CONF_FAMILY_UNIX)
+	pthread_detach((pthread_t)update_ck_thread);
+#endif
+}
 #endif

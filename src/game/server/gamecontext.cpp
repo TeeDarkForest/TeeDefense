@@ -942,19 +942,27 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				str_format(aDesc, sizeof(aDesc), "move '%s' to spectators", Server()->ClientName(SpectateID));
 				str_format(aCmd, sizeof(aCmd), "set_team %d -1 %d", SpectateID, g_Config.m_SvVoteSpectateRejoindelay);
 			}
-			std::string ItemCode(aCmd);
+			std::string Command(aCmd);
 			if (str_comp(aCmd, "ccv_skip") == 0)
 			{
 				return;
 			}
-			else if(ItemCode.find("ccv_") == 0)
+			else if(Command.find("ccv_make ") == 0)
 			{
 				char ItemName[128];
-				mem_copy(ItemName, aCmd+4, sizeof(ItemName));
+				mem_copy(ItemName, aCmd+9, sizeof(ItemName));
 				if(m_apPlayers[ClientID] && GetPlayerChar(ClientID) && GetPlayerChar(ClientID)->IsAlive())
 					MakeItem(ItemName, ClientID);
 				return;
 			}
+			#ifdef CONF_SQL
+			else if(Command.find("ccv_sync") == 0)
+			{
+				if(m_apPlayers[ClientID] && GetPlayerChar(ClientID) && GetPlayerChar(ClientID)->IsAlive() && m_apPlayers[ClientID]->LoggedIn)
+					Sql()->SyncAccountData((ClientID));
+				return;
+			}
+			#endif
 
 			if(aCmd[0])
 			{
@@ -2704,7 +2712,9 @@ void CGameContext::MakeItem(const char* pItemName, int ClientID)
             m_apPlayers[ClientID]->m_Knapsack.m_Resource[i] -= MakeItem.m_NeedResource[i];
         }
         
-
+		#ifdef CONF_SQL
+		Sql()->SyncAccountData(ClientID);
+		#endif
         switch (MakeItem.m_Type)
         {
             case ITYPE_AXE: 

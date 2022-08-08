@@ -408,28 +408,33 @@ int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 		int rando = rand()%100 + 1;
 		if(rando <= 50)
 		{
-			pKiller->m_Knapsack.m_Resource[RESOURCE_LOG]++;
+			#ifdef CONF_SQL
+			if(pKiller->LoggedIn)
+				GameServer()->Sql()->UpdateCK(pKiller->GetCID(), "Log");
+			#endif
 			GameServer()->SendChatTarget(pKiller->GetCID(), _("You got 1 Log from the Zombie"));
 		}
 		else if(rando >= 51 && rando <= 75)
 		{
-			pKiller->m_Knapsack.m_Resource[RESOURCE_COPPER]++;
+			#ifdef CONF_SQL
+			if(pKiller->LoggedIn)
+				GameServer()->Sql()->UpdateCK(pKiller->GetCID(), "Copper");
+			#endif
 			GameServer()->SendChatTarget(pKiller->GetCID(), _("You got 1 Copper from the Zombie"));
 		}
 		else if(rando <= 99)
 		{
-			pKiller->m_Knapsack.m_Resource[RESOURCE_ZOMBIEHEART]++;
-			GameServer()->SendChatTarget(pKiller->GetCID(), _("You picked up Zombie's Heart"));
-		}
-		else
-		{
-			pKiller->m_Knapsack.m_Resource[RESOURCE_GOLD]++;
+			#ifdef CONF_SQL
+			if(pKiller->LoggedIn)
+				GameServer()->Sql()->UpdateCK(pKiller->GetCID(), "Gold");
+			#endif
 			GameServer()->SendChatTarget(pKiller->GetCID(), _("You picked up a Gold"));
 		}
 		#ifdef CONF_SQL
 		if(pKiller->LoggedIn)
-			GameServer()->Sql()->update(pKiller->GetCID());
+			GameServer()->Sql()->UpdateCK(pKiller->GetCID(), "ZombieHeart");
 		#endif
+		GameServer()->SendChatTarget(pKiller->GetCID(), _("You picked up Zombie's Heart"));
 		pKiller->m_Score++;
 		DoZombMessage(m_ZombLeft--);
 	}

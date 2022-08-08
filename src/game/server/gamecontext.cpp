@@ -63,10 +63,6 @@ CGameContext::CGameContext()
 
 CGameContext::~CGameContext()
 {
-	for(auto &pPlayer : m_apPlayers)
-		delete pPlayer;
-	if(!m_Resetting)
-		delete m_pVoteOptionHeap;
 	delete m_pItemSystem;
 }
 
@@ -90,6 +86,10 @@ void CGameContext::Clear(bool ChangeMap)
 	#endif
 
 	m_Resetting = true;
+	for(auto &pPlayer : m_apPlayers)
+		delete pPlayer;
+	if(!m_Resetting)
+		delete m_pVoteOptionHeap;
 	//this->~CGameContext();
 	mem_zero(this, sizeof(*this));
 	new (this) CGameContext(RESET, ChangeMap);

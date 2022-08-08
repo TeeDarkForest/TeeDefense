@@ -35,8 +35,10 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team, int Zomb)
 	}
 	idMap[0] = ClientID;
 
+	#ifdef CONF_SQL
 	m_AccData.m_UserID = 0;
 	LoggedIn = false;
+	#endif
 	if(!Zomb)
 		ResetKnapsack();
 	//Zomb2

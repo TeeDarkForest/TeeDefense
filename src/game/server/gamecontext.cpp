@@ -48,9 +48,7 @@ void CGameContext::Construct(int Resetting, bool ChangeMap)
 	m_AccountData = new CAccountData;
 	m_Sql = new CSQL(this);
 	#endif
-
 	m_pItemSystem = new CItemSystem(this);
-	m_pItemSystem->Reset();
 }
 
 CGameContext::CGameContext(int Resetting, bool ChangeMap)
@@ -65,10 +63,6 @@ CGameContext::CGameContext()
 
 CGameContext::~CGameContext()
 {
-	for(int i = 0; i < MAX_CLIENTS; i++)
-		delete m_apPlayers[i];
-	if(!m_Resetting)
-		delete m_pVoteOptionHeap;
 	delete m_pItemSystem;
 }
 
@@ -92,7 +86,11 @@ void CGameContext::Clear(bool ChangeMap)
 	#endif
 
 	m_Resetting = true;
-	this->~CGameContext();
+	for(auto &pPlayer : m_apPlayers)
+		delete pPlayer;
+	if(!m_Resetting)
+		delete m_pVoteOptionHeap;
+	delete m_pItemSystem;
 	mem_zero(this, sizeof(*this));
 	new (this) CGameContext(RESET, ChangeMap);
 

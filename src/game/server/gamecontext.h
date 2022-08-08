@@ -16,6 +16,7 @@
 #include "gamecontroller.h"
 #include "gameworld.h"
 #include "player.h"
+#include <vector>
 #include "item.h"
 
 #ifdef CONF_SQL
@@ -52,13 +53,13 @@ typedef unsigned __int64 uint64_t;
 			All players (CPlayer::snap)
 
 */
+
 class CGameContext : public IGameServer
 {
 	IServer *m_pServer;
 	class IConsole *m_pConsole;
 	CLayers m_Layers;
 	CCollision m_Collision;
-	CItemSystem *m_pItemSystem;
 	CNetObjHandler m_NetObjHandler;
 	CTuningParams m_Tuning;
 
@@ -127,7 +128,6 @@ public:
 	CAccountData *AccountData() {return m_AccountData; };
 	void LogoutAccount(int ClientID);
 	#endif
-	CItemSystem *ItemSystem() const { return m_pItemSystem; }
 	
 	CGameContext();
 	~CGameContext();
@@ -242,6 +242,41 @@ public:
 	bool m_NeedResetTower;
 	bool GetPaused();
 	int m_TowerHealth;
+
+	int m_ItemID;
+	void InitItems();
+	void CreateItem(const char* pItemName, int ID, int Type, int Damage, int Level, int TurretType, int Proba, 
+		        int Speed, int Log, int Coal, int Copper, int Iron, int Gold, int Diamond, int Enegry, int ZombieHeart = 0);
+	struct CItem
+	{
+		const char* m_Name;
+    	int m_Type;
+    	int m_NeedResource[NUM_RESOURCE];
+    	int m_Proba;
+    	int m_Level;
+    	int m_Damage;
+    	int m_Speed;
+    	int m_ID;
+    	int m_TurretType;
+	};
+	
+	int GetItemId(const char* pItemName);
+
+	int GetSpeed(int Level, int Type);
+
+    int GetDmg(int Level);
+
+	void MakeItem(const char* pItemName, int ClientID);
+
+    bool CheckItemName(const char* pItemName);
+
+    void SendCantMakeItemChat(int To, int *Resource);
+
+    void SendMakeItemChat(int To, CItem Item);
+
+    void SendMakeItemFailedChat(int To, int* Resource);
+		
+	std::vector<CItem> m_vItem;
 };
 
 inline int64_t CmaskAll() { return -1LL; }

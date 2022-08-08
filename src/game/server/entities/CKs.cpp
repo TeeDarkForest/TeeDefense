@@ -119,7 +119,7 @@ void CKs::Tick()
 
 				pChr->m_InMining = true;
 				GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP);
-				Picking(GameServer()->ItemSystem()->GetSpeed(pChr->GetPlayer()->m_Knapsack.m_Axe,ITYPE_AXE), pChr->GetPlayer());
+				//Picking(GameServer()->ItemSystem()->GetSpeed(pChr->GetPlayer()->m_Knapsack.m_Axe,ITYPE_AXE), pChr->GetPlayer());
 				return;
 			}
 			else if(m_Type == CK_WOOD) 
@@ -129,10 +129,10 @@ void CKs::Tick()
 			}
 			else if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe >= 0)
 			{
-				if(m_Type == CK_ENEGRY)
-					PickSpeed = GameServer()->ItemSystem()->GetSpeed(pChr->GetPlayer()->m_Knapsack.m_Pickaxe,ITYPE_PICKAXE) / 2;
-				else
-					PickSpeed = GameServer()->ItemSystem()->GetSpeed(pChr->GetPlayer()->m_Knapsack.m_Pickaxe,ITYPE_PICKAXE);
+				//if(m_Type == CK_ENEGRY)
+					//PickSpeed = GameServer()->ItemSystem()->GetSpeed(pChr->GetPlayer()->m_Knapsack.m_Pickaxe,ITYPE_PICKAXE) / 2;
+				//else
+					//PickSpeed = GameServer()->ItemSystem()->GetSpeed(pChr->GetPlayer()->m_Knapsack.m_Pickaxe,ITYPE_PICKAXE);
 			}
 
 			pChr->GetPlayer()->m_MiningType = m_Type;

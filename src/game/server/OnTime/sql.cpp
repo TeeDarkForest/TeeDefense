@@ -2,6 +2,7 @@
 /* SQL class 0.5 by Sushi */
 /* SQL class 0.6 by FFS   */
 #include "../gamecontext.h"
+#include "../item.h"
 
 #include <engine/shared/config.h>
 

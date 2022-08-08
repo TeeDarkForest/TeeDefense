@@ -63,8 +63,8 @@ CGameContext::CGameContext()
 
 CGameContext::~CGameContext()
 {
-	for(int i = 0; i < MAX_CLIENTS; i++)
-		delete m_apPlayers[i];
+	for(auto &pPlayer : m_apPlayers)
+		delete pPlayer;
 	if(!m_Resetting)
 		delete m_pVoteOptionHeap;
 }

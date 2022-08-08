@@ -64,7 +64,8 @@ class CItemSystem
 public:
 
     CItemSystem(class CGameContext *pGameServer);
-
+    ~CItemSystem();
+    
     CItem *m_ItemList[CURRENT_ITEM_NUM];
 
     bool CreateItem(const char* pItemName, int ID, int Type, int Damage, int Level, int TurretType, int Proba, 

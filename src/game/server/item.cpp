@@ -46,11 +46,15 @@ CItemSystem::CItemSystem(class CGameContext *pGameServer)
     Reset();
 }
 
-void CItemSystem::Reset()
+CItemSystem::~CItemSystem()
 {
     for(int i = 0; i < CURRENT_ITEM_NUM; i++)
         if(m_ItemList[i])
             m_ItemList[i]->Reset();
+}
+
+void CItemSystem::Reset()
+{
     InitItem();
 }
 

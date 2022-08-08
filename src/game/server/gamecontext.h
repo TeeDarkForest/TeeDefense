@@ -118,7 +118,6 @@ public:
 	IServer *Server() const { return m_pServer; }
 	class IConsole *Console() { return m_pConsole; }
 	CCollision *Collision() { return &m_Collision; }
-	CItemSystem *ItemSystem() { return m_pItemSystem; }
 	CTuningParams *Tuning() { return &m_Tuning; }
 	virtual class CLayers *Layers() { return &m_Layers; }
 
@@ -128,6 +127,7 @@ public:
 	CAccountData *AccountData() {return m_AccountData; };
 	void LogoutAccount(int ClientID);
 	#endif
+	CItemSystem *ItemSystem() const { return m_pItemSystem; }
 	
 	CGameContext();
 	~CGameContext();

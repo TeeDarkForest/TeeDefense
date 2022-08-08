@@ -809,9 +809,6 @@ void CCharacter::Die(int Killer, int Weapon)
 {
 	if(!GetPlayer())
 		return;
-	
-	if(Killer < 0)
-		return;
 
 	m_pPlayer->m_LockedCK = false;
 	// we got to wait 0.5 secs before respawning
@@ -1372,6 +1369,7 @@ void CCharacter::Teleport(vec2 Pos)
 
 	m_Core.m_HookPos = m_Pos;
 	m_Core.m_HookedPlayer = -1;
+	m_Core.Reset();
 	
 	m_Pos = Pos;
 	m_Core.m_Pos = m_Pos;

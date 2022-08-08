@@ -35,6 +35,10 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team, int Zomb)
 	}
 	idMap[0] = ClientID;
 
+	#ifdef CONF_SQL
+	m_AccData.m_UserID = 0;
+	LoggedIn = false;
+	#endif
 	if(!Zomb)
 		ResetKnapsack();
 	//Zomb2
@@ -313,10 +317,11 @@ void CPlayer::OnDisconnect(const char *pReason)
 {
 	#ifdef CONF_SQL
 	if(!GetZomb() && LoggedIn)
-		GameServer()->Sql()->update(m_ClientID);
+	{
+		dbg_msg("saa","LO");
+		GameServer()->LogoutAccount(m_ClientID);
+	}
 	#endif
-	ResetKnapsack();
-	KillCharacter();
 
 	if(Server()->ClientIngame(m_ClientID) && !m_Zomb)
 	{
@@ -335,6 +340,9 @@ void CPlayer::OnDisconnect(const char *pReason)
 		str_format(aBuf, sizeof(aBuf), "leave player='%d:%s'", m_ClientID, Server()->ClientName(m_ClientID));
 		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
 	}
+
+	ResetKnapsack();
+	KillCharacter();
 }
 
 void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput)

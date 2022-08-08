@@ -1,6 +1,6 @@
 sv_name ""
 sv_rcon_password rcon
-sv_map Mine-Craft
+sv_map TDeF-Shwar
 
 ffs_password
 xc_password
@@ -10,9 +10,11 @@ sv_max_clients 48
 sv_register 1
 
 add_vote "跳过热身,开始召唤僵尸（谨慎选择）" "skip_warmup"
-add_vote "地图：我的世界" "sv_map Mine-Craft"
-add_vote "地图：0号地区" "sv_map TDef-Zero"
 add_vote "地图：深层矿井"sv_map TDeF-Shwar"
+add_vote "地图：0号地区" "sv_map TDef-Zero"
+add_vote "地图：继续深入" "sv_map TDef-Deeply"
+add_vote "地图：我的世界" "sv_map Mine-Craft"
+add_vote "地图：你的《Minecraft》" "sv_map yours_minecraft"
 
 
 add_command_vote ======= 制作 =======" "null"

@@ -47,7 +47,6 @@ CKs::CKs(CGameWorld *pGameWorld, int Type, vec2 Pos, int ID, int SubType)
 		break;
 	}
 
-	m_ID = ID;
 	m_LockPlayer = -1;
 
 	Reset();
@@ -71,27 +70,16 @@ void CKs::HandleLockPlayer()
 	if(!GameServer()->GetPlayerChar(m_LockPlayer)->IsAlive())
 		return;
 
-	if(!GameServer()->m_apPlayers[m_LockPlayer]->m_LockedCK)
+	else
 	{
-		m_LockPlayer = -1;
-		return;
+		GameServer()->GetPlayerChar(m_LockPlayer)->Teleport(m_Pos);
 	}
-	
-	GameServer()->GetPlayerChar(m_LockPlayer)->Teleport(m_Pos);
 }
 
 void CKs::Tick()
 {
 	if(m_SpawnTick >= 0)
 		m_SpawnTick--;
-	if(GameServer()->GetPlayerChar(m_LockPlayer) && !GameServer()->GetPlayerChar(m_LockPlayer)->IsAlive())
-		m_LockPlayer = 0;
-	if((m_LockPlayer >= 0 && GameServer()->GetPlayerChar(m_LockPlayer) && GameServer()->GetPlayerChar(m_LockPlayer)->m_LatestInput.m_Jump))
-	{
-		//GameServer()->GetPlayerChar(m_LockPlayer)->GetPlayer()->m_LockedCK = false;
-		m_LockPlayer = -1;
-		m_SpawnTick = 50;
-	}
 	// Check if a player intersected us
 	CCharacter *pChr = GameServer()->m_World.ClosestCharacter(m_Pos, 20.0f, 0);
 	if(pChr && pChr->IsAlive() && !pChr->GetPlayer()->GetZomb())
@@ -103,21 +91,32 @@ void CKs::Tick()
 		/*If u have wooden pickaxe, u can mine all 'CKs' low then Iron(not include logs)*/
 		/*          copper                                        Gold                  */
 		/*          iron                                          Diamond               */
-		/*          gold                                          NULL                  */
+		/*          gold                                          NULL                  */
 
 		int RespawnTime = -1;
 		int PickSpeed = 1;
 		
-		if(pChr->GetPlayer()->PressTab() && m_SpawnTick <= 0/* && !GameServer()->GetPlayerChar(m_LockPlayer)->GetPlayer()->m_LockedCK*/)
+		if(GameServer()->GetPlayerChar(m_LockPlayer) && !GameServer()->GetPlayerChar(m_LockPlayer)->IsAlive())
+			m_LockPlayer = 0;
+		
+		if(pChr->GetPlayer()->PressTab() && m_SpawnTick <= 0)
 		{
-			//GameServer()->GetPlayerChar(m_LockPlayer)->GetPlayer()->m_LockedCK = true;
 			m_LockPlayer = pChr->GetCID();
 			m_SpawnTick = 50;
 		}
-		if(pChr->m_LatestInput.m_Fire&1 && pChr->m_ActiveWeapon == WEAPON_HAMMER && pChr->GetPlayer()->m_MiningTick <= 0)
+
+		if(m_LockPlayer >= 0 && GameServer()->GetPlayerChar(m_LockPlayer) && GameServer()->GetPlayerChar(m_LockPlayer)->m_LatestInput.m_Jump)
+		{
+			GameServer()->GetPlayerChar(m_LockPlayer);
+			m_LockPlayer = -1;
+			m_SpawnTick = 50;
+		}
+		HandleLockPlayer();
+		if(pChr->m_LatestInput.m_Fire&1&& pChr->m_ActiveWeapon == WEAPON_HAMMER && pChr->GetPlayer()->m_MiningTick <= 0)
 		{
 			if(pChr->GetPlayer()->m_Knapsack.m_Axe >= 0 && m_Type == CK_WOOD)
 			{
+
 				pChr->m_InMining = true;
 				GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP);
 				Picking(GameServer()->ItemSystem()->GetSpeed(pChr->GetPlayer()->m_Knapsack.m_Axe,ITYPE_AXE), pChr->GetPlayer());
@@ -196,7 +195,6 @@ void CKs::Tick()
 			
 		}
 	}
-	HandleLockPlayer();
 }
 
 void CKs::Picking(int Time, CPlayer *Player)
@@ -215,32 +213,32 @@ void CKs::Picking(int Time, CPlayer *Player)
 		case CK_COAL:
 			Player->m_Knapsack.m_Resource[RESOURCE_COAL]++;
 			GameServer()->SendChatTarget(CID, _("You picked up a Coal"));
-			m_Health = 800;
+			m_Health = 8000;
 			break;
 		case CK_COPPER:
 			Player->m_Knapsack.m_Resource[RESOURCE_COPPER]++;
 			GameServer()->SendChatTarget(CID, _("You picked up a Copper"));
-			m_Health = 1600;
+			m_Health = 16000;
 			break;
 		case CK_IRON:
 			Player->m_Knapsack.m_Resource[RESOURCE_IRON]++;
 			GameServer()->SendChatTarget(CID, _("You picked up a Iron"));
-			m_Health = 4000;
+			m_Health = 40000;
 			break;
 		case CK_GOLD:
 			Player->m_Knapsack.m_Resource[RESOURCE_GOLD]++;
 			GameServer()->SendChatTarget(CID, _("You picked up a Gold"));
-			m_Health = 6000;
+			m_Health = 60000;
 			break;
 		case CK_DIAMONAD:
 			Player->m_Knapsack.m_Resource[RESOURCE_DIAMOND]++;
 			GameServer()->SendChatTarget(CID, _("You picked up a Diamond"));
-			m_Health = 10000;
+			m_Health = 500000;
 			break;
 		case CK_ENEGRY:
 			Player->m_Knapsack.m_Resource[RESOURCE_ENEGRY]++;
 			GameServer()->SendChatTarget(CID, _("You picked up a Enegry"));
-			m_Health = 15000;
+			m_Health = 3000000;
 			break;
 		
 		default:

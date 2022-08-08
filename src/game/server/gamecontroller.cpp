@@ -405,21 +405,26 @@ int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 
 	if(pVictim->GetPlayer()->GetZomb())
 	{
-		int rando = rand()%20 + 1;
-		if(rando <= 10)
+		int rando = rand()%100 + 1;
+		if(rando <= 50)
 		{
 			pKiller->m_Knapsack.m_Resource[RESOURCE_LOG]++;
 			GameServer()->SendChatTarget(pKiller->GetCID(), _("You got 1 Log from the Zombie"));
 		}
-		else if(rando >= 15)
+		else if(rando >= 51 && rando <= 75)
 		{
 			pKiller->m_Knapsack.m_Resource[RESOURCE_COPPER]++;
 			GameServer()->SendChatTarget(pKiller->GetCID(), _("You got 1 Copper from the Zombie"));
 		}
+		else if(rando <= 99)
+		{
+			pKiller->m_Knapsack.m_Resource[RESOURCE_ZOMBIEHEART]++;
+			GameServer()->SendChatTarget(pKiller->GetCID(), _("You picked up Zombie's Heart"));
+		}
 		else
 		{
-			// Give Player zombie's heart.
-			GameServer()->SendChatTarget(pKiller->GetCID(), _("You picked up Zombie's Heart"));
+			pKiller->m_Knapsack.m_Resource[RESOURCE_GOLD]++;
+			GameServer()->SendChatTarget(pKiller->GetCID(), _("You picked up a Gold"));
 		}
 		#ifdef CONF_SQL
 		if(pKiller->LoggedIn)

@@ -1,5 +1,6 @@
 #ifdef CONF_SQL
-/* SQL class by Sushi */
+/* SQL class 0.5 by Sushi */
+/* SQL class 0.6 by FFS   */
 #include "../gamecontext.h"
 
 #include <engine/shared/config.h>
@@ -43,12 +44,11 @@ bool CSQL::connect()
 		
 		// Connect to specific Database
 		connection->setSchema(Database);
-		dbg_msg("SQL", "SQL connection established");
 		return true;
 	} 
 	catch (sql::SQLException &e)
 	{
-		dbg_msg("SQL", "ERROR: SQL connection failed");
+		dbg_msg("SQL", "ERROR: SQL connection failed (%s)", e.what());
 		return false;
 	}
 }
@@ -62,7 +62,7 @@ void CSQL::disconnect()
 	}
 	catch (sql::SQLException &e)
 	{
-		dbg_msg("SQL", "ERROR: No SQL connection");
+		dbg_msg("SQL", "ERROR: No SQL connection (%s)", e.what());
 	}
 }
 
@@ -94,7 +94,10 @@ void CSQL::create_tables()
 			"Pickaxe BIGINT DEFAULT 0, "
 			"SName VARCHAR(32) DEFAULT 0, "
 			"Skill BIGINT DEFAULT 0, "
-			"Wave BIGINT DEFAULT 0);", prefix);
+			"Wave BIGINT DEFAULT 0, "
+			"qq VARCHAR(32) DEFAULT -1, "
+			"checktime date DEFAULT '1000-01-01', "
+			"checkhead TINYINT(1) DEFAULT 0);", prefix);
 			statement->execute(buf);
 			dbg_msg("SQL", "Tables were created successfully");
 
@@ -103,7 +106,7 @@ void CSQL::create_tables()
 		}
 		catch (sql::SQLException &e)
 		{
-			dbg_msg("SQL", "ERROR: Tables were NOT created");
+			dbg_msg("SQL", "ERROR: Tables were NOT created (%s)", e.what());
 		}
 		
 		// disconnect from Database
@@ -132,9 +135,9 @@ static void create_account_thread(void *user)
 				if(Data->m_SqlData->results->next())
 				{
 					// Account found
-					dbg_msg("SQL", "Account '%s' allready exists", Data->name);
+					dbg_msg("SQL", "Account '%s' already exists", Data->name);
 					
-					GameServer()->SendChatTarget(Data->m_ClientID, "This acoount allready exists!");
+					GameServer()->SendChatTarget(Data->m_ClientID, "This acoount already exists!");
 				}
 				else
 				{
@@ -147,7 +150,7 @@ static void create_account_thread(void *user)
 					dbg_msg("SQL", "Account '%s' was successfully created", Data->name);
 					
 					GameServer()->SendChatTarget(Data->m_ClientID, "Acoount was created successfully.");
-					GameServer()->SendChatTarget(Data->m_ClientID, "You may login now. (/login <user> <pass>)");
+					Data->m_SqlData->login(Data->name, Data->pass, Data->m_ClientID);
 				}
 				
 				// delete statement
@@ -156,7 +159,7 @@ static void create_account_thread(void *user)
 			}
 			catch (sql::SQLException &e)
 			{
-				dbg_msg("SQL", "ERROR: Could not create Account");
+				dbg_msg("SQL", "ERROR: Could not create Account (%s)", e.what());
 			}
 			
 			// disconnect from Database
@@ -205,11 +208,11 @@ static void change_password_thread(void *user)
 			if(Data->m_SqlData->results->next())
 			{
 				// update Account data
-				str_format(buf, sizeof(buf), "UPDATE %s_Account SET Password='%s' WHERE UserID='%d'", Data->m_SqlData->prefix, Data->pass, Data->UserID[Data->m_ClientID]);
+				str_format(buf, sizeof(buf), "UPDATE %s_Account SET Password='%s' WHERE UserID=%d", Data->m_SqlData->prefix, Data->pass, Data->UserID[Data->m_ClientID]);
 				Data->m_SqlData->statement->execute(buf);
 				
 				// get Account name from Database
-				str_format(buf, sizeof(buf), "SELECT Username FROM %s_Account WHERE UserID='%d';", Data->m_SqlData->prefix, Data->UserID[Data->m_ClientID]);
+				str_format(buf, sizeof(buf), "SELECT Username FROM %s_Account WHERE UserID=%d;", Data->m_SqlData->prefix, Data->UserID[Data->m_ClientID]);
 				
 				// create results
 				Data->m_SqlData->results = Data->m_SqlData->statement->executeQuery(buf);
@@ -236,7 +239,7 @@ static void change_password_thread(void *user)
 		}
 		catch (sql::SQLException &e)
 		{
-			dbg_msg("SQL", "ERROR: Could not update Account");
+			dbg_msg("SQL", "ERROR: Could not update Account (Why: %s) (ClientID: %d, UserID: %d)", e.what(), Data->m_ClientID, Data->UserID);
 		}
 		
 		// disconnect from Database
@@ -268,8 +271,8 @@ static void login_thread(void *user)
 	lock_wait(SQLLock);
 	
 	CSqlData *Data = (CSqlData *)user;
-	
-	if(GameServer()->m_apPlayers[Data->m_ClientID] && !GameServer()->m_apPlayers[Data->m_ClientID]->m_AccData.m_UserID)
+
+	if(GameServer()->m_apPlayers[Data->m_ClientID] && !GameServer()->m_apPlayers[Data->m_ClientID]->LoggedIn)
 	{
 		// Connect to Database
 		if(Data->m_SqlData->connect())
@@ -298,7 +301,10 @@ static void login_thread(void *user)
 						// check if Account allready is logged in
 						for(int i = 0; i < ZOMBIE_START; i++)
 						{
-							if(GameServer()->AccountData()->UserID[i] == Data->m_SqlData->results->getInt("UserID"))
+							if(!GameServer()->m_apPlayers[i])
+								continue;
+
+							if(GameServer()->m_apPlayers[i]->m_AccData.m_UserID == Data->m_SqlData->results->getInt("UserID"))
 							{								
 								GameServer()->SendChatTarget(Data->m_ClientID, _("This Account is already logged in."));
 								
@@ -333,7 +339,7 @@ static void login_thread(void *user)
 						GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Pickaxe = Data->m_SqlData->results->getInt("Pickaxe");
 						
 						// login should be the last thing
-						GameServer()->AccountData()->m_LoggedIn[Data->m_ClientID] = true;
+						GameServer()->m_apPlayers[Data->m_ClientID]->LoggedIn = true;
 						dbg_msg("SQL", "Account '%s' logged in sucessfully", Data->name);
 						
 						GameServer()->SendChatTarget(Data->m_ClientID, _("You are now logged in."));
@@ -382,7 +388,6 @@ void CSQL::login(const char* name, const char* pass, int m_ClientID)
 	str_copy(tmp->pass, pass, sizeof(tmp->pass));
 	tmp->m_ClientID = m_ClientID;
 	tmp->m_SqlData = this;
-	tmp->UserID[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_UserID;
 	
 	void *login_account_thread = thread_init(login_thread, tmp);
 #if defined(CONF_FAMILY_UNIX)
@@ -396,7 +401,7 @@ static void update_thread(void *user)
 	lock_wait(SQLLock);
 	
 	CSqlData *Data = (CSqlData *)user;
-	
+
 	// Connect to Database
 	if(Data->m_SqlData->connect())
 	{
@@ -404,7 +409,7 @@ static void update_thread(void *user)
 		{
 			// check if Account exists
 			char buf[1024];
-			str_format(buf, sizeof(buf), "SELECT * FROM %s_Account WHERE UserID='%d';", Data->m_SqlData->prefix, Data->UserID[Data->m_ClientID]);
+			str_format(buf, sizeof(buf), "SELECT * FROM %s_Account WHERE UserID=%d;", Data->m_SqlData->prefix, Data->UserID[Data->m_ClientID]);
 			Data->m_SqlData->results = Data->m_SqlData->statement->executeQuery(buf);
 			if(Data->m_SqlData->results->next())
 			{
@@ -422,10 +427,10 @@ static void update_thread(void *user)
 				p->m_Knapsack.m_Axe,p->m_Knapsack.m_Pickaxe,Data->UserID[Data->m_ClientID] \
 				);
 				Data->m_SqlData->statement->execute(buf);
-				
+				// get Account name from database
+				str_format(buf, sizeof(buf), "SELECT Username FROM %s_Account WHERE UserID=%d;", Data->m_SqlData->prefix, Data->UserID[Data->m_ClientID]);
 				// create results
 				Data->m_SqlData->results = Data->m_SqlData->statement->executeQuery(buf);
-
 				// jump to result
 				Data->m_SqlData->results->next();
 				
@@ -443,7 +448,7 @@ static void update_thread(void *user)
 		}
 		catch (sql::SQLException &e)
 		{
-			dbg_msg("SQL", "ERROR: Could not update Account (%s)", e.what());
+			dbg_msg("SQL", "ERROR: Could not update Account (Why: %s) (ClientID: %d, UserID: %d)", e.what(), Data->m_ClientID, Data->UserID[Data->m_ClientID]);
 		}
 		
 		// disconnect from Database
@@ -490,7 +495,7 @@ void CSQL::update_all()
 					continue;
 				
 				// check if Account exists
-				str_format(buf, sizeof(buf), "SELECT * FROM %s_Account WHERE UserID='%d';", prefix, GameServer()->m_apPlayers[i]->m_AccData.m_UserID);
+				str_format(buf, sizeof(buf), "SELECT * FROM %s_Account WHERE UserID=%d;", prefix, GameServer()->m_apPlayers[i]->m_AccData.m_UserID);
 				results = statement->executeQuery(buf);
 				if(results->next())
 				{
@@ -512,7 +517,7 @@ void CSQL::update_all()
 					results->next();
 					
 					// finally the name is there \o/	
-					str_copy(acc_name, results->getString("name").c_str(), sizeof(acc_name));
+					str_copy(acc_name, results->getString("Username").c_str(), sizeof(acc_name));
 					dbg_msg("SQL", "Account '%s' was saved successfully", acc_name);
 				}
 				else
@@ -527,7 +532,7 @@ void CSQL::update_all()
 		}
 		catch (sql::SQLException &e)
 		{
-			dbg_msg("SQL", "ERROR: Could not update Account");
+			dbg_msg("SQL", "ERROR: Could not update Account (Why: %s)");
 		}
 		
 		// disconnect from Database

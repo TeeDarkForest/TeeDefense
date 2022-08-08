@@ -42,15 +42,13 @@ void CGameContext::Construct(int Resetting, bool ChangeMap)
 
 	if(Resetting==NO_RESET)
 		m_pVoteOptionHeap = new CHeap();
-	
-	m_pItemSystem = new CItemSystem(this);
-	m_pItemSystem->Reset();
 
 	#ifdef CONF_SQL
 	/* SQL */
 	m_AccountData = new CAccountData;
 	m_Sql = new CSQL(this);
 	#endif
+	m_pItemSystem = new CItemSystem(this);
 }
 
 CGameContext::CGameContext(int Resetting, bool ChangeMap)
@@ -65,10 +63,6 @@ CGameContext::CGameContext()
 
 CGameContext::~CGameContext()
 {
-	for(int i = 0; i < MAX_CLIENTS; i++)
-		delete m_apPlayers[i];
-	if(!m_Resetting)
-		delete m_pVoteOptionHeap;
 	delete m_pItemSystem;
 }
 
@@ -90,9 +84,13 @@ void CGameContext::Clear(bool ChangeMap)
 	delete m_Sql;
 	delete m_AccountData;
 	#endif
-	
+
 	m_Resetting = true;
-	this->~CGameContext();
+	for(auto &pPlayer : m_apPlayers)
+		delete pPlayer;
+	if(!m_Resetting)
+		delete m_pVoteOptionHeap;
+	delete m_pItemSystem;
 	mem_zero(this, sizeof(*this));
 	new (this) CGameContext(RESET, ChangeMap);
 
@@ -1727,9 +1725,14 @@ void CGameContext::ConMe(IConsole::IResult *pResult, void *pUserData)
 	int Gold = Player->m_Knapsack.m_Resource[RESOURCE_GOLD];
 	int Diamond = Player->m_Knapsack.m_Resource[RESOURCE_DIAMOND];
 	int Enegry = Player->m_Knapsack.m_Resource[RESOURCE_ENEGRY];
-	pThis->SendChatTarget(pResult->GetClientID(), _("Log: {int:Log}, Copper: {int:Copper}, Coal: {int:Coal},"), "Log", &Log, "Copper", &Copper, "Coal", &Coal);
-	pThis->SendChatTarget(pResult->GetClientID(), _("Iron: {int:Iron}, Gold: {int:Gold}, Diamond: {int:Diamond},"), "Iron", &Iron, "Gold", &Gold, "Diamond", &Diamond);
-	pThis->SendChatTarget(pResult->GetClientID(), _("Enegry: {int:Enegry}"), "Enegry", &Enegry);
+	int ZombieHeart = Player->m_Knapsack.m_Resource[RESOURCE_ZOMBIEHEART];
+	#ifdef CONF_SQL
+	if(!Player->LoggedIn)
+		pThis->SendChatTarget(pResult->GetClientID(), _("[Warning]: If you dont login or register a account, then when you left. you will lose EVERYTHING in this mod!"));
+	#endif
+	pThis->SendChatTarget(pResult->GetClientID(), _("Log: {int:Log}, Copper: {int:Copper}, Coal: {int:Coal},"), "Log", &Log, "Copper", &Copper, "Coal", &Coal, NULL);
+	pThis->SendChatTarget(pResult->GetClientID(), _("Iron: {int:Iron}, Gold: {int:Gold}, Diamond: {int:Diamond},"), "Iron", &Iron, "Gold", &Gold, "Diamond", &Diamond, NULL);
+	pThis->SendChatTarget(pResult->GetClientID(), _("Enegry: {int:Enegry}, Zombie's Heart: {int:ZombieHeart}"), "Enegry", &Enegry, "ZombieHeart", &ZombieHeart, NULL);
 }
 
 void CGameContext::ConLanguage(IConsole::IResult *pResult, void *pUserData)
@@ -1870,7 +1873,7 @@ void CGameContext::OnConsoleInit()
 	m_pServer = Kernel()->RequestInterface<IServer>();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 
-	m_ChatPrintCBIndex = Console()->RegisterPrintCallback(IConsole::OUTPUT_LEVEL_STANDARD, ConsoleOutputCallback_Chat, this);
+	m_ChatPrintCBIndex = Console()->RegisterPrintCallback(IConsole::OUTPUT_LEVEL_CHAT, ConsoleOutputCallback_Chat, this);
 	
 	Console()->Register("tune", "si", CFGFLAG_SERVER, ConTuneParam, this, "Tune variable to value");
 	Console()->Register("tune_reset", "", CFGFLAG_SERVER, ConTuneReset, this, "Reset tuning");
@@ -1962,14 +1965,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 
 void CGameContext::OnShutdown(bool ChangeMap)
 {
-	for (int i=0; i<g_Config.m_SvMaxClients; i++)
-	{
-		if (!m_apPlayers[i])
-			continue;
 
-		delete m_apPlayers[i];
-		m_apPlayers[i] = 0x0;
-	}
 	delete m_pController;
 	m_pController = 0;
 	Clear(ChangeMap);
@@ -2056,7 +2052,6 @@ void CGameContext::ConRegister(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
 
-	dbg_msg("Register", "%d", pResult->NumArguments());
     if (pResult->NumArguments() != 2) {
         pSelf->SendChatTarget(pResult->GetClientID(), _("Usage: /register <username> <password>"));
         return;
@@ -2096,19 +2091,14 @@ void CGameContext::ConLogin(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConLogout(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
-    CPlayer *pP = pSelf->m_apPlayers[pResult->GetClientID()];
+    pSelf->LogoutAccount(pResult->GetClientID());
+}
+
+void CGameContext::LogoutAccount(int ClientID)
+{
+	CPlayer *pP = m_apPlayers[ClientID];
     CCharacter *pChr = pP->GetCharacter();
-
-    if (!pChr)
-        return;
-
-    if (!pP->m_AccData.m_UserID)
-        return;
-
-    pSelf->Sql()->update(pResult->GetClientID());
     pP->Logout();
-
-    pSelf->SendChatTarget(pP->GetCID(), _("Logout succesful"));
-    pChr->Die(pP->GetCID(), WEAPON_GAME);
+    SendChatTarget(pP->GetCID(), _("Logout succesful"));
 }
 #endif

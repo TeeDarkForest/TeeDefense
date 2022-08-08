@@ -173,7 +173,7 @@
             "value": "[第 {int:a} 轮]:还剩 {int:a1} 只僵尸"
         },
         {
-            "key": "Wave {int:i}:1 zombie is left",
+            "key": "Wave {int:i}: 1 zombie is left",
             "value": "[第 {int:i} 轮]:还剩 1 只僵尸"
         },
         {
@@ -289,8 +289,8 @@
             "value": "铁矿: {int:Iron}, 金矿: {int:Gold}, 钻石: {int:Diamond},"
         },
         {
-            "key": "Enegry: {int:Enegry}",
-            "value": "能量: {int:Enegry}"
+            "key": "Enegry: {int:Enegry}, Zombie's Heart: {int:ZombieHeart}",
+            "value": "能量: {int:Enegry}, 僵尸之心: {int:ZombieHeart}"
         },
         {
             "key": "Nice! U entered to DEVELOPER MODE",

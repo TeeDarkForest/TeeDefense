@@ -40,7 +40,7 @@ public:
 	void login(const char* name, const char* pass, int client_id);
 	void update(int client_id);
 	void update_all();
-	void UpdateCK(int ClientID, const char* CK);
+	void UpdateCK(int ClientID, const char* CK, const char* Num);
 	void SyncAccountData(int ClientID);
 
 /*	static void change_password_thread(void *user);
@@ -56,6 +56,7 @@ struct CSqlData
 	char name[32];
 	char pass[32];
 	const char* m_Resource;
+	const char* m_Num;
 	int m_Sword[MAX_CLIENTS];
 	int m_Pickaxe[MAX_CLIENTS];
 	int m_Axe[MAX_CLIENTS];

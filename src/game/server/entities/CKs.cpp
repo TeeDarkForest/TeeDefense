@@ -209,8 +209,12 @@ void CKs::Picking(int Time, CPlayer *Player)
 			#ifdef CONF_SQL
 			if(Player->LoggedIn)
 			{
-				GameServer()->Sql()->UpdateCK(Player->GetCID(), "Log");
+				GameServer()->Sql()->UpdateCK(Player->GetCID(), "Log", "+1");
 			}
+			else
+				Player->m_Knapsack.m_Resource[RESOURCE_LOG]++;
+			#else
+			Player->m_Knapsack.m_Resource[RESOURCE_LOG]++;
 			#endif
 			GameServer()->SendChatTarget(CID, _("You picked up a Log"));
 			m_Health = 50;
@@ -219,8 +223,12 @@ void CKs::Picking(int Time, CPlayer *Player)
 			#ifdef CONF_SQL
 			if(Player->LoggedIn)
 			{
-				GameServer()->Sql()->UpdateCK(Player->GetCID(), "Coal");
+				GameServer()->Sql()->UpdateCK(Player->GetCID(), "Coal", "+1");
 			}
+			else
+				Player->m_Knapsack.m_Resource[RESOURCE_COAL]++;
+			#else
+			Player->m_Knapsack.m_Resource[RESOURCE_COAL]++;
 			#endif
 			GameServer()->SendChatTarget(CID, _("You picked up a Coal"));
 			m_Health = 8000;
@@ -229,8 +237,12 @@ void CKs::Picking(int Time, CPlayer *Player)
 			#ifdef CONF_SQL
 			if(Player->LoggedIn)
 			{
-				GameServer()->Sql()->UpdateCK(Player->GetCID(), "Copper");
+				GameServer()->Sql()->UpdateCK(Player->GetCID(), "Copper", "+1");
 			}
+			else
+				Player->m_Knapsack.m_Resource[RESOURCE_COPPER]++;
+			#else
+			Player->m_Knapsack.m_Resource[RESOURCE_COPPER]++;
 			#endif
 			GameServer()->SendChatTarget(CID, _("You picked up a Copper"));
 			m_Health = 16000;
@@ -239,8 +251,12 @@ void CKs::Picking(int Time, CPlayer *Player)
 			#ifdef CONF_SQL
 			if(Player->LoggedIn)
 			{
-				GameServer()->Sql()->UpdateCK(Player->GetCID(), "Iron");
+				GameServer()->Sql()->UpdateCK(Player->GetCID(), "Iron", "+1");
 			}
+			else
+				Player->m_Knapsack.m_Resource[RESOURCE_IRON]++;
+			#else
+			Player->m_Knapsack.m_Resource[RESOURCE_IRON]++;
 			#endif
 			GameServer()->SendChatTarget(CID, _("You picked up a Iron"));
 			m_Health = 40000;
@@ -249,8 +265,12 @@ void CKs::Picking(int Time, CPlayer *Player)
 			#ifdef CONF_SQL
 			if(Player->LoggedIn)
 			{
-				GameServer()->Sql()->UpdateCK(Player->GetCID(), "Gold");
+				GameServer()->Sql()->UpdateCK(Player->GetCID(), "Gold", "+1");
 			}
+			else
+				Player->m_Knapsack.m_Resource[RESOURCE_GOLD]++;
+			#else
+			Player->m_Knapsack.m_Resource[RESOURCE_GOLD]++;
 			#endif
 			GameServer()->SendChatTarget(CID, _("You picked up a Gold"));
 			m_Health = 60000;
@@ -259,8 +279,12 @@ void CKs::Picking(int Time, CPlayer *Player)
 			#ifdef CONF_SQL
 			if(Player->LoggedIn)
 			{
-				GameServer()->Sql()->UpdateCK(Player->GetCID(), "Diamond");
+				GameServer()->Sql()->UpdateCK(Player->GetCID(), "Diamond", "+1");
 			}
+			else
+				Player->m_Knapsack.m_Resource[RESOURCE_DIAMOND]++;
+			#else
+			Player->m_Knapsack.m_Resource[RESOURCE_DIAMOND]++;
 			#endif
 			GameServer()->SendChatTarget(CID, _("You picked up a Diamond"));
 			m_Health = 500000;
@@ -269,8 +293,12 @@ void CKs::Picking(int Time, CPlayer *Player)
 			#ifdef CONF_SQL
 			if(Player->LoggedIn)
 			{
-				GameServer()->Sql()->UpdateCK(Player->GetCID(), "Enegry");
+				GameServer()->Sql()->UpdateCK(Player->GetCID(), "Enegry", "+1");
 			}
+			else
+				Player->m_Knapsack.m_Resource[RESOURCE_ENEGRY]++;
+			#else
+			Player->m_Knapsack.m_Resource[RESOURCE_ENEGRY]++;
 			#endif
 			GameServer()->SendChatTarget(CID, _("You picked up a Enegry"));
 			m_Health = 3000000;

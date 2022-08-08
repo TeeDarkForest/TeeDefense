@@ -411,6 +411,10 @@ int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 			#ifdef CONF_SQL
 			if(pKiller->LoggedIn)
 				GameServer()->Sql()->UpdateCK(pKiller->GetCID(), "Log");
+			else
+				pKiller->m_Knapsack.m_Resource[RESOURCE_LOG]++;
+			#else
+				pKiller->m_Knapsack.m_Resource[RESOURCE_LOG]++;
 			#endif
 			GameServer()->SendChatTarget(pKiller->GetCID(), _("You got 1 Log from the Zombie"));
 		}
@@ -419,6 +423,8 @@ int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 			#ifdef CONF_SQL
 			if(pKiller->LoggedIn)
 				GameServer()->Sql()->UpdateCK(pKiller->GetCID(), "Copper");
+			else
+				pKiller->m_Knapsack.m_Resource[RESOURCE_COPPER]++;
 			#endif
 			GameServer()->SendChatTarget(pKiller->GetCID(), _("You got 1 Copper from the Zombie"));
 		}
@@ -427,12 +433,20 @@ int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 			#ifdef CONF_SQL
 			if(pKiller->LoggedIn)
 				GameServer()->Sql()->UpdateCK(pKiller->GetCID(), "Gold");
+			else
+				pKiller->m_Knapsack.m_Resource[RESOURCE_GOLD]++;
+			#else
+				pKiller->m_Knapsack.m_Resource[RESOURCE_GOLD]++;
 			#endif
 			GameServer()->SendChatTarget(pKiller->GetCID(), _("You picked up a Gold"));
 		}
 		#ifdef CONF_SQL
 		if(pKiller->LoggedIn)
 			GameServer()->Sql()->UpdateCK(pKiller->GetCID(), "ZombieHeart");
+		else
+			pKiller->m_Knapsack.m_Resource[RESOURCE_ZOMBIEHEART]++;
+		#else
+			pKiller->m_Knapsack.m_Resource[RESOURCE_ZOMBIEHEART]++;
 		#endif
 		GameServer()->SendChatTarget(pKiller->GetCID(), _("You picked up Zombie's Heart"));
 		pKiller->m_Score++;

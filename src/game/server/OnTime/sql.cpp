@@ -559,7 +559,7 @@ static void UpdateResourceThread(void *user)
 				CPlayer *p = GameServer()->m_apPlayers[Data->m_ClientID];
 				if(!p)
 					return;
-				str_format(buf, sizeof(buf), "UPDATE %s_Account SET %s=%s+1 WHERE UserID=%d;", Data->m_SqlData->prefix, Data->m_Resource, Data->m_Resource, Data->UserID);
+				str_format(buf, sizeof(buf), "UPDATE %s_Account SET %s=%s%s WHERE UserID=%d;", Data->m_SqlData->prefix, Data->m_Resource, Data->m_Resource, Data->m_Num, Data->UserID[Data->m_ClientID]);
 				Data->m_SqlData->statement->execute(buf);
 			}
 			else
@@ -660,12 +660,13 @@ void CSQL::SyncAccountData(int ClientID)
 #endif
 }
 
-void CSQL::UpdateCK(int ClientID, const char* CK)
+void CSQL::UpdateCK(int ClientID, const char* CK, const char* Num)
 {
 	CSqlData *tmp = new CSqlData();
 	tmp->m_ClientID = ClientID;
 	tmp->UserID[ClientID] = GameServer()->m_apPlayers[ClientID]->m_AccData.m_UserID;
 	tmp->m_Resource = CK;
+	tmp->m_Num = Num;
 
 	tmp->m_SqlData = this;
 	

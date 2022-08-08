@@ -2702,6 +2702,10 @@ void CGameContext::MakeItem(const char* pItemName, int ClientID)
         }
     }
 
+	#ifdef CONF_SQL
+	Sql()->SyncAccountData(ClientID);
+	#endif
+
     if(random_int(0, 100) < MakeItem.m_Proba)
     {
 		SendMakeItemChat(ClientID, MakeItem);
@@ -2711,10 +2715,6 @@ void CGameContext::MakeItem(const char* pItemName, int ClientID)
         {
             m_apPlayers[ClientID]->m_Knapsack.m_Resource[i] -= MakeItem.m_NeedResource[i];
         }
-        
-		#ifdef CONF_SQL
-		Sql()->SyncAccountData(ClientID);
-		#endif
         switch (MakeItem.m_Type)
         {
             case ITYPE_AXE: 

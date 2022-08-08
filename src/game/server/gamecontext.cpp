@@ -90,7 +90,7 @@ void CGameContext::Clear(bool ChangeMap)
 		delete pPlayer;
 	if(!m_Resetting)
 		delete m_pVoteOptionHeap;
-	//this->~CGameContext();
+	delete m_pItemSystem;
 	mem_zero(this, sizeof(*this));
 	new (this) CGameContext(RESET, ChangeMap);
 

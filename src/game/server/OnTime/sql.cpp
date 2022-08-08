@@ -561,8 +561,6 @@ static void UpdateResourceThread(void *user)
 					return;
 				str_format(buf, sizeof(buf), "UPDATE %s_Account SET %s=%s+1;", Data->m_SqlData->prefix, Data->m_Resource, Data->m_Resource);
 				Data->m_SqlData->statement->execute(buf);
-				lock_unlock(SQLLock);
-				Data->m_SqlData->SyncAccountData(Data->m_ClientID);
 			}
 			else
 				dbg_msg("SQL", "Account seems to be deleted");
@@ -579,6 +577,7 @@ static void UpdateResourceThread(void *user)
 		Data->m_SqlData->disconnect();
 	}
 	lock_unlock(SQLLock);
+	Data->m_SqlData->SyncAccountData(Data->m_ClientID);
 }
 // update all
 void CSQL::update_all()

@@ -90,7 +90,7 @@ void CGameContext::Clear(bool ChangeMap)
 	#endif
 
 	m_Resetting = true;
-	this->~CGameContext();
+	//this->~CGameContext();
 	mem_zero(this, sizeof(*this));
 	new (this) CGameContext(RESET, ChangeMap);
 

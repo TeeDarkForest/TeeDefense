@@ -11,6 +11,8 @@
 #include "lightning.h"
 #include "turret.h"
 
+#include "../item.h"
+
 #define RAD 0.017453292519943295769236907684886f
 
 //input count
@@ -364,7 +366,7 @@ void CCharacter::FireWeapon()
 				Hits++;
 			}
 
-			if(GetPlayer() && !GetPlayer()->GetZomb() && (GetPlayer()->m_Knapsack.m_FFS || (GetPlayer()->m_Knapsack.m_Sword >= 0 && GameServer()->ItemSystem()->GetItem(GetPlayer()->m_Knapsack.m_Sword)->m_Level >= LEVEL_DIAMOND)))
+			if(GetPlayer() && !GetPlayer()->GetZomb() && (GetPlayer()->m_Knapsack.m_FFS || (GetPlayer()->m_Knapsack.m_Sword >= 0 && GetPlayer()->m_Knapsack.m_Sword >= LEVEL_DIAMOND)))
 			{
 				for (int i = 0; i < 25; i++)
 				{
@@ -375,7 +377,7 @@ void CCharacter::FireWeapon()
 				}
 			}
 
-			if(GetPlayer() && !GetPlayer()->GetZomb() && (GetPlayer()->m_Knapsack.m_EDreemurr || (GetPlayer()->m_Knapsack.m_Sword >= 0 && GameServer()->ItemSystem()->GetItem(GetPlayer()->m_Knapsack.m_Sword)->m_Level >= LEVEL_DIAMOND)))
+			if(GetPlayer() && !GetPlayer()->GetZomb() && (GetPlayer()->m_Knapsack.m_EDreemurr || (GetPlayer()->m_Knapsack.m_Sword >= 0 && GetPlayer()->m_Knapsack.m_Sword >= LEVEL_DIAMOND)))
 			{
 				m_Core.m_Vel += ((normalize(vec2(m_LatestInput.m_TargetX, m_LatestInput.m_TargetY))) * max(0.001f, 64.0f));
 				for(int i = 0; i < 10; i++)
@@ -883,7 +885,8 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 		{
 			CPlayer *Player = GameServer()->m_apPlayers[From];
 			if(Player->m_Knapsack.m_Sword >= 0)
-				Dmg+=GameServer()->ItemSystem()->GetDmg(Player->m_Knapsack.m_Sword);
+				//Dmg+=GameServer()->ItemSystem()->GetDmg(Player->m_Knapsack.m_Sword);
+			return true;
 		}
 	}
 

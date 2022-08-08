@@ -559,7 +559,7 @@ static void UpdateResourceThread(void *user)
 				CPlayer *p = GameServer()->m_apPlayers[Data->m_ClientID];
 				if(!p)
 					return;
-				str_format(buf, sizeof(buf), "UPDATE %s_Account SET %s=%s+1;", Data->m_SqlData->prefix, Data->m_Resource, Data->m_Resource);
+				str_format(buf, sizeof(buf), "UPDATE %s_Account SET %s=%s+1 WHERE UserID=%d;", Data->m_SqlData->prefix, Data->m_Resource, Data->m_Resource, Data->UserID);
 				Data->m_SqlData->statement->execute(buf);
 			}
 			else

@@ -699,7 +699,6 @@ target_link_libraries(${TARGET_VERSIONSRV} ${LIBS})
 
 list(APPEND TARGETS_OWN ${TARGET_MASTERSRV} ${TARGET_VERSIONSRV})
 list(APPEND TARGETS_LINK ${TARGET_MASTERSRV} ${TARGET_VERSIONSRV})
-
 ########################################################################
 # INSTALLATION
 ########################################################################

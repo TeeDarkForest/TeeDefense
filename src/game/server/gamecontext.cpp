@@ -2281,7 +2281,7 @@ void CGameContext::InitItems()
              0,// Coal
               0,//Copper
                0,// Iron
-                0,// Gold
+                10,// Gold
                  0,// Diamond
                   0//Enegry
     );
@@ -2378,7 +2378,7 @@ void CGameContext::InitItems()
               0,//Copper
                0,// Iron
                 0,// Gold
-                 1000,// Diamond
+                 35,// Diamond
                   20//Enegry
     );
     
@@ -2390,9 +2390,9 @@ void CGameContext::InitItems()
          TURRET_GUN, // TurretType
           90, // Proba
            0, // Speed
-            20, // Log
+            50, // Log
              0, // Coal
-              1, // Copper
+              10, // Copper
                0, // Iron
                 0, // Gold
                  0, // Diamond
@@ -2407,9 +2407,9 @@ void CGameContext::InitItems()
          TURRET_SHOTGUN, // TurretType
           90, // Proba
            0, // Speed
-            25, // Log
+            75, // Log
              0, // Coal
-              5, // Copper
+              20, // Copper
                0, // Iron
                 0, // Gold
                  0, // Diamond

@@ -885,7 +885,7 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 		{
 			CPlayer *Player = GameServer()->m_apPlayers[From];
 			if(Player->m_Knapsack.m_Sword >= 0)
-				//Dmg+=GameServer()->ItemSystem()->GetDmg(Player->m_Knapsack.m_Sword);
+				Dmg+=GameServer()->GetDmg(Player->m_Knapsack.m_Sword);
 			return true;
 		}
 	}

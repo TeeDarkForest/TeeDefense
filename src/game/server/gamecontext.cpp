@@ -2062,16 +2062,8 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 			int Index = pTiles[y*pTileMap->m_Width+x].m_Index;
 			vec2 Pos(x*32.0f+16.0f, y*32.0f+16.0f);
 
-			switch (Index)
-			{
-			case TILE_SOLID:
-			case TILE_NOHOOK:
+			if(Index <= 8 && Index >= 1)
 				CreateGround(Pos);
-				break;
-			
-			default:
-				break;
-			}
 			if(Index >= ENTITY_OFFSET)
 			{
 				m_pController->OnEntity(Index-ENTITY_OFFSET, Pos);

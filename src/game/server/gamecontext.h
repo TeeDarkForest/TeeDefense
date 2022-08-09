@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_SERVER_GAMECONTEXT_H
 #define GAME_SERVER_GAMECONTEXT_H
+#include <box2d/box2d.h>
 
 #include <engine/server.h>
 #include <engine/console.h>
@@ -54,6 +55,47 @@ typedef unsigned __int64 uint64_t;
 
 */
 
+class CBox2DBox;
+
+class BodyRangeRay : public b2RayCastCallback
+{
+public:
+	b2Body* m_body;
+	b2Vec2 m_point;
+	b2Vec2 m_normal;
+	float m_fraction;
+
+	float ReportFixture(b2Fixture* fixture, const b2Vec2& point, const b2Vec2& normal, float fraction)
+	{
+		m_body = fixture->GetBody();
+		m_point = point;
+		m_normal = normal;
+		m_fraction = fraction;
+		return 0;
+	}
+};
+
+class BodyCollideQuery : public b2QueryCallback
+{
+public:
+	b2Body* Body;
+	b2Vec2 findPos;
+
+	bool ReportFixture(b2Fixture* fixture)
+	{
+		b2Shape* shape = fixture->GetShape();
+		bool inside = shape->TestPoint(fixture->GetBody()->GetTransform(), findPos);
+
+		if (inside)
+		{
+			Body = fixture->GetBody();
+			return false;
+		}
+		return true;
+	}
+};
+
+
 class CGameContext : public IGameServer
 {
 	IServer *m_pServer;
@@ -103,6 +145,10 @@ class CGameContext : public IGameServer
 	static void ConLogout(IConsole::IResult *pResult, void *pUserData);
 	static void ConRegister(IConsole::IResult *pResult, void *pUserData);
 	static void ConLogin(IConsole::IResult *pResult, void *pUserData);
+
+	static void ConB2CreateBox(IConsole::IResult *pResult, void *pUserData);
+	static void ConB2CreateGround(IConsole::IResult *pResult, void *pUserData);
+	static void ConB2ClearWorld(IConsole::IResult *pResult, void *pUserData);
 	
 
 	CGameContext(int Resetting, bool ChangeMap);
@@ -115,6 +161,14 @@ class CGameContext : public IGameServer
 public:
 	int m_ChatResponseTargetID;
 	int m_ChatPrintCBIndex;
+
+public:
+	b2World* m_b2world;
+	std::vector<CBox2DBox*> m_b2bodies;
+	std::vector<b2Body*> m_b2explosions;
+
+	void CreateGround(vec2 Pos);
+
 public:
 	IServer *Server() const { return m_pServer; }
 	class IConsole *Console() { return m_pConsole; }

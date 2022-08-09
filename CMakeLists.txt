@@ -340,6 +340,8 @@ else()
   endif()
 endif()
 
+add_subdirectory(box2d)
+
 ########################################################################
 # DEPENDENCY COMPILATION
 ########################################################################
@@ -576,6 +578,8 @@ set(SERVER_INCLUDES_DIRS
 )
 
 set_glob(GAME_SERVER GLOB_RECURSE src/game/server
+  entities/box2d_box.cpp
+  entities/box2d_box.h
   entities/character.cpp
   entities/character.h
   entities/CKs.cpp
@@ -641,6 +645,7 @@ add_executable(${TARGET_SERVER}
   $<TARGET_OBJECTS:game-shared>
 )
 target_link_libraries(${TARGET_SERVER} ${LIBS_SERVER})
+target_link_libraries(${TARGET_SERVER} box2d)
 target_link_libraries(${TARGET_SERVER} ICU::i18n)
 target_link_libraries(${TARGET_SERVER} ICU::uc)
 list(APPEND TARGETS_OWN ${TARGET_SERVER})

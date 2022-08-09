@@ -93,6 +93,13 @@ MACRO_CONFIG_INT(SvMaxZombieSpawn, sv_max_zombie_spawn, 1, 1, 20, CFGFLAG_SERVER
 // TeeDefense
 MACRO_CONFIG_INT(SvMaxTowerHealth, sv_max_tower_health, 100, 1, 1000, CFGFLAG_SERVER, "Main max tower health")
 
+// Box2D
+MACRO_CONFIG_INT(B2WorldFps, b2_world_fps, 30, 0, 300, CFGFLAG_SERVER, "box2d world fps (not really fps, higher value slows down the world)")
+MACRO_CONFIG_INT(B2TeeJointMaxForce, b2_teejoint_maxforce, 100000, 0, 2147483647, CFGFLAG_SERVER, "maxForce value for the tee's box2d mouse joint")
+MACRO_CONFIG_INT(B2TeeJointDamping, b2_teejoint_damping, 4, 0, 2147483647, CFGFLAG_SERVER, "damping value for the tee's box2d mouse joint")
+MACRO_CONFIG_INT(B2TeeJointStiffness, b2_teejoint_stiffness, 100000, 0, 2147483647, CFGFLAG_SERVER, "stiffness value for the tee's box2d mouse joint")
+MACRO_CONFIG_INT(B2TeeLaser, b2_tee_laser, 0, 0, 1, CFGFLAG_SERVER, "draws your tee in the box2d world as a laser")
+
 // OnTime
 /* SQL */
 MACRO_CONFIG_STR(SvSqlUser, sv_sql_user, 256, "nameless", CFGFLAG_SERVER, "SQL User")

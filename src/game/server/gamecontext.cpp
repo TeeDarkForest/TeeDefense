@@ -14,6 +14,7 @@
 #include "entities/turret.h"
 
 #include "item.h"
+#include "entities/box2d_box.h"
 
 #include <teeuniverses/components/localization.h>
 #ifdef CONF_SQL
@@ -52,6 +53,9 @@ void CGameContext::Construct(int Resetting, bool ChangeMap)
 	#endif
 
 	InitItems();
+
+	b2Vec2 gravity(0.f, 9.81f);
+	m_b2world = new b2World(gravity);
 }
 
 CGameContext::CGameContext(int Resetting, bool ChangeMap)
@@ -90,6 +94,12 @@ void CGameContext::Clear(bool ChangeMap)
 	delete m_Sql;
 	delete m_AccountData;
 	#endif
+
+	if (m_b2world)
+	{
+		delete m_b2world;
+		m_b2world = NULL;
+	}
 
 	m_Resetting = true;
 	this->~CGameContext();
@@ -152,13 +162,14 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 		pEvent->m_Y = (int)Pos.y;
 	}
 
+	// deal damage
+	CCharacter *apEnts[MAX_CLIENTS];
+	float Radius = 135.0f;
+	float InnerRadius = 48.0f;
+	int Num = m_World.FindEntities(Pos, Radius, (CEntity**)apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+
 	if (!NoDamage)
 	{
-		// deal damage
-		CCharacter *apEnts[MAX_CLIENTS];
-		float Radius = 135.0f;
-		float InnerRadius = 48.0f;
-		int Num = m_World.FindEntities(Pos, Radius, (CEntity**)apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 		for(int i = 0; i < Num; i++)
 		{
 			vec2 Diff = apEnts[i]->m_Pos - Pos;
@@ -171,6 +182,42 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 			if((int)Dmg)
 				apEnts[i]->TakeDamage(ForceDir*Dmg*2, (int)Dmg, Owner, Weapon);
 		}
+	}
+
+	// apply force to box2d objects
+	b2Vec2 b2Pos(Pos.x / 30.f, Pos.y / 30.f);
+	b2Vec2 b2Rad((Radius) / 30.f, (Radius) / 30.f);
+	float Strength = 4;
+
+	int numRays = 32;
+	for (int i=0; i<numRays; i++)
+	{
+		float angle = ((i / (float)numRays) * 360) / 180.f * b2_pi;
+		b2Vec2 rayDir(sinf(angle), cosf(angle));
+
+		// use a "particle" system, essentially very tiny circles, that hits objects at high speeds
+		b2BodyDef bd;
+		bd.type = b2_dynamicBody;
+		bd.fixedRotation = true; // don't rotate
+		bd.bullet = true; // avoid tunneling at high speed
+		bd.linearDamping = 10; // slow down
+		bd.gravityScale = 0; // don't be affected by gravity
+		bd.position = b2Pos;
+		bd.linearVelocity = (Strength * 30.f) * rayDir;
+		b2Body* body = m_b2world->CreateBody(&bd);
+
+		b2CircleShape circle;
+		circle.m_radius = 0.05; // ok so basically i'm very... you get the drill
+
+		b2FixtureDef fd;
+		fd.shape = &circle;
+		fd.density = 60 / (float)numRays;
+		fd.friction = 0;
+		fd.restitution = 0.99f;
+		fd.filter.groupIndex = -1;
+		body->CreateFixture(&fd);
+
+		m_b2explosions.push_back(body);
 	}
 }
 
@@ -584,7 +631,19 @@ void CGameContext::OnTick()
 		}
 	}
 
-
+	if (m_b2world)
+	{
+		m_b2world->Step(1. / g_Config.m_B2WorldFps, 8, 3);
+		for (unsigned i=0; i<m_b2explosions.size(); i++)
+		{
+			if (m_b2explosions[i]->GetLinearVelocity().x < 5.f and m_b2explosions[i]->GetLinearVelocity().y < 5.f) // delete
+			{
+				m_b2world->DestroyBody(m_b2explosions[i]);
+				m_b2explosions.erase(m_b2explosions.begin() + i);
+				--i;
+			}
+		}
+	}
 #ifdef CONF_DEBUG
 	if(g_Config.m_DbgDummies)
 	{
@@ -1878,6 +1937,53 @@ void CGameContext::ConsoleOutputCallback_Chat(const char *pLine, void *pUser)
 	ReentryGuard--;
 }
 
+void CGameContext::CreateGround(vec2 Pos)
+{
+	vec2 size(32,32);
+	float angle = 180 * b2_pi;
+	m_b2bodies.push_back(new CBox2DBox(&m_World, Pos, size, angle, m_b2world, b2_kinematicBody, 0.f, true));
+}
+
+void CGameContext::ConB2CreateBox(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	CCharacter *Char = pSelf->GetPlayerChar(pResult->GetClientID());
+	if (not Char) return;
+
+	vec2 size(pResult->GetInteger(0), pResult->GetInteger(1));
+	pSelf->m_b2bodies.push_back(new CBox2DBox(&pSelf->m_World, vec2(Char->m_Pos.x, Char->m_Pos.y-128), size, 0, pSelf->m_b2world, b2_dynamicBody, 1.f));
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "Box2D", "Created box above you");
+}
+
+void CGameContext::ConB2CreateGround(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	CCharacter *Char = pSelf->GetPlayerChar(pResult->GetClientID());
+	if (not Char) return;
+
+	vec2 size(pResult->GetInteger(0), pResult->GetInteger(1));
+	float angle = 	pResult->GetInteger(2) / 180 * b2_pi;
+	pSelf->m_b2bodies.push_back(new CBox2DBox(&pSelf->m_World, vec2(Char->m_Pos.x, Char->m_Pos.y+28), size, angle, pSelf->m_b2world, b2_kinematicBody, 0.f));
+
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "Box2D", "Created ground");
+}
+
+void CGameContext::ConB2ClearWorld(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	for (unsigned i=0; i<pSelf->m_b2bodies.size(); i++)
+	{
+		if (pSelf->m_b2bodies[i])
+			delete pSelf->m_b2bodies[i];
+	}
+	pSelf->m_b2bodies.clear();
+
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "Box2D", "Cleared world");
+}
+
 void CGameContext::OnConsoleInit()
 {
 	m_pServer = Kernel()->RequestInterface<IServer>();
@@ -1906,6 +2012,10 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("force_vote", "ss?r", CFGFLAG_SERVER, ConForceVote, this, "Force a voting option");
 	Console()->Register("clear_votes", "", CFGFLAG_SERVER, ConClearVotes, this, "Clears the voting options");
 	Console()->Register("vote", "r", CFGFLAG_SERVER, ConVote, this, "Force a vote to yes/no");
+
+	Console()->Register("b2_create_box", "ii", CFGFLAG_SERVER, ConB2CreateBox, this, "create a box in the Box2D world using your current position");
+	Console()->Register("b2_create_ground", "ii?i", CFGFLAG_SERVER, ConB2CreateGround, this, "create ground in the Box2D world using your current position");
+	Console()->Register("b2_clear_world", "", CFGFLAG_SERVER, ConB2ClearWorld, this, "clear all bodies (except tee bodies) in the Box2D world");
 	
 	Console()->Register("about", "", CFGFLAG_CHAT, ConAbout, this, "Show information about the mod");
 	Console()->Register("help", "", CFGFLAG_CHAT, ConHelp, this, "Show information about the mod");
@@ -1950,10 +2060,20 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		for(int x = 0; x < pTileMap->m_Width; x++)
 		{
 			int Index = pTiles[y*pTileMap->m_Width+x].m_Index;
+			vec2 Pos(x*32.0f+16.0f, y*32.0f+16.0f);
 
+			switch (Index)
+			{
+			case TILE_SOLID:
+			case TILE_NOHOOK:
+				CreateGround(Pos);
+				break;
+			
+			default:
+				break;
+			}
 			if(Index >= ENTITY_OFFSET)
 			{
-				vec2 Pos(x*32.0f+16.0f, y*32.0f+16.0f);
 				m_pController->OnEntity(Index-ENTITY_OFFSET, Pos);
 			}
 		}

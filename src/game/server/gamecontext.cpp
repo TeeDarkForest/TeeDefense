@@ -15,6 +15,7 @@
 
 #include "item.h"
 #include "entities/box2d_box.h"
+#include "entities/box2d_test.h"
 
 #include <teeuniverses/components/localization.h>
 #ifdef CONF_SQL
@@ -25,6 +26,19 @@ enum
 {
 	RESET,
 	NO_RESET
+};
+
+class MyQueryCallback : public b2QueryCallback
+{
+public:
+    bool ReportFixture(b2Fixture* fixture)
+    {
+        b2Body* body = fixture->GetBody();
+        body->SetAwake(true);
+
+        // Return true to continue the query.
+        return true;
+    }
 };
 
 void CGameContext::Construct(int Resetting, bool ChangeMap)
@@ -54,8 +68,15 @@ void CGameContext::Construct(int Resetting, bool ChangeMap)
 
 	InitItems();
 
-	b2Vec2 gravity(0.f, 9.81f);
+	b2AABB worldAABB;
+	worldAABB.lowerBound.Set(0, 0);
+	worldAABB.upperBound.Set(Collision()->GetHeight(), Collision()->GetWidth());
+	b2Vec2 gravity(0.f, 0.5f * 30.0f);
+
+	MyQueryCallback callback;
+
 	m_b2world = new b2World(gravity);
+	m_b2world->QueryAABB(&callback, worldAABB);
 }
 
 CGameContext::CGameContext(int Resetting, bool ChangeMap)
@@ -631,6 +652,23 @@ void CGameContext::OnTick()
 		}
 	}
 
+	HandleBox2D();
+
+#ifdef CONF_DEBUG
+	if(g_Config.m_DbgDummies)
+	{
+		for(int i = 0; i < g_Config.m_DbgDummies ; i++)
+		{
+			CNetObj_PlayerInput Input = {0};
+			Input.m_Direction = (i&1)?-1:1;
+			m_apPlayers[MAX_CLIENTS-i-1]->OnPredictedInput(&Input);
+		}
+	}
+#endif
+}
+
+void CGameContext::HandleBox2D()
+{
 	if (m_b2world)
 	{
 		m_b2world->Step(1. / g_Config.m_B2WorldFps, 8, 3);
@@ -644,17 +682,6 @@ void CGameContext::OnTick()
 			}
 		}
 	}
-#ifdef CONF_DEBUG
-	if(g_Config.m_DbgDummies)
-	{
-		for(int i = 0; i < g_Config.m_DbgDummies ; i++)
-		{
-			CNetObj_PlayerInput Input = {0};
-			Input.m_Direction = (i&1)?-1:1;
-			m_apPlayers[MAX_CLIENTS-i-1]->OnPredictedInput(&Input);
-		}
-	}
-#endif
 }
 
 // Server hooks
@@ -1937,11 +1964,22 @@ void CGameContext::ConsoleOutputCallback_Chat(const char *pLine, void *pUser)
 	ReentryGuard--;
 }
 
-void CGameContext::CreateGround(vec2 Pos)
+void CGameContext::CreateGround(vec2 Pos, int Type)
 {
 	vec2 size(32,32);
 	float angle = 180 * b2_pi;
-	m_b2bodies.push_back(new CBox2DBox(&m_World, Pos, size, angle, m_b2world, b2_kinematicBody, 0.f, true));
+	b2BodyDef groundBodyDef;
+	groundBodyDef.angle = angle;
+	groundBodyDef.position = b2Vec2(Pos.x / 30, Pos.y/ 30);
+	groundBodyDef.type = b2_kinematicBody;
+	b2Body *ground = m_b2world->CreateBody(&groundBodyDef);
+
+	b2PolygonShape Shape;
+	Shape.SetAsBox(size.x / 2 / 30, size.y / 2 / 30);
+	b2FixtureDef FixtureDef;
+	FixtureDef.density = 0;
+	FixtureDef.shape = &Shape;
+	ground->CreateFixture(&FixtureDef);
 }
 
 void CGameContext::ConB2CreateBox(IConsole::IResult *pResult, void *pUserData)
@@ -1956,6 +1994,18 @@ void CGameContext::ConB2CreateBox(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "Box2D", "Created box above you");
 }
 
+void CGameContext::ConB2CreateTest(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	CCharacter *Char = pSelf->GetPlayerChar(pResult->GetClientID());
+	if (not Char) return;
+
+	vec2 size(pResult->GetInteger(0), pResult->GetInteger(1));
+	pSelf->m_b2Test.push_back(new CBox2DTest(&pSelf->m_World, vec2(Char->m_Pos.x, Char->m_Pos.y-128), size, pSelf->m_b2world, b2_dynamicBody, 1.f));
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "Box2D", "Created box above you");
+}
+
 void CGameContext::ConB2CreateGround(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -1964,7 +2014,7 @@ void CGameContext::ConB2CreateGround(IConsole::IResult *pResult, void *pUserData
 	if (not Char) return;
 
 	vec2 size(pResult->GetInteger(0), pResult->GetInteger(1));
-	float angle = 	pResult->GetInteger(2) / 180 * b2_pi;
+	float angle = pResult->GetFloat(2) / 180.0f * b2_pi;
 	pSelf->m_b2bodies.push_back(new CBox2DBox(&pSelf->m_World, vec2(Char->m_Pos.x, Char->m_Pos.y+28), size, angle, pSelf->m_b2world, b2_kinematicBody, 0.f));
 
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "Box2D", "Created ground");
@@ -2014,6 +2064,7 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("vote", "r", CFGFLAG_SERVER, ConVote, this, "Force a vote to yes/no");
 
 	Console()->Register("b2_create_box", "ii", CFGFLAG_SERVER, ConB2CreateBox, this, "create a box in the Box2D world using your current position");
+	Console()->Register("b2_create_test", "ii", CFGFLAG_SERVER, ConB2CreateTest, this, "create a box in the Box2D world using your current position");
 	Console()->Register("b2_create_ground", "ii?i", CFGFLAG_SERVER, ConB2CreateGround, this, "create ground in the Box2D world using your current position");
 	Console()->Register("b2_clear_world", "", CFGFLAG_SERVER, ConB2ClearWorld, this, "clear all bodies (except tee bodies) in the Box2D world");
 	
@@ -2062,8 +2113,16 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 			int Index = pTiles[y*pTileMap->m_Width+x].m_Index;
 			vec2 Pos(x*32.0f+16.0f, y*32.0f+16.0f);
 
-			if(Index <= 8 && Index >= 1)
-				CreateGround(Pos);
+			switch(Collision()->GetRealTile(Pos))
+			{
+				case TILE_SOLID:
+				case TILE_NOHOOK:
+				{
+					dbg_msg("s","%d", Collision()->GetRealTile(vec2(Pos.x, Pos.y-32	)));
+					if(!Collision()->CheckPoint(Pos.x, Pos.y+32) || !Collision()->CheckPoint(Pos.x, Pos.y-32) || !Collision()->CheckPoint(Pos.x+32, Pos.y) || !Collision()->CheckPoint(Pos.x-32, Pos.y))
+						CreateGround(Pos);
+				}
+			}
 			if(Index >= ENTITY_OFFSET)
 			{
 				m_pController->OnEntity(Index-ENTITY_OFFSET, Pos);
@@ -2087,7 +2146,14 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 
 void CGameContext::OnShutdown(bool ChangeMap)
 {
+	b2Body *node = m_b2world->GetBodyList();
+	while(node)
+	{
+		b2Body *b = node;
+		node = node->GetNext();
 
+		m_b2world->DestroyBody(b);
+	}
 	delete m_pController;
 	m_pController = 0;
 	Clear(ChangeMap);

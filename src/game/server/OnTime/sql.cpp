@@ -480,7 +480,10 @@ static void update_thread(void *user)
 				// update Account data
 				CPlayer *p = GameServer()->m_apPlayers[Data->m_ClientID];
 				if(!p)
+				{
+					lock_unlock(SQLLock);
 					return;
+				}
 				str_format(buf, sizeof(buf), "UPDATE %s_Account SET " \
 				"Log=%d,Coal=%d,Copper=%d,Iron=%d,Gold=%d,Diamond=%d,Enegry=%d,ZombieHeart=%d,Sword=%d,Axe=%d,Pickaxe=%d " \
 				"WHERE UserID=%d", \
@@ -558,7 +561,10 @@ static void UpdateResourceThread(void *user)
 				// update Account data
 				CPlayer *p = GameServer()->m_apPlayers[Data->m_ClientID];
 				if(!p)
+				{
+					lock_unlock(SQLLock);
 					return;
+				}
 				str_format(buf, sizeof(buf), "UPDATE %s_Account SET %s=%s%s WHERE UserID=%d;", Data->m_SqlData->prefix, Data->m_Resource, Data->m_Resource, Data->m_Num, Data->UserID[Data->m_ClientID]);
 				Data->m_SqlData->statement->execute(buf);
 			}

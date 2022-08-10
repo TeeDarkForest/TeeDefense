@@ -14,6 +14,7 @@
 #include "../item.h"
 
 #define RAD 0.017453292519943295769236907684886f
+#define SCALE 30
 
 //input count
 struct CInputCount
@@ -113,7 +114,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 
 	// box2d
 	b2BodyDef BodyDef;
-	BodyDef.position = b2Vec2(m_Pos.x / 30.f, m_Pos.y / 30.f);
+	BodyDef.position = b2Vec2(m_Pos.x / 30.f, (m_Pos.y / 30.f)+2);
 	BodyDef.type = b2_dynamicBody;
 	m_b2Body = GameServer()->m_b2world->CreateBody(&BodyDef);
 
@@ -142,6 +143,20 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 
 	m_b2HammerTick = m_b2HammerTickAdd = 0;
 
+	/*b2BodyDef bd;
+	bd.position = b2Vec2(m_Core.m_Pos.x / 30.f, m_Core.m_Pos.y / 30.f);
+	bd.type = b2_kinematicBody;
+	m_Tee = GameServer()->m_b2world->CreateBody(&bd);
+
+	/*b2PolygonShape PolygonShape;
+	PolygonShape.SetAsBox(28.0f / 2 / SCALE, 28.0f / 2 / SCALE);
+	b2FixtureDef FixtureDef1;
+	FixtureDef1.density = 1.0f;
+	FixtureDef1.shape = &PolygonShape;
+	m_Tee->CreateFixture(&FixtureDef1);*/
+
+
+	m_InVehicle = false;
 	return true;
 }
 
@@ -694,6 +709,7 @@ void CCharacter::Tick()
 		Die(m_pPlayer->GetCID(), WEAPON_WORLD);
 	}
 
+	
 	// handle Weapons
 	HandleWeapons();
 
@@ -902,6 +918,7 @@ void CCharacter::Die(int Killer, int Weapon)
 	m_b2Body = 0;
 	m_DummyBody = 0;
 
+	m_InVehicle = false;
 	if(m_pPlayer->m_Zomb)
 		GameServer()->OnZombieKill(m_pPlayer->GetCID());//remove the player to get a new one
 }
@@ -1044,14 +1061,13 @@ void CCharacter::Snap(int SnappingClient)
 		m_SendCore.Write(pCharacter);
 	}
 
-	if (g_Config.m_B2TeeLaser && SnappingClient == m_pPlayer->GetCID())
+	if (g_Config.m_B2TeeLaser)
 	{
 		CNetObj_Laser *pB2Body = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, Id, sizeof(CNetObj_Laser)));
 		pB2Body->m_FromX = pB2Body->m_X = m_b2Body->GetPosition().x * 30.f;
 		pB2Body->m_FromY = pB2Body->m_Y = m_b2Body->GetPosition().y * 30.f;
 		pB2Body->m_StartTick = Server()->Tick();
 	}
-
 	// set emote
 	if (m_EmoteStop < Server()->Tick())
 	{

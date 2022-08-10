@@ -580,6 +580,8 @@ set(SERVER_INCLUDES_DIRS
 set_glob(GAME_SERVER GLOB_RECURSE src/game/server
   entities/box2d_box.cpp
   entities/box2d_box.h
+  entities/box2d_test.cpp
+  entities/box2d_test.h
   entities/character.cpp
   entities/character.h
   entities/CKs.cpp

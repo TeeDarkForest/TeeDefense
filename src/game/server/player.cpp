@@ -44,6 +44,15 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team, int Zomb)
 	//Zomb2
 	m_Zomb = Zomb;
 	mem_zero(m_SubZomb, sizeof(m_SubZomb));
+
+	b2CircleShape shape;
+	shape.m_radius = 1.6f;
+
+	b2FixtureDef sd;
+	sd.density = 1.0f;
+	sd.shape = &shape;
+	sd.filter.groupIndex = -1;
+	
 }
 
 CPlayer::~CPlayer()

@@ -106,6 +106,11 @@ public:
 	bool IsFrozen() const;
 	void Unfreeze();
 
+	// the player core for the physics
+	CCharacterCore m_Core;
+
+	bool m_InVehicle;
+
 private:
 	// player controlling this character
 	class CPlayer *m_pPlayer;
@@ -132,9 +137,6 @@ private:
 		int m_CurrentMoveTime;
 		int m_OldVelAmount;
 	} m_Ninja;
-
-	// the player core for the physics
-	CCharacterCore m_Core;
 
 	// info for dead reckoning
 	int m_ReckoningTick; // tick that we are performing dead reckoning From
@@ -174,11 +176,14 @@ private:
     bool m_IsVisible;
     vec2 m_PrevPos;
 
+public:
 	b2Body* m_b2Body;
 	b2Body* m_DummyBody;
 	b2MouseJoint* m_TeeJoint;
 	vec2 m_b2HammerJointDir;
 	int m_b2HammerTick, m_b2HammerTickAdd;
+
+	b2Body *m_Tee;
 };
 
 #endif

@@ -11,7 +11,7 @@
 #include <engine/shared/config.h>
 #include <game/server/gamecontext.h>
 
-void Rotate(vec2* vertex, float x_orig, float y_orig, float angle)
+void CBox2DBox::Rotate(vec2* vertex, float x_orig, float y_orig, float angle)
 {
 	// FUCK THIS MATH
 	float s = sin(angle);
@@ -29,17 +29,19 @@ void Rotate(vec2* vertex, float x_orig, float y_orig, float angle)
 
 
 CBox2DBox::CBox2DBox(CGameWorld *pGameWorld, vec2 Pos, vec2 Size, float Angle, b2World* World, b2BodyType bodytype, float dens, bool IsCollision) :
-	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
+	CEntity(pGameWorld, CGameWorld::ENTTYPE_BOX2D)
 {
 	m_Pos = Pos;
 	m_Size = Size;
 	m_World = World;
 	m_IsCollision = IsCollision;
 
+	m_Angle = Angle;
 	// the box
  	b2BodyDef BodyDef;
 	BodyDef.position = b2Vec2(Pos.x / SCALE, Pos.y / SCALE);
 	BodyDef.type = bodytype;
+	BodyDef.angle = m_Angle;
 	m_Body = GameServer()->m_b2world->CreateBody(&BodyDef);
 
 	b2PolygonShape Shape;
@@ -49,27 +51,35 @@ CBox2DBox::CBox2DBox(CGameWorld *pGameWorld, vec2 Pos, vec2 Size, float Angle, b
 	FixtureDef.shape = &Shape;
 	m_Body->CreateFixture(&FixtureDef);
 
-	if(!IsCollision)
-	{
-		m_ID2 = Server()->SnapNewID();
-		m_ID3 = Server()->SnapNewID();
-		m_ID4 = Server()->SnapNewID();
-	}
+	m_ID2 = Server()->SnapNewID();
+	m_ID3 = Server()->SnapNewID();
+	m_ID4 = Server()->SnapNewID();
+
 
 	GameWorld()->InsertEntity(this);
 }
 
 CBox2DBox::~CBox2DBox()
 {
-	if(!m_IsCollision)
+	if(m_ID2 >= 0)
 	{
 		Server()->SnapFreeID(m_ID2);
+		m_ID2 = -1;
+	}
+	if(m_ID3 >= 0)
+	{
 		Server()->SnapFreeID(m_ID3);
+		m_ID3 = -1;
+	}
+	if(m_ID4 >= 0)
+	{
 		Server()->SnapFreeID(m_ID4);
+		m_ID4 = -1;
 	}
 
 	if (GameServer()->m_b2world)
 	{
+		dbg_msg("s","Destory");
 		m_World->DestroyBody(m_Body);
 	}
 
@@ -77,10 +87,18 @@ CBox2DBox::~CBox2DBox()
 	{
 		if (GameServer()->m_b2bodies[i] == this)
 		{
+			dbg_msg("s","Erase");
 			GameServer()->m_b2bodies.erase(GameServer()->m_b2bodies.begin() + i);
 			break;
 		}
 	}
+
+	Reset();
+}
+
+void CBox2DBox::Reset()
+{
+	GameServer()->m_World.DestroyEntity(this);
 }
 
 void CBox2DBox::Tick()
@@ -90,6 +108,12 @@ void CBox2DBox::Tick()
 	{
 		m_MarkedForDestroy = true;
 	}
+/*
+	CCharacter *pChr = GameServer()->m_World.ClosestCharacter(m_Pos, m_Size.y, NULL);
+	if(pChr)
+	{
+		pChr->
+	}*/
 }
 
 void CBox2DBox::TickPaused()

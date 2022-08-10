@@ -56,6 +56,8 @@ typedef unsigned __int64 uint64_t;
 */
 
 class CBox2DBox;
+class CBox2DTest;
+class CBox2DCrank;
 
 class BodyRangeRay : public b2RayCastCallback
 {
@@ -147,6 +149,8 @@ class CGameContext : public IGameServer
 	static void ConLogin(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConB2CreateBox(IConsole::IResult *pResult, void *pUserData);
+	static void ConB2CreateTest(IConsole::IResult *pResult, void *pUserData);
+	static void ConB2CreateCrank(IConsole::IResult *pResult, void *pUserData);
 	static void ConB2CreateGround(IConsole::IResult *pResult, void *pUserData);
 	static void ConB2ClearWorld(IConsole::IResult *pResult, void *pUserData);
 	
@@ -163,11 +167,21 @@ public:
 	int m_ChatPrintCBIndex;
 
 public:
-	b2World* m_b2world;
+	b2World *m_b2world;
 	std::vector<CBox2DBox*> m_b2bodies;
+	std::vector<CBox2DTest*> m_b2Test;
 	std::vector<b2Body*> m_b2explosions;
 
-	void CreateGround(vec2 Pos);
+	void CreateGround(vec2 Pos, int Type = 0);
+	void HandleBox2D();
+
+private:
+	struct Actor
+	{
+		bool m_Dead;
+
+		bool IsDead() {return m_Dead;}
+	};
 
 public:
 	IServer *Server() const { return m_pServer; }

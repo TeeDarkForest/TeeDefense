@@ -64,13 +64,24 @@ void CProjectile::Tick()
 	float Ct = (Server()->Tick()-m_StartTick)/(float)Server()->TickSpeed();
 	vec2 PrevPos = GetPos(Pt);
 	vec2 CurPos = GetPos(Ct);
-	int Collide = GameServer()->Collision()->IntersectLine(PrevPos, CurPos, &CurPos, 0);
+	vec2 ColPos;
+	vec2 NewPos;
+	int Collide = GameServer()->Collision()->IntersectLine(PrevPos, CurPos, &ColPos, &NewPos);
 	CCharacter *OwnerChar = GameServer()->GetPlayerChar(m_Owner);
 	CCharacter *TargetChr = GameServer()->m_World.IntersectCharacter(PrevPos, CurPos, 6.0f, CurPos, OwnerChar);
 
 	m_LifeSpan--;
 
-	if(Collide || m_LifeSpan < 0 || GameLayerClipped(CurPos) || (TargetChr && OwnerChar && OwnerChar->GetPlayer()->GetTeam() != TargetChr->GetPlayer()->GetTeam()))
+	BodyCollideQuery queryCallback;
+	b2Vec2 b2Pos(ColPos.x / 30.f, ColPos.y / 30.f);
+	queryCallback.Body = 0;
+	queryCallback.findPos = b2Pos;
+	b2AABB aabb;
+	aabb.lowerBound = b2Vec2(b2Pos.x - 0.001, b2Pos.y - 0.001);
+	aabb.upperBound = b2Vec2(b2Pos.x + 0.001, b2Pos.y + 0.001);
+	GameServer()->m_b2world->QueryAABB(&queryCallback, aabb);
+
+	if(Collide || m_LifeSpan < 0 || GameLayerClipped(CurPos) || queryCallback.Body || (TargetChr && OwnerChar && OwnerChar->GetPlayer()->GetTeam() != TargetChr->GetPlayer()->GetTeam()))
 	{
 		if(m_LifeSpan >= 0 || m_Weapon == WEAPON_GRENADE)
 			GameServer()->CreateSound(CurPos, m_SoundImpact);

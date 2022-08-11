@@ -57,7 +57,7 @@ typedef unsigned __int64 uint64_t;
 
 class CBox2DBox;
 class CBox2DTest;
-class CBox2DCrank;
+class CBox2DTestSpider;
 
 class BodyRangeRay : public b2RayCastCallback
 {
@@ -150,6 +150,7 @@ class CGameContext : public IGameServer
 
 	static void ConB2CreateBox(IConsole::IResult *pResult, void *pUserData);
 	static void ConB2CreateTest(IConsole::IResult *pResult, void *pUserData);
+	static void ConB2CreateTestSpider(IConsole::IResult *pResult, void *pUserData);
 	static void ConB2CreateCrank(IConsole::IResult *pResult, void *pUserData);
 	static void ConB2CreateGround(IConsole::IResult *pResult, void *pUserData);
 	static void ConB2ClearWorld(IConsole::IResult *pResult, void *pUserData);
@@ -170,7 +171,13 @@ public:
 	b2World *m_b2world;
 	std::vector<CBox2DBox*> m_b2bodies;
 	std::vector<CBox2DTest*> m_b2Test;
+	std::vector<CBox2DTestSpider*> m_b2TestSpider;
 	std::vector<b2Body*> m_b2explosions;
+
+	vec2 B2Vec2ToVec2(b2Vec2 b2vec2, float Scale)
+	{
+		return vec2(b2vec2.x * Scale, b2vec2.y * Scale);
+	}
 
 	void CreateGround(vec2 Pos, int Type = 0);
 	void HandleBox2D();

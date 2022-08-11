@@ -16,6 +16,7 @@
 #include "item.h"
 #include "entities/box2d_box.h"
 #include "entities/box2d_test.h"
+#include "entities/box2d_test_spider.h"
 
 #include <teeuniverses/components/localization.h>
 #ifdef CONF_SQL
@@ -2006,6 +2007,18 @@ void CGameContext::ConB2CreateTest(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "Box2D", "Created box above you");
 }
 
+void CGameContext::ConB2CreateTestSpider(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	CCharacter *Char = pSelf->GetPlayerChar(pResult->GetClientID());
+	if (not Char) return;
+
+	vec2 size(pResult->GetInteger(0), pResult->GetInteger(1));
+	pSelf->m_b2TestSpider.push_back(new CBox2DTestSpider(&pSelf->m_World, vec2(Char->m_Pos.x, Char->m_Pos.y-128), size, pSelf->m_b2world, b2_dynamicBody, 1.f));
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "Box2D", "Created box above you");
+}
+
 void CGameContext::ConB2CreateGround(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -2064,7 +2077,8 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("vote", "r", CFGFLAG_SERVER, ConVote, this, "Force a vote to yes/no");
 
 	Console()->Register("b2_create_box", "ii", CFGFLAG_SERVER, ConB2CreateBox, this, "create a box in the Box2D world using your current position");
-	Console()->Register("b2_create_test", "ii", CFGFLAG_SERVER, ConB2CreateTest, this, "create a box in the Box2D world using your current position");
+	Console()->Register("b2_create_test", "", CFGFLAG_SERVER, ConB2CreateTest, this, "create a box in the Box2D world using your current position");
+	Console()->Register("b2_create_test_spider", "", CFGFLAG_SERVER, ConB2CreateTestSpider, this, "create a box in the Box2D world using your current position");
 	Console()->Register("b2_create_ground", "ii?i", CFGFLAG_SERVER, ConB2CreateGround, this, "create ground in the Box2D world using your current position");
 	Console()->Register("b2_clear_world", "", CFGFLAG_SERVER, ConB2ClearWorld, this, "clear all bodies (except tee bodies) in the Box2D world");
 	

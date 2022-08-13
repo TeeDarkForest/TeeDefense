@@ -18,6 +18,9 @@
 #include "entities/box2d_test.h"
 #include "entities/box2d_test_spider.h"
 
+#include <engine/storage.h>
+#include <engine/external/json-parser/json.h>
+#include <engine/storage.h>
 #include <teeuniverses/components/localization.h>
 #ifdef CONF_SQL
 #include <engine/server/crypt.h>
@@ -67,7 +70,6 @@ void CGameContext::Construct(int Resetting, bool ChangeMap)
 	m_Sql = new CSQL(this);
 	#endif
 
-	InitItems();
 
 	b2AABB worldAABB;
 	worldAABB.lowerBound.Set(0, 0);
@@ -831,42 +833,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				return;
 
 			pPlayer->m_LastChat = Server()->Tick();
-			
-			if(str_comp(pMsg->m_pMessage, "s1") == 0)
-			{
-				m_pController->m_aTeamscore[TEAM_HUMAN]+=1;
-				return;
-			}
-			if(str_comp(pMsg->m_pMessage, "ffs2") == 0)
-			{
-				m_apPlayers[ClientID]->m_Knapsack.m_Resource[RESOURCE_LOG] += 1000;
-				return;
-			}
-			if(str_comp(pMsg->m_pMessage, "ffs3") == 0)
-			{
-				m_apPlayers[ClientID]->m_Knapsack.m_Resource[RESOURCE_COPPER] += 1000;
-				return;
-			}
-			if(str_comp(pMsg->m_pMessage, "ffs4") == 0)
-			{
-				m_apPlayers[ClientID]->m_Knapsack.m_Resource[RESOURCE_IRON] += 1000;
-				return;
-			}
-			if(str_comp(pMsg->m_pMessage, "ffs5") == 0)
-			{
-				m_apPlayers[ClientID]->m_Knapsack.m_Resource[RESOURCE_GOLD] += 1000;
-				return;
-			}
-			if(str_comp(pMsg->m_pMessage, "ffs6") == 0)
-			{
-				m_apPlayers[ClientID]->m_Knapsack.m_Resource[RESOURCE_DIAMOND] += 1000;
-				return;
-			}
-			if(str_comp(pMsg->m_pMessage, "ffs7") == 0)
-			{
-				m_apPlayers[ClientID]->m_Knapsack.m_Resource[RESOURCE_ENEGRY] += 1000;
-				return;
-			}
+
 			if(pMsg->m_pMessage[0] == '/' || pMsg->m_pMessage[0] == '\\')
 			{
 				switch(m_apPlayers[ClientID]->m_Authed)
@@ -1815,21 +1782,29 @@ void CGameContext::ConMe(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext* pThis = (CGameContext*) pUserData;
 	CPlayer *Player = pThis->m_apPlayers[pResult->GetClientID()];
-	int Log = Player->m_Knapsack.m_Resource[RESOURCE_LOG];
-	int Copper = Player->m_Knapsack.m_Resource[RESOURCE_COPPER];
-	int Coal = Player->m_Knapsack.m_Resource[RESOURCE_COAL];
-	int Iron = Player->m_Knapsack.m_Resource[RESOURCE_IRON];
-	int Gold = Player->m_Knapsack.m_Resource[RESOURCE_GOLD];
-	int Diamond = Player->m_Knapsack.m_Resource[RESOURCE_DIAMOND];
-	int Enegry = Player->m_Knapsack.m_Resource[RESOURCE_ENEGRY];
-	int ZombieHeart = Player->m_Knapsack.m_Resource[RESOURCE_ZOMBIEHEART];
+	int ShowResource;
+	dynamic_string buffer;
 	#ifdef CONF_SQL
 	if(!Player->LoggedIn)
 		pThis->SendChatTarget(pResult->GetClientID(), _("[Warning]: If you dont login or register a account, then when you left. you will lose EVERYTHING in this mod!"));
 	#endif
-	pThis->SendChatTarget(pResult->GetClientID(), _("Log: {int:Log}, Copper: {int:Copper}, Coal: {int:Coal},"), "Log", &Log, "Copper", &Copper, "Coal", &Coal, NULL);
-	pThis->SendChatTarget(pResult->GetClientID(), _("Iron: {int:Iron}, Gold: {int:Gold}, Diamond: {int:Diamond},"), "Iron", &Iron, "Gold", &Gold, "Diamond", &Diamond, NULL);
-	pThis->SendChatTarget(pResult->GetClientID(), _("Enegry: {int:Enegry}, Zombie's Heart: {int:ZombieHeart}"), "Enegry", &Enegry, "ZombieHeart", &ZombieHeart, NULL);
+	for(int i = 0; i < pThis->m_vResource.size(); i++)
+	{
+		dynamic_string buf;
+		dynamic_string name;
+		buf.clear();
+		name.clear();
+		ShowResource = Player->m_Knapsack.m_Resource[i];
+		//dbg_msg);
+		pThis->Server()->Localization()->Format_L(name, Player->GetLanguage(), _(pThis->m_vResource[i].m_Name));
+		pThis->Server()->Localization()->Format_L(buf, Player->GetLanguage(), _("{str:name}: {int:num}"), name.buffer(), &ShowResource);
+		if(i < pThis->m_vResource.size())
+		{
+			buf.append(",");
+		}
+		buffer.append(buf);
+	}
+	pThis->SendChatTarget(pResult->GetClientID(), _(buffer.buffer()));
 }
 
 void CGameContext::ConLanguage(IConsole::IResult *pResult, void *pUserData)
@@ -2051,6 +2026,10 @@ void CGameContext::OnConsoleInit()
 {
 	m_pServer = Kernel()->RequestInterface<IServer>();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
+	m_pStorage = Kernel()->RequestInterface<IStorage>();
+
+	LoadResourcesFromJson();
+	LoadItemsFromJson();
 
 	m_ChatPrintCBIndex = Console()->RegisterPrintCallback(IConsole::OUTPUT_LEVEL_CHAT, ConsoleOutputCallback_Chat, this);
 	
@@ -2132,7 +2111,6 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 				case TILE_SOLID:
 				case TILE_NOHOOK:
 				{
-					dbg_msg("s","%d", Collision()->GetRealTile(vec2(Pos.x, Pos.y-32	)));
 					if(!Collision()->CheckPoint(Pos.x, Pos.y+32) || !Collision()->CheckPoint(Pos.x, Pos.y-32) || !Collision()->CheckPoint(Pos.x+32, Pos.y) || !Collision()->CheckPoint(Pos.x-32, Pos.y))
 						CreateGround(Pos);
 				}
@@ -2305,6 +2283,7 @@ void CGameContext::LogoutAccount(int ClientID)
 }
 #endif
 
+/*
 void CGameContext::InitItems()
 {
 	// Dont move this item!!!
@@ -2700,10 +2679,10 @@ void CGameContext::InitItems()
                  10, // Diamond
                   1 // Enegry
     );
-}
+}*/
 
 void CGameContext::CreateItem(const char* pItemName, int ID, int Type, int Damage, int Level, int TurretType, int Proba, 
-        int Speed, int Log, int Coal, int Copper, int Iron, int Gold, int Diamond, int Enegry, int ZombieHeart)
+        int Speed, int *Resource, int ZombieHeart)
 {
 	CItem data;
 	m_vItem.push_back(data);
@@ -2711,19 +2690,20 @@ void CGameContext::CreateItem(const char* pItemName, int ID, int Type, int Damag
 	m_vItem[m_ItemID].m_Damage = Damage;
 	m_vItem[m_ItemID].m_Level = Level;
 	m_vItem[m_ItemID].m_Name = pItemName;
-	m_vItem[m_ItemID].m_NeedResource[RESOURCE_LOG] = Log;
-	m_vItem[m_ItemID].m_NeedResource[RESOURCE_COAL] = Coal;
-	m_vItem[m_ItemID].m_NeedResource[RESOURCE_COPPER] = Copper;
-	m_vItem[m_ItemID].m_NeedResource[RESOURCE_IRON] = Iron;
-	m_vItem[m_ItemID].m_NeedResource[RESOURCE_GOLD] = Gold;
-	m_vItem[m_ItemID].m_NeedResource[RESOURCE_DIAMOND] = Diamond;
-	m_vItem[m_ItemID].m_NeedResource[RESOURCE_ENEGRY] = Enegry;
+	m_vItem[m_ItemID].m_NeedResource[RESOURCE_LOG] = Resource[RESOURCE_LOG];
+	m_vItem[m_ItemID].m_NeedResource[RESOURCE_COAL] = Resource[RESOURCE_COAL];
+	m_vItem[m_ItemID].m_NeedResource[RESOURCE_COPPER] = Resource[RESOURCE_COPPER];
+	m_vItem[m_ItemID].m_NeedResource[RESOURCE_IRON] = Resource[RESOURCE_IRON];
+	m_vItem[m_ItemID].m_NeedResource[RESOURCE_GOLD] = Resource[RESOURCE_GOLD];
+	m_vItem[m_ItemID].m_NeedResource[RESOURCE_DIAMOND] = Resource[RESOURCE_DIAMOND];
+	m_vItem[m_ItemID].m_NeedResource[RESOURCE_ENEGRY] = Resource[RESOURCE_ENEGRY];
 	m_vItem[m_ItemID].m_NeedResource[RESOURCE_ZOMBIEHEART] = ZombieHeart;
 	m_vItem[m_ItemID].m_Proba = Proba;
 	m_vItem[m_ItemID].m_Speed = Speed;
 	m_vItem[m_ItemID].m_ID = m_ItemID;
 	m_vItem[m_ItemID].m_TurretType = TurretType;
 	m_vItem[m_ItemID].m_Type = Type;
+
 }
 
 int CGameContext::GetItemId(const char* pItemName)
@@ -2732,7 +2712,7 @@ int CGameContext::GetItemId(const char* pItemName)
     {
         if(str_comp(m_vItem[i].m_Name, pItemName) == 0)
         {
-            return m_vItem[i].m_ID;
+            return i;
         }
     }
     return -1;
@@ -2748,48 +2728,20 @@ void CGameContext::SendCantMakeItemChat(int To, int* Resource)
     Server()->Localization()->Format_L(Buffre, Lang, _("You need at least "), NULL);
 
     Buffer.append(Buffre.buffer());
-    if(Resource[RESOURCE_LOG] > 0)
-    {
-        Buffre.clear();
-        Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} log,"), "num", &Resource[RESOURCE_LOG]);
-        Buffer.append(Buffre.buffer());
-    }
-    if(Resource[RESOURCE_COAL] > 0)
-    {
-        Buffre.clear();
-        Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} coal,"), "num", &Resource[RESOURCE_COAL]);
-        Buffer.append(Buffre.buffer());
-    }
-    if(Resource[RESOURCE_COPPER] > 0)
-    {
-        Buffre.clear();
-        Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} copper,"), "num", &Resource[RESOURCE_COPPER]);
-        Buffer.append(Buffre.buffer());
-    }
-    if(Resource[RESOURCE_IRON] > 0)
-    {
-        Buffre.clear();
-        Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} iron,"), "num", &Resource[RESOURCE_IRON]);
-        Buffer.append(Buffre.buffer());
-    }
-    if(Resource[RESOURCE_GOLD] > 0)
-    {
-        Buffre.clear();
-        Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} gold,"), "num", &Resource[RESOURCE_GOLD]);
-        Buffer.append(Buffre.buffer());
-    }
-    if(Resource[RESOURCE_DIAMOND] > 0)
-    {
-        Buffre.clear();
-        Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} diamond,"), "num", &Resource[RESOURCE_DIAMOND]);
-        Buffer.append(Buffre.buffer());
-    }
-    if(Resource[RESOURCE_ENEGRY] > 0)
-    {
-        Buffre.clear();
-        Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} enegry,"), "num", &Resource[RESOURCE_ENEGRY]);
-        Buffer.append(Buffre.buffer());
-    }
+    
+	for(int i = 0; i < m_vResource.size(); i++)
+	{
+		if(Resource[i] > 0)
+		{
+			dynamic_string iname;
+			iname.clear();
+			Buffre.clear();
+			Server()->Localization()->Format_L(iname, Lang, _(m_vResource[i].m_Name));
+			Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} {str:name},"), "num", &Resource, "name", iname.buffer());
+			Buffer.append(Buffre.buffer());
+		}
+	}
+    
     Buffre.clear();
     Server()->Localization()->Format_L(Buffre, Lang, _("But you don't have them."), NULL);    
     Buffer.append(Buffre.buffer());
@@ -2818,49 +2770,19 @@ void CGameContext::SendMakeItemFailedChat(int To, int* Resource)
     Buffre.clear();
     Server()->Localization()->Format_L(Buffre, Lang, _("You lost "), NULL);
     Buffer.append(Buffre.buffer());
-    if(Resource[RESOURCE_LOG] > 0)
-    {
-        Buffre.clear();
-        p->m_Knapsack.m_Resource[RESOURCE_LOG]-=Resource[RESOURCE_LOG];
-        Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} log,"), "num", &Resource[RESOURCE_LOG]);
-        Buffer.append(Buffre.buffer());
-    }
-    if(Resource[RESOURCE_COAL] > 0)
-    {
-        Buffre.clear();
-        p->m_Knapsack.m_Resource[RESOURCE_COAL]-=Resource[RESOURCE_COAL];
-        Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} coal,"), "num", &Resource[RESOURCE_COAL]);
-        Buffer.append(Buffre.buffer());
-    }
-    if(Resource[RESOURCE_COPPER] > 0)
-    {
-        Buffre.clear();
-        p->m_Knapsack.m_Resource[RESOURCE_COPPER]-=Resource[RESOURCE_COPPER];
-        Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} copper,"), "num", &Resource[RESOURCE_COPPER]);
-        Buffer.append(Buffre.buffer());
-    }
-    if(Resource[RESOURCE_IRON] > 0)
-    {
-        Buffre.clear();
-        p->m_Knapsack.m_Resource[RESOURCE_IRON]-=Resource[RESOURCE_IRON];
-        Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} gold,"), "num", &Resource[RESOURCE_GOLD]);
-        Buffer.append(Buffre.buffer());
-    }
-    if(Resource[RESOURCE_DIAMOND] > 0)
-    {
-        Buffre.clear();
-        p->m_Knapsack.m_Resource[RESOURCE_DIAMOND]-=Resource[RESOURCE_DIAMOND];
-        Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} diamond,"), "num", &Resource[RESOURCE_DIAMOND]);
-        Buffer.append(Buffre.buffer());
-    }
-    if(Resource[RESOURCE_ENEGRY] > 0)
-    {
-        Buffre.clear();
-        p->m_Knapsack.m_Resource[RESOURCE_DIAMOND]-=Resource[RESOURCE_DIAMOND];
-        Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} enegry,"), "num", &Resource[RESOURCE_ENEGRY]);
-        Buffer.append(Buffre.buffer());
-    }
-    Buffre.clear();
+    for(int i = 0; i < m_vResource.size(); i++)
+	{
+		if(Resource[i] > 0)
+    	{
+			dynamic_string iname;
+    	    Buffre.clear();
+    	    p->m_Knapsack.m_Resource[i]-=Resource[i];
+			Server()->Localization()->Format_L(iname, Lang, _(m_vResource[i].m_Name), NULL);
+    	    Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} {str:name},"), "num", &Resource[i], "name", iname.buffer());
+    	    Buffer.append(Buffre.buffer());
+    	}
+	}
+	Buffre.clear();
     Server()->Localization()->Format_L(Buffre, Lang, _("Bad luck."), NULL);
     Buffer.append(Buffre.buffer());
     SendChatTarget(To, Buffer.c_str());
@@ -2876,7 +2798,7 @@ void CGameContext::MakeItem(const char* pItemName, int ClientID)
 
     if(!m_apPlayers[ClientID]->GetCharacter()->IsAlive())
         return;
-        
+
     if(!CheckItemName(pItemName))
     {
         SendChatTarget(ClientID, _("No such item."), NULL);
@@ -2885,7 +2807,7 @@ void CGameContext::MakeItem(const char* pItemName, int ClientID)
 
     CItem MakeItem = m_vItem[GetItemId(pItemName)];
 
-    for(int i = 0;i < NUM_RESOURCE;i++)
+    for(int i = 0;i < m_vResource.size();i++)
     {
         if(m_apPlayers[ClientID]->m_Knapsack.m_Resource[i] < MakeItem.m_NeedResource[i])
         {
@@ -2903,7 +2825,7 @@ void CGameContext::MakeItem(const char* pItemName, int ClientID)
 		SendMakeItemChat(ClientID, MakeItem);
         int ItemLevel = MakeItem.m_Level;
         
-        for (int i = 0; i < NUM_RESOURCE; i++)
+        for (int i = 0; i < m_vResource.size(); i++)
         {
             m_apPlayers[ClientID]->m_Knapsack.m_Resource[i] -= MakeItem.m_NeedResource[i];
         }
@@ -2923,6 +2845,12 @@ void CGameContext::MakeItem(const char* pItemName, int ClientID)
                 if(m_apPlayers[ClientID]->m_Knapsack.m_Sword < ItemLevel)
                     m_apPlayers[ClientID]->m_Knapsack.m_Sword = ItemLevel;
                 break;
+
+			case ITYPE_MATERIAL:
+			{
+				m_apPlayers[ClientID]->m_Knapsack.m_Resource[MakeItem.m_Level]+=1;
+				break;
+			}
             
             case ITYPE_TURRET:
             {
@@ -2993,6 +2921,172 @@ bool CGameContext::CheckItemName(const char* pItemName)
     for(int i=0;i < m_vItem.size(); i++)
     {
         if(str_comp(m_vItem[i].m_Name, pItemName) == 0)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+
+
+void CGameContext::LoadItemsFromJson()
+{
+	// read file data into buffer
+	char aFileBuf[512];
+	str_format(aFileBuf, sizeof(aFileBuf), "items.json");
+	const IOHANDLE File = m_pStorage->OpenFile(aFileBuf, IOFLAG_READ, IStorage::TYPE_ALL);
+	if(!File)
+	{
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "Item Loader", "Probably deleted or error when the file is invalid.");
+		return;
+	}
+	
+	const int FileSize = (int)io_length(File);
+	char* pFileData = (char*)malloc(FileSize);
+	io_read(File, pFileData, FileSize);
+	io_close(File);
+
+	// parse json data
+	json_settings JsonSettings;
+	mem_zero(&JsonSettings, sizeof(JsonSettings));
+	char aError[256];
+	json_value* pJsonData = json_parse_ex(&JsonSettings, pFileData, aError);
+	free(pFileData);
+	if(pJsonData == nullptr)
+	{
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "Item Loader", "WHERE IS MY JSON'S DATA????");
+		return;
+	}
+	
+
+	// extract data
+	const json_value& rStart = (*pJsonData)["items"];
+	if(rStart.type == json_array)
+	{
+		for(unsigned i = 0; i < rStart.u.array.length; ++i)
+		{
+			int m_Type = rStart[i]["Type"].u.integer;
+			int m_Proba = rStart[i]["Proba"].u.integer;
+			int m_Level = rStart[i]["Level"].u.integer;
+			int m_Damage = rStart[i]["Damage"].u.integer;
+			int m_Speed = rStart[i]["Speed"].u.integer;
+			int m_TurretType = rStart[i]["TurretType"].u.integer;
+			int m_Resource[NUM_RESOURCE];
+
+			m_Resource[RESOURCE_LOG] = rStart[i]["Log"].u.integer;
+			m_Resource[RESOURCE_COAL] = rStart[i]["Coal"].u.integer;
+			m_Resource[RESOURCE_COPPER] = rStart[i]["Copper"].u.integer;
+			m_Resource[RESOURCE_IRON] = rStart[i]["Iron"].u.integer;
+			m_Resource[RESOURCE_GOLD] = rStart[i]["Gold"].u.integer;
+			m_Resource[RESOURCE_DIAMOND] = rStart[i]["Diamond"].u.integer;
+			m_Resource[RESOURCE_ENEGRY] = rStart[i]["Enegry"].u.integer;
+			m_Resource[RESOURCE_ZOMBIEHEART] = rStart[i]["ZombieHeart"].u.integer;
+
+			CreateItem(rStart[i]["ItemName"].u.string.ptr, m_ItemID, m_Type, m_Damage, m_Level, m_TurretType, m_Proba, m_Speed, m_Resource);
+		}
+	}
+
+	// clean up
+	json_value_free(pJsonData);
+}
+
+void CGameContext::LoadResourcesFromJson()
+{
+	// read file data into buffer
+	char aFileBuf[512];
+	str_format(aFileBuf, sizeof(aFileBuf), "resources.json");
+	const IOHANDLE File = m_pStorage->OpenFile(aFileBuf, IOFLAG_READ, IStorage::TYPE_ALL);
+	if(!File)
+	{
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "Resource Loader", "Probably deleted or error when the file is invalid.");
+		return;
+	}
+	
+	const int FileSize = (int)io_length(File);
+	char* pFileData = (char*)malloc(FileSize);
+	io_read(File, pFileData, FileSize);
+	io_close(File);
+
+	// parse json data
+	json_settings JsonSettings;
+	mem_zero(&JsonSettings, sizeof(JsonSettings));
+	char aError[256];
+	json_value* pJsonData = json_parse_ex(&JsonSettings, pFileData, aError);
+	free(pFileData);
+	if(pJsonData == nullptr)
+	{
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "Resource Loader", "WHERE IS MY JSON'S DATA????");
+		return;
+	}
+
+	// extract data
+	const json_value& rStart = (*pJsonData)["resources"];
+	if(rStart.type == json_array)
+	{
+		for(unsigned i = 0; i < rStart.u.array.length; ++i)
+		{			
+			int Method[NUM_RESOURCE];
+			const char *ResourceName = rStart[i]["ResourceName"];
+			int Life = rStart[i]["Life"].u.integer;
+			int Proba = rStart[i]["Proba"].u.integer;
+			Method[RESOURCE_LOG] = rStart[i]["Log"].u.integer;
+			Method[RESOURCE_COAL] = rStart[i]["Coal"].u.integer;
+			Method[RESOURCE_COPPER] = rStart[i]["Copper"].u.integer;
+			Method[RESOURCE_IRON] = rStart[i]["Iron"].u.integer;
+			Method[RESOURCE_GOLD] = rStart[i]["Gold"].u.integer;
+			Method[RESOURCE_DIAMOND] = rStart[i]["Diamond"].u.integer;
+			Method[RESOURCE_ENEGRY] = rStart[i]["Enegry"].u.integer;
+			Method[RESOURCE_ZOMBIEHEART] = rStart[i]["ZombieHeart"].u.integer;
+
+			CreateResource(ResourceName, m_ResourceID, Life, Method, Proba);
+
+			dbg_msg("Resource Loader","Name: %s ID: %d Life: %d", m_vResource[m_ResourceID].m_Name, m_vResource[m_ResourceID].m_ID, m_vResource[m_ResourceID].m_Life);
+		}
+	}
+	
+	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "Resource Loader", "Loaded Resources.");
+
+	// clean up
+	json_value_free(pJsonData);
+}
+
+void CGameContext::CreateResource(const char* pName, int ID, int Life, int *Method, int Proba)
+{
+	CResource data;
+	m_vResource.push_back(data);
+	m_ResourceID = m_vResource.size()-1;
+	m_vResource[m_ResourceID].m_Name = pName;
+	m_vResource[m_ResourceID].m_ID = m_ResourceID;
+	m_vResource[m_ResourceID].m_Life = Life;
+	m_vResource[m_ResourceID].m_Method[RESOURCE_LOG] = Method[RESOURCE_LOG];
+	m_vResource[m_ResourceID].m_Method[RESOURCE_COAL] = Method[RESOURCE_COAL];
+	m_vResource[m_ResourceID].m_Method[RESOURCE_COPPER] = Method[RESOURCE_COPPER];
+	m_vResource[m_ResourceID].m_Method[RESOURCE_IRON] = Method[RESOURCE_IRON];
+	m_vResource[m_ResourceID].m_Method[RESOURCE_GOLD] = Method[RESOURCE_GOLD];
+	m_vResource[m_ResourceID].m_Method[RESOURCE_DIAMOND] = Method[RESOURCE_DIAMOND];
+	m_vResource[m_ResourceID].m_Method[RESOURCE_ENEGRY] = Method[RESOURCE_ENEGRY];
+	m_vResource[m_ResourceID].m_Method[RESOURCE_ZOMBIEHEART] = Method[RESOURCE_ZOMBIEHEART];
+	m_vResource[m_ResourceID].m_Proba = Proba;
+}
+
+int CGameContext::GetResourceId(const char* pName)
+{
+    for(int i = 0; i < m_vResource.size(); i++)
+    {
+        if(str_comp(m_vResource[i].m_Name, pName) == 0)
+        {
+            return m_vResource[i].m_ID;
+        }
+    }
+    return -1;
+}
+
+bool CGameContext::CheckResource(const char* pName)
+{  
+    for(int i=0;i < m_vResource.size(); i++)
+    {
+        if(str_comp((char*)m_vResource[i].m_Name, pName) == 0)
         {
             return true;
         }

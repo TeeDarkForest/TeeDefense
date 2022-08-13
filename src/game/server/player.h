@@ -155,7 +155,7 @@ public:
 public:
 	struct // knapsack
 	{
-		int m_Resource[NUM_RESOURCE];
+		int m_Resource[100];
 		int m_Sword;
 		int m_Pickaxe;
 		int m_Axe;

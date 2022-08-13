@@ -7,6 +7,7 @@
 #include <engine/server.h>
 #include <engine/console.h>
 #include <engine/shared/memheap.h>
+#include <engine/storage.h>
 
 #include <teeuniverses/components/localization.h>
 
@@ -19,6 +20,8 @@
 #include "player.h"
 #include <vector>
 #include "item.h"
+
+#define CStorage IStorage
 
 #ifdef CONF_SQL
 #include "OnTime/sql.h"
@@ -106,6 +109,7 @@ class CGameContext : public IGameServer
 	CCollision m_Collision;
 	CNetObjHandler m_NetObjHandler;
 	CTuningParams m_Tuning;
+	IStorage *m_pStorage;
 
 	#ifdef CONF_SQL
 	/* SQL */
@@ -167,6 +171,8 @@ public:
 	int m_ChatResponseTargetID;
 	int m_ChatPrintCBIndex;
 
+	IStorage *Storage() const { return m_pStorage; }
+
 public:
 	b2World *m_b2world;
 	std::vector<CBox2DBox*> m_b2bodies;
@@ -183,6 +189,7 @@ public:
 	void HandleBox2D();
 
 private:
+
 	struct Actor
 	{
 		bool m_Dead;
@@ -319,9 +326,13 @@ public:
 	int m_TowerHealth;
 
 	int m_ItemID;
-	void InitItems();
+	int m_ResourceID;
 	void CreateItem(const char* pItemName, int ID, int Type, int Damage, int Level, int TurretType, int Proba, 
-		        int Speed, int Log, int Coal, int Copper, int Iron, int Gold, int Diamond, int Enegry, int ZombieHeart = 0);
+		        int Speed, int *Resource, int ZombieHeart = 0);
+	void LoadItemsFromJson();
+	void LoadResourcesFromJson();
+	
+public:	
 	struct CItem
 	{
 		const char* m_Name;
@@ -332,26 +343,33 @@ public:
     	int m_Damage;
     	int m_Speed;
     	int m_ID;
-    	int m_TurretType;
+		int m_TurretType;
 	};
-	
+
 	int GetItemId(const char* pItemName);
-
 	int GetSpeed(int Level, int Type);
-
-    int GetDmg(int Level);
-
+	int GetDmg(int Level);
 	void MakeItem(const char* pItemName, int ClientID);
-
-    bool CheckItemName(const char* pItemName);
-
-    void SendCantMakeItemChat(int To, int *Resource);
-
-    void SendMakeItemChat(int To, CItem Item);
-
-    void SendMakeItemFailedChat(int To, int* Resource);
-		
+	bool CheckItemName(const char* pItemName);
+	void SendCantMakeItemChat(int To, int *Resource);
+	void SendMakeItemChat(int To, CItem Item);
+	void SendMakeItemFailedChat(int To, int* Resource);
 	std::vector<CItem> m_vItem;
+
+	struct CResource
+	{
+		const char* m_Name;
+		int m_ID;
+		int m_Life;
+		int m_Proba;
+		int m_Method[NUM_RESOURCE];
+	};
+
+	int GetResourceId(const char* pName);
+	bool CheckResource(const char* pName);
+	void CreateResource(const char* pName, int ID, int Life, int *Method, int Proba);
+	
+	std::vector<CResource> m_vResource;
 };
 
 inline int64_t CmaskAll() { return -1LL; }

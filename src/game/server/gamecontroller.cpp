@@ -412,9 +412,9 @@ int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 			if(pKiller->LoggedIn)
 				GameServer()->Sql()->UpdateCK(pKiller->GetCID(), "Log", "+1");
 			else
-				pKiller->m_Knapsack.m_Resource[RESOURCE_LOG]++;
+				pKiller->m_Knapsack.m_Resource[GameServer()->GetResourceId("Log")]++;
 			#else
-				pKiller->m_Knapsack.m_Resource[RESOURCE_LOG]++;
+				pKiller->m_Knapsack.m_Resource[GameServer()->GetResourceId("Log")]++;
 			#endif
 			GameServer()->SendChatTarget(pKiller->GetCID(), _("You got 1 Log from the Zombie"));
 		}
@@ -424,7 +424,9 @@ int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 			if(pKiller->LoggedIn)
 				GameServer()->Sql()->UpdateCK(pKiller->GetCID(), "Copper", "+1");
 			else
-				pKiller->m_Knapsack.m_Resource[RESOURCE_COPPER]++;
+				pKiller->m_Knapsack.m_Resource[GameServer()->GetResourceId("Copper")]++;
+			#else
+				pKiller->m_Knapsack.m_Resource[GameServer()->GetResourceId("Copper")]++;
 			#endif
 			GameServer()->SendChatTarget(pKiller->GetCID(), _("You got 1 Copper from the Zombie"));
 		}
@@ -434,9 +436,9 @@ int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 			if(pKiller->LoggedIn)
 				GameServer()->Sql()->UpdateCK(pKiller->GetCID(), "Gold", "+1");
 			else
-				pKiller->m_Knapsack.m_Resource[RESOURCE_GOLD]++;
+				pKiller->m_Knapsack.m_Resource[GameServer()->GetResourceId("Gold")]++;
 			#else
-				pKiller->m_Knapsack.m_Resource[RESOURCE_GOLD]++;
+				pKiller->m_Knapsack.m_Resource[GameServer()->GetResourceId("Gold")]++;
 			#endif
 			GameServer()->SendChatTarget(pKiller->GetCID(), _("You picked up a Gold"));
 		}
@@ -444,9 +446,9 @@ int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 		if(pKiller->LoggedIn)
 			GameServer()->Sql()->UpdateCK(pKiller->GetCID(), "ZombieHeart", "+1");
 		else
-			pKiller->m_Knapsack.m_Resource[RESOURCE_ZOMBIEHEART]++;
+			pKiller->m_Knapsack.m_Resource[GameServer()->GetResourceId("ZombieHeart")]++;
 		#else
-			pKiller->m_Knapsack.m_Resource[RESOURCE_ZOMBIEHEART]++;
+			pKiller->m_Knapsack.m_Resource[GameServer()->GetResourceId("ZombieHeart")]++;
 		#endif
 		GameServer()->SendChatTarget(pKiller->GetCID(), _("You picked up Zombie's Heart"));
 		pKiller->m_Score++;

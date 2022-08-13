@@ -1,0 +1,108 @@
+{"resources":
+    [
+        {
+            "ResourceName": "Log",
+            "Proba": 100,
+            "Life": 50,
+            "Log": 0,
+            "Coal": 0,
+            "Copper": 0,
+            "Iron": 0,
+            "Gold": 0,
+            "Diamond": 0,
+            "Enegry": 0,
+            "ZombieHeart": 0
+        },
+        {
+            "ResourceName": "Coal",
+            "Proba": 100,
+            "Life": 8000,
+            "Log": 0,
+            "Coal": 0,
+            "Copper": 0,
+            "Iron": 0,
+            "Gold": 0,
+            "Diamond": 0,
+            "Enegry": 0,
+            "ZombieHeart": 0
+        },
+        {
+            "ResourceName": "Copper",
+            "Proba": 100,
+            "Life": 16000,
+            "Log": 0,
+            "Coal": 0,
+            "Copper": 0,
+            "Iron": 0,
+            "Gold": 0,
+            "Diamond": 0,
+            "Enegry": 0,
+            "ZombieHeart": 0
+        },
+        {
+            "ResourceName": "Iron",
+            "Proba": 100,
+            "Life": 40000,
+            "Log": 0,
+            "Coal": 0,
+            "Copper": 0,
+            "Iron": 0,
+            "Gold": 0,
+            "Diamond": 0,
+            "Enegry": 0,
+            "ZombieHeart": 0
+        },
+        {
+            "ResourceName": "Gold",
+            "Proba": 100,
+            "Life": 60000,
+            "Log": 0,
+            "Coal": 0,
+            "Copper": 0,
+            "Iron": 0,
+            "Gold": 0,
+            "Diamond": 0,
+            "Enegry": 0,
+            "ZombieHeart": 0
+        },
+        {
+            "ResourceName": "Diamond",
+            "Proba": 100,
+            "Life": 500000,
+            "Log": 0,
+            "Coal": 0,
+            "Copper": 0,
+            "Iron": 0,
+            "Gold": 0,
+            "Diamond": 0,
+            "Enegry": 0,
+            "ZombieHeart": 0
+        },
+        {
+            "ResourceName": "Enegry",
+            "Proba": 100,
+            "Life": 3000000,
+            "Log": 0,
+            "Coal": 0,
+            "Copper": 0,
+            "Iron": 0,
+            "Gold": 0,
+            "Diamond": 0,
+            "Enegry": 0,
+            "ZombieHeart": 0
+        },
+        {
+            "ResourceName": "ZombieHeart",
+            "Proba": 100,
+            "Life": 0,
+            "Log": 0,
+            "Coal": 0,
+            "Copper": 0,
+            "Iron": 0,
+            "Gold": 0,
+            "Diamond": 0,
+            "Enegry": 0,
+            "ZombieHeart": 0
+        }
+    ]
+}

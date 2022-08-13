@@ -474,7 +474,7 @@ bool CPlayer::GetZomb(int Type)
 
 void CPlayer::ResetKnapsack()
 {
-	for(int i = 0; i < NUM_RESOURCE; i++)
+	for(int i = 0; i < GameServer()->m_vResource.size(); i++)
 		m_Knapsack.m_Resource[i] = 0;
 	m_Knapsack.m_Axe = -1;
 	m_Knapsack.m_Pickaxe = -1;

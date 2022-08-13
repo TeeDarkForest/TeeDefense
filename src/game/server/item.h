@@ -1,4 +1,4 @@
-/* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
+/* (c) EDreemurr. See licence.txt in the root of the distribution for more information.      */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_SERVER_ITEM_H
 #define GAME_SERVER_ITEM_H
@@ -35,5 +35,6 @@ enum
     ITYPE_AXE,
     ITYPE_SWORD,
     ITYPE_TURRET,
+    ITYPE_MATERIAL,
 };
 #endif

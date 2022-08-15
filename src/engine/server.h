@@ -49,6 +49,8 @@ public:
 
 	virtual int SendMsg(CMsgPacker *pMsg, int Flags, int ClientID) = 0;
 
+	virtual void InitZomb(int ClientID) = 0;
+
 	template<class T>
 	int SendPackMsg(T *pMsg, int Flags, int ClientID)
 	{

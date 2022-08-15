@@ -1,7 +1,9 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include <base/system.h>
 #include "eventhandler.h"
 #include "gamecontext.h"
+#include "player.h"
 
 //////////////////////////////////////////////////
 // Event handler
@@ -17,7 +19,7 @@ void CEventHandler::SetGameServer(CGameContext *pGameServer)
 	m_pGameServer = pGameServer;
 }
 
-void *CEventHandler::Create(int Type, int Size, int64_t Mask)
+void *CEventHandler::Create(int Type, int Size, Mask128 Mask)
 {
 	if(m_NumEvents == MAX_EVENTS)
 		return 0;

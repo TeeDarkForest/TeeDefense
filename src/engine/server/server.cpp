@@ -382,7 +382,7 @@ void CServer::SetClientScore(int ClientID, int Score)
 
 void CServer::Kick(int ClientID, const char *pReason)
 {
-	if(ClientID > ZOMBIE_START)
+	if(m_aClients[ClientID].m_State == CClient::STATE_ZOMB)
 	{
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "you can't kick zombies");
 		return;
@@ -453,7 +453,7 @@ int CServer::GetClientInfo(int ClientID, CClientInfo *pInfo)
 	dbg_assert(ClientID >= 0 && ClientID < MAX_CLIENTS, "client_id is not valid");
 	dbg_assert(pInfo != 0, "info can not be null");
 
-	if(m_aClients[ClientID].m_State == CClient::STATE_INGAME)
+	if(m_aClients[ClientID].m_State == CClient::STATE_INGAME || m_aClients[ClientID].m_State == CClient::STATE_ZOMB)
 	{
 		pInfo->m_pName = m_aClients[ClientID].m_aName;
 		pInfo->m_Latency = m_aClients[ClientID].m_Latency;
@@ -472,7 +472,7 @@ void CServer::GetClientAddr(int ClientID, char *pAddrStr, int Size)
 
 const char *CServer::ClientName(int ClientID)
 {
-	if(ClientID > ZOMBIE_START && ClientID < ZOMBIE_END)
+	if(m_aClients[ClientID].m_State == CClient::STATE_ZOMB)
 		return "Zombie";//needed
 	if(ClientID < 0|| ClientID >= MAX_CLIENTS || m_aClients[ClientID].m_State == CServer::CClient::STATE_EMPTY)
 		return "(invalid)";
@@ -488,7 +488,7 @@ const char *CServer::ClientClan(int ClientID)
 {
 	if(ClientID < 0 || ClientID >= MAX_CLIENTS || m_aClients[ClientID].m_State == CServer::CClient::STATE_EMPTY)
 		return "";
-	if(m_aClients[ClientID].m_State == CServer::CClient::STATE_INGAME)
+	if(m_aClients[ClientID].m_State == CServer::CClient::STATE_INGAME || m_aClients[ClientID].m_State == CClient::STATE_ZOMB)
 		return m_aClients[ClientID].m_aClan;
 	else
 		return "";
@@ -498,7 +498,7 @@ int CServer::ClientCountry(int ClientID)
 {
 	if(ClientID < 0 || ClientID >= MAX_CLIENTS || m_aClients[ClientID].m_State == CServer::CClient::STATE_EMPTY)
 		return -1;
-	if(m_aClients[ClientID].m_State == CServer::CClient::STATE_INGAME)
+	if(m_aClients[ClientID].m_State == CServer::CClient::STATE_INGAME || m_aClients[ClientID].m_State == CClient::STATE_ZOMB)
 		return m_aClients[ClientID].m_Country;
 	else
 		return -1;
@@ -506,7 +506,7 @@ int CServer::ClientCountry(int ClientID)
 
 bool CServer::ClientIngame(int ClientID)
 {
-	return ClientID >= 0 && ClientID < MAX_CLIENTS && m_aClients[ClientID].m_State == CServer::CClient::STATE_INGAME;
+	return ClientID >= 0 && ClientID < MAX_CLIENTS && (m_aClients[ClientID].m_State == CServer::CClient::STATE_INGAME);
 }
 
 int CServer::MaxClients() const
@@ -552,7 +552,7 @@ int CServer::SendMsgEx(CMsgPacker *pMsg, int Flags, int ClientID, bool System)
 			// broadcast
 			int i;
 			for(i = 0; i < MAX_CLIENTS; i++)
-				if(m_aClients[i].m_State == CClient::STATE_INGAME)
+				if(m_aClients[i].m_State == CClient::STATE_INGAME || m_aClients[i].m_State == CClient::STATE_ZOMB)
 				{
 					Packet.m_ClientID = i;
 					m_NetServer.Send(&Packet);
@@ -587,7 +587,7 @@ void CServer::DoSnapshot()
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		// client must be ingame to recive snapshots
-		if(m_aClients[i].m_State != CClient::STATE_INGAME)
+		if(m_aClients[i].m_State != CClient::STATE_INGAME || m_aClients[i].m_State == CClient::STATE_ZOMB)
 			continue;
 
 		// this client is trying to recover, don't spam snapshots
@@ -985,7 +985,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			m_aClients[ClientID].m_CurrentInput %= 200;
 
 			// call the mod with the fresh input data
-			if(m_aClients[ClientID].m_State == CClient::STATE_INGAME)
+			if(m_aClients[ClientID].m_State == CClient::STATE_INGAME || m_aClients[ClientID].m_State == CClient::STATE_ZOMB)
 				GameServer()->OnClientDirectInput(ClientID, m_aClients[ClientID].m_LatestInput.m_aData);
 		}
 		else if(Msg == NETMSG_RCON_CMD)
@@ -1645,7 +1645,7 @@ int CServer::Run()
 					{
 						if(m_aClients[c].m_aInputs[i].m_GameTick == Tick())
 						{
-							if(m_aClients[c].m_State == CClient::STATE_INGAME)
+							if(m_aClients[c].m_State == CClient::STATE_INGAME || m_aClients[c].m_State == CClient::STATE_ZOMB)
 								GameServer()->OnClientPredictedInput(c, m_aClients[c].m_aInputs[i].m_aData);
 							break;
 						}
@@ -2042,4 +2042,9 @@ int main(int argc, const char **argv) // ignore_convention
 	delete pStorage;
 	delete pConfig;
 	return 0;
+}
+
+void CServer::InitZomb(int ClientID)
+{
+	m_aClients[ClientID].m_State = CClient::STATE_ZOMB;
 }

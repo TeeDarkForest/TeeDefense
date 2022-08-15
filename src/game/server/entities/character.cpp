@@ -53,6 +53,7 @@ CCharacter::CCharacter(CGameWorld *pWorld)
 	m_Health = 0;
 	m_Armor = 0;
 	m_IsFrozen = false;
+	m_SnappingNum = 0;
 }
 
 void CCharacter::Reset()
@@ -793,7 +794,7 @@ void CCharacter::TickDefered()
 	}
 
 	int Events = m_Core.m_TriggeredEvents;
-	int Mask = CmaskAllExceptOne(m_pPlayer->GetCID());
+	Mask128 Mask = CmaskAllExceptOne(m_pPlayer->GetCID());
 
 	if(Events&COREEVENT_GROUND_JUMP) GameServer()->CreateSound(m_Pos, SOUND_PLAYER_JUMP, Mask);
 
@@ -925,7 +926,7 @@ void CCharacter::Die(int Killer, int Weapon)
 
 bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 {
-	if(GetCID() >= ZOMBIE_START && From >= ZOMBIE_START)
+	if(GetPlayer()->GetZomb() && GameServer()->m_apPlayers[From]->GetZomb())
 		return false;
 
 	m_Core.m_Vel += Force;
@@ -995,7 +996,7 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 	// do damage Hit sound
 	if(From >= 0 && From != m_pPlayer->GetCID() && GameServer()->m_apPlayers[From])
 	{
-		int64 Mask = CmaskOne(From);
+		Mask128 Mask = CmaskOne(From);
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
 			if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS && GameServer()->m_apPlayers[i]->m_SpectatorID == From)
@@ -1036,8 +1037,48 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 void CCharacter::Snap(int SnappingClient)
 {
 	int Id = m_pPlayer->GetCID();
+	
+	// I dont think there is someone still using Vanilla Client...
 
-	if (!Server()->Translate(Id, SnappingClient))
+	/*if(!GetPlayer()->GetZomb())
+	if(SnappingClient <= ZOMBIE_START && SnappingClient != Id)
+	{
+		dbg_msg("QQ","WW");
+
+		int MaxClient = ZOMBIE_START;
+		int MinRange1;
+		int MaxRange1;
+		int MinRange2;
+		int MaxRange2;
+		int RealID = SnappingClient+1;
+		if(RealID+16>=MaxClient)
+		{
+			MinRange1 = RealID-16;
+			MaxRange1 = MaxClient;
+			MinRange2 = 0;
+			MaxRange2 = 0+(16 - (MaxClient-RealID));
+		}
+		else if(RealID-16<0)
+		{
+			MinRange1 = 0;
+			MaxRange1 = RealID+16;
+			MinRange2 = MaxClient-(32-(MinRange1+MinRange2));
+			MaxRange2 = MaxClient;
+		}
+		else
+		{
+			MinRange1 = RealID-16;
+			MaxRange1 = MinRange2 = RealID;
+			MinRange2 = RealID+16;
+		}
+
+		if(!((Id > MinRange1 && Id < MaxRange1) || (Id > MinRange2 && Id < MaxRange2)))
+			return;
+		else
+			dbg_msg("Character","sawdw");
+	}*/
+
+	if (SnappingClient > -1 && !Server()->Translate(Id, SnappingClient))
 		return;
 
 	if(NetworkClipped(SnappingClient))

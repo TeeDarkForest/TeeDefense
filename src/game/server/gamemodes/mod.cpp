@@ -41,7 +41,7 @@ void CGameControllerMOD::Snap(int SnappingClient)
 void CGameControllerMOD::Tick()
 {
 	int Players = 0;
-	for(int i = 0;i < ZOMBIE_START; i++)
+	for(int i = 0;i < MAX_CLIENTS; i++)
 	{
 		if(GameServer()->m_apPlayers[Players])
 		{

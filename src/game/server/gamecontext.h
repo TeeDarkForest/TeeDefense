@@ -33,6 +33,8 @@ typedef unsigned __int64 uint64_t;
 #include <stdint.h>
 #endif
 
+#include "mask128.h"
+
 /*
 	Tick
 		Game Context (CGameContext::tick)
@@ -247,13 +249,15 @@ public:
 	CVoteOptionServer *m_pVoteOptionLast;
 
 	// helper functions
-	void CreateDamageInd(vec2 Pos, float AngleMod, int Amount, int64_t Mask=-1LL);
-	void CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int64_t Mask=-1LL);
-	void CreateHammerHit(vec2 Pos, int64_t Mask=-1LL);
-	void CreatePlayerSpawn(vec2 Pos, int64_t Mask=-1LL);
-	void CreateDeath(vec2 Pos, int Who, int64_t Mask=-1LL);
-	void CreateSound(vec2 Pos, int Sound, int64_t Mask=-1LL);
+	void CreateDamageInd(vec2 Pos, float AngleMod, int Amount, Mask128 Mask=Mask128());
+	void CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, Mask128 Mask=Mask128());
+	void CreateHammerHit(vec2 Pos, Mask128 Mask=Mask128());
+	void CreatePlayerSpawn(vec2 Pos, Mask128 Mask=Mask128());
+	void CreateDeath(vec2 Pos, int Who, Mask128 Mask=Mask128());
+	void CreateSound(vec2 Pos, int Sound, Mask128 Mask=Mask128());
 	void CreateSoundGlobal(int Sound, int Target=-1);
+
+	int NumZombiesAlive();
 
 
 	enum
@@ -354,9 +358,11 @@ public:
 	std::vector<CItem> m_vItem;
 };
 
-inline int64_t CmaskAll() { return -1LL; }
-inline int64_t CmaskOne(int ClientID) { return 1LL<<ClientID; }
-inline int64_t CmaskAllExceptOne(int ClientID) { return CmaskAll()^CmaskOne(ClientID); }
-inline bool CmaskIsSet(int64_t Mask, int ClientID) { return (Mask&CmaskOne(ClientID)) != 0; }
+inline Mask128 CmaskAll() { return Mask128(); }
+inline Mask128 CmaskNone() { return Mask128(-1); }
+inline Mask128 CmaskOne(int ClientID) { return Mask128(ClientID); }
+inline Mask128 CmaskUnset(Mask128 Mask, int ClientID) { return Mask^CmaskOne(ClientID); }
+inline Mask128 CmaskAllExceptOne(int ClientID) { return CmaskUnset(CmaskAll(), ClientID); }
+inline bool CmaskIsSet(Mask128 Mask, int ClientID) { return (Mask&CmaskOne(ClientID)) != 0; }
 
 #endif

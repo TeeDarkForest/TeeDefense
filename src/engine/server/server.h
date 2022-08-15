@@ -89,6 +89,7 @@ public:
 			STATE_CONNECTING,
 			STATE_READY,
 			STATE_INGAME,
+			STATE_ZOMB,
 
 			SNAPRATE_INIT=0,
 			SNAPRATE_FULL,
@@ -256,6 +257,8 @@ public:
 	virtual void SetClientLanguage(int ClientID, const char* pLanguage);
 	virtual int* GetIdMap(int ClientID);
 	virtual void SetCustClt(int ClientID);
+
+	void InitZomb(int ClientID);
 };
 
 #endif

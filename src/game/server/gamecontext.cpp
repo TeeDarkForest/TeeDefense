@@ -143,7 +143,7 @@ class CCharacter *CGameContext::GetPlayerChar(int ClientID)
 	return m_apPlayers[ClientID]->GetCharacter();
 }
 
-void CGameContext::CreateDamageInd(vec2 Pos, float Angle, int Amount, int64_t Mask)
+void CGameContext::CreateDamageInd(vec2 Pos, float Angle, int Amount, Mask128 Mask)
 {
 	float a = 3 * 3.14159f / 2 + Angle;
 	//float a = get_angle(dir);
@@ -162,7 +162,7 @@ void CGameContext::CreateDamageInd(vec2 Pos, float Angle, int Amount, int64_t Ma
 	}
 }
 
-void CGameContext::CreateHammerHit(vec2 Pos, int64_t Mask)
+void CGameContext::CreateHammerHit(vec2 Pos, Mask128 Mask)
 {
 	// create the event
 	CNetEvent_HammerHit *pEvent = (CNetEvent_HammerHit *)m_Events.Create(NETEVENTTYPE_HAMMERHIT, sizeof(CNetEvent_HammerHit), Mask);
@@ -174,7 +174,7 @@ void CGameContext::CreateHammerHit(vec2 Pos, int64_t Mask)
 }
 
 
-void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int64_t Mask)
+void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, Mask128 Mask)
 {
 	// create the event
 	CNetEvent_Explosion *pEvent = (CNetEvent_Explosion *)m_Events.Create(NETEVENTTYPE_EXPLOSION, sizeof(CNetEvent_Explosion), Mask);
@@ -255,7 +255,7 @@ void create_smoke(vec2 Pos)
 	}
 }*/
 
-void CGameContext::CreatePlayerSpawn(vec2 Pos, int64_t Mask)
+void CGameContext::CreatePlayerSpawn(vec2 Pos, Mask128 Mask)
 {
 	// create the event
 	CNetEvent_Spawn *ev = (CNetEvent_Spawn *)m_Events.Create(NETEVENTTYPE_SPAWN, sizeof(CNetEvent_Spawn), Mask);
@@ -266,7 +266,7 @@ void CGameContext::CreatePlayerSpawn(vec2 Pos, int64_t Mask)
 	}
 }
 
-void CGameContext::CreateDeath(vec2 Pos, int ClientID, int64_t Mask)
+void CGameContext::CreateDeath(vec2 Pos, int ClientID, Mask128 Mask)
 {
 	// create the event
 	CNetEvent_Death *pEvent = (CNetEvent_Death *)m_Events.Create(NETEVENTTYPE_DEATH, sizeof(CNetEvent_Death), Mask);
@@ -278,7 +278,7 @@ void CGameContext::CreateDeath(vec2 Pos, int ClientID, int64_t Mask)
 	}
 }
 
-void CGameContext::CreateSound(vec2 Pos, int Sound, int64_t Mask)
+void CGameContext::CreateSound(vec2 Pos, int Sound, Mask128 Mask)
 {
 	if (Sound < 0)
 		return;
@@ -315,7 +315,7 @@ void CGameContext::CreateSoundGlobal(int Sound, int Target)
 void CGameContext::SendChatTarget(int To, const char *pText, ...)
 {
 	int Start = (To < 0 ? 0 : To);
-	int End = (To < 0 ? ZOMBIE_START : To+1);
+	int End = (To < 0 ? MAX_CLIENTS : To+1);
 	
 	CNetMsg_Sv_Chat Msg;
 	Msg.m_Team = 0;
@@ -345,7 +345,7 @@ void CGameContext::SendChatTarget(int To, const char *pText, ...)
 void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText)
 {
 	char aBuf[256];
-	if(ChatterClientID >= 0 && ChatterClientID < ZOMBIE_START)
+	if(ChatterClientID >= 0 && ChatterClientID < MAX_CLIENTS)
 		str_format(aBuf, sizeof(aBuf), "%d:%d:%s: %s", ChatterClientID, Team, Server()->ClientName(ChatterClientID), pText);
 	else
 		str_format(aBuf, sizeof(aBuf), "*** %s", pText);
@@ -408,7 +408,7 @@ void CGameContext::SendBroadcast_VL(const char *pText, int ClientID, ...)
 {
 	CNetMsg_Sv_Broadcast Msg;
 	int Start = (ClientID < 0 ? 0 : ClientID);
-	int End = (ClientID < 0 ? ZOMBIE_START : ClientID+1);
+	int End = (ClientID < 0 ? MAX_CLIENTS : ClientID+1);
 	
 	dynamic_string Buffer;
 	
@@ -714,6 +714,10 @@ void CGameContext::OnClientEnter(int ClientID)
 
 void CGameContext::OnClientConnected(int ClientID)
 {
+	if(m_apPlayers[ClientID])
+	{
+		OnZombieKill(ClientID);
+	}
 	m_apPlayers[ClientID] = new(ClientID) CPlayer(this, ClientID, 0, 0);
 	//players[client_id].init(client_id);
 	//players[client_id].client_id = client_id;
@@ -831,42 +835,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				return;
 
 			pPlayer->m_LastChat = Server()->Tick();
-			
-			if(str_comp(pMsg->m_pMessage, "s1") == 0)
-			{
-				m_pController->m_aTeamscore[TEAM_HUMAN]+=1;
-				return;
-			}
-			if(str_comp(pMsg->m_pMessage, "ffs2") == 0)
-			{
-				m_apPlayers[ClientID]->m_Knapsack.m_Resource[RESOURCE_LOG] += 1000;
-				return;
-			}
-			if(str_comp(pMsg->m_pMessage, "ffs3") == 0)
-			{
-				m_apPlayers[ClientID]->m_Knapsack.m_Resource[RESOURCE_COPPER] += 1000;
-				return;
-			}
-			if(str_comp(pMsg->m_pMessage, "ffs4") == 0)
-			{
-				m_apPlayers[ClientID]->m_Knapsack.m_Resource[RESOURCE_IRON] += 1000;
-				return;
-			}
-			if(str_comp(pMsg->m_pMessage, "ffs5") == 0)
-			{
-				m_apPlayers[ClientID]->m_Knapsack.m_Resource[RESOURCE_GOLD] += 1000;
-				return;
-			}
-			if(str_comp(pMsg->m_pMessage, "ffs6") == 0)
-			{
-				m_apPlayers[ClientID]->m_Knapsack.m_Resource[RESOURCE_DIAMOND] += 1000;
-				return;
-			}
-			if(str_comp(pMsg->m_pMessage, "ffs7") == 0)
-			{
-				m_apPlayers[ClientID]->m_Knapsack.m_Resource[RESOURCE_ENEGRY] += 1000;
-				return;
-			}
+
 			if(pMsg->m_pMessage[0] == '/' || pMsg->m_pMessage[0] == '\\')
 			{
 				switch(m_apPlayers[ClientID]->m_Authed)
@@ -2220,11 +2189,12 @@ IGameServer *CreateGameServer() { return new CGameContext; }
 
 void CGameContext::OnZombie(int ClientID, int Zomb)
 {
-	if(ClientID >= MAX_CLIENTS) //|| //m_apPlayers[ClientID])
-			return;
+	if(ClientID >= MAX_CLIENTS || m_apPlayers[ClientID])
+		return;
 
 	m_apPlayers[ClientID] = new(ClientID) CPlayer(this, ClientID, 1, Zomb);
 	
+	Server()->InitZomb(ClientID);
 	m_apPlayers[ClientID]->TryRespawn();
 }
 
@@ -2237,11 +2207,25 @@ void CGameContext::OnZombieKill(int ClientID)
 	m_apPlayers[ClientID] = 0;
 
 	// update spectator modes
-	for(int i = 0; i < ZOMBIE_END; ++i)
+	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
 		if(m_apPlayers[i] && m_apPlayers[i]->m_SpectatorID == ClientID)
 			m_apPlayers[i]->m_SpectatorID = SPEC_FREEVIEW;
 	}
+}
+
+int CGameContext::NumZombiesAlive()
+{
+	int NumZombies;
+	for(int i = 0;i<MAX_CLIENTS;i++)
+	{
+		if(m_apPlayers[i])
+			if(m_apPlayers[i]->GetCharacter())
+				if(m_apPlayers[i]->GetCharacter()->IsAlive())
+					if(m_apPlayers[i]->GetZomb())
+						NumZombies++;
+	}
+	return NumZombies;
 }
 
 bool CGameContext::GetPaused()
@@ -2923,6 +2907,12 @@ void CGameContext::MakeItem(const char* pItemName, int ClientID)
                 if(m_apPlayers[ClientID]->m_Knapsack.m_Sword < ItemLevel)
                     m_apPlayers[ClientID]->m_Knapsack.m_Sword = ItemLevel;
                 break;
+			
+			case ITYPE_MATERIAL:
+			{
+				m_apPlayers[ClientID]->m_Knapsack.m_Resource[MakeItem.m_Level]+=1;
+				break;
+			}
             
             case ITYPE_TURRET:
             {

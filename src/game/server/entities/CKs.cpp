@@ -41,6 +41,31 @@ CKs::CKs(CGameWorld *pGameWorld, int Type, vec2 Pos, int ID, int SubType)
 	case CK_ENEGRY:
 		m_Health = 3000000;
 		break;
+
+	case CK_Abyss_LumSub:
+		m_Health = 500000;
+		break;
+
+	case CK_Abyss_Agar:
+		m_Health = 500000;
+		break;
+	
+	case CK_Abyss_ScrapMetal:
+		m_Health = 3000000;
+		break;
+
+	case CK_Abyss_ScrapMatal_S:
+		m_Health = 4500000;
+		break;
+
+	case CK_Abyss_NuclearWaste_S:
+		m_Health = 4250000;
+		break;
+
+	case CK_Abyss_Remnant:
+		m_Health = 5000000;
+		break;
+
 	
 	default:
 		m_Health = 99999999;

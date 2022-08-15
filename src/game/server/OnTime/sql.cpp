@@ -1,3 +1,4 @@
+
 #ifdef CONF_SQL
 /* SQL class 0.5 by Sushi */
 /* SQL class 0.6 by FFS   */
@@ -82,6 +83,18 @@ void CSQL::create_tables()
 			"(UserID INT AUTO_INCREMENT PRIMARY KEY, "
 			"Username VARCHAR(31) NOT NULL, "
 			"Password VARCHAR(32) NOT NULL, "
+			"Pickaxe BIGINT DEFAULT 0, "
+			"SName VARCHAR(32) DEFAULT 0, "
+			"Skill BIGINT DEFAULT 0, "
+			"Wave BIGINT DEFAULT 0, "
+			"qq VARCHAR(32) DEFAULT -1, "
+			"checktime date DEFAULT '1000-01-01', "
+			"checkhead TINYINT(1) DEFAULT 0);", prefix);
+			statement->execute(buf);
+
+			str_format(buf, sizeof(buf), 
+			"CREATE TABLE IF NOT EXISTS %s_Resource "
+			"(UserID INT DEFAULT 0, "
 			"Log BIGINT DEFAULT 0, "
 			"Coal BIGINT DEFAULT 0, "
 			"Copper BIGINT DEFAULT 0, "
@@ -92,13 +105,7 @@ void CSQL::create_tables()
 			"ZombieHeart BIGINT DEFAULT 0, "
 			"Sword BIGINT DEFAULT 0, "
 			"Axe BIGINT DEFAULT 0, "
-			"Pickaxe BIGINT DEFAULT 0, "
-			"SName VARCHAR(32) DEFAULT 0, "
-			"Skill BIGINT DEFAULT 0, "
-			"Wave BIGINT DEFAULT 0, "
-			"qq VARCHAR(32) DEFAULT -1, "
-			"checktime date DEFAULT '1000-01-01', "
-			"checkhead TINYINT(1) DEFAULT 0);", prefix);
+			"Pickaxe BIGINT DEFAULT 0);", prefix);
 			statement->execute(buf);
 			dbg_msg("SQL", "Tables were created successfully");
 
@@ -146,7 +153,18 @@ static void create_account_thread(void *user)
 					str_format(buf, sizeof(buf), "INSERT INTO %s_Account(Username, Password) VALUES ('%s', '%s');", 
 					Data->m_SqlData->prefix, 
 					Data->name, Data->pass);
+					Data->m_SqlData->statement->execute(buf);
+
+					str_format(buf, sizeof(buf), "SELECT * FROM %s_Account WHERE Username='%s';", Data->m_SqlData->prefix, Data->name);
+					Data->m_SqlData->results = Data->m_SqlData->statement->executeQuery(buf);
 					
+					if(Data->m_SqlData->results->next())
+					{
+						str_format(buf, sizeof(buf), "INSERT INTO %s_Resource(UserID) VALUES (%d);", 
+						Data->m_SqlData->prefix, 
+						Data->m_SqlData->results->getInt("UserID"));					
+					}
+
 					Data->m_SqlData->statement->execute(buf);
 					dbg_msg("SQL", "Account '%s' was successfully created", Data->name);
 					
@@ -300,9 +318,12 @@ static void login_thread(void *user)
 						// finally save the result to AccountData() \o/
 
 						// check if Account allready is logged in
-						for(int i = 0; i < ZOMBIE_START; i++)
+						for(int i = 0; i < MAX_CLIENTS; i++)
 						{
 							if(!GameServer()->m_apPlayers[i])
+								continue;
+							
+							if(GameServer()->m_apPlayers[i]->GetZomb())
 								continue;
 
 							if(GameServer()->m_apPlayers[i]->m_AccData.m_UserID == Data->m_SqlData->results->getInt("UserID"))
@@ -327,18 +348,26 @@ static void login_thread(void *user)
 						}
 
 						GameServer()->m_apPlayers[Data->m_ClientID]->m_AccData.m_UserID = Data->m_SqlData->results->getInt("UserID");
-						GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_LOG] = Data->m_SqlData->results->getInt("Log");
-						GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_COAL] = Data->m_SqlData->results->getInt("Coal");
-						GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_COPPER] = Data->m_SqlData->results->getInt("Copper");
-						GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_IRON] = Data->m_SqlData->results->getInt("Iron");
-						GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_GOLD] = Data->m_SqlData->results->getInt("Gold");
-						GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_DIAMOND] = Data->m_SqlData->results->getInt("Diamond");
-						GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_ENEGRY] = Data->m_SqlData->results->getInt("Enegry");
-						GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_ZOMBIEHEART] = Data->m_SqlData->results->getInt("ZombieHeart");
-						GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Sword = Data->m_SqlData->results->getInt("Sword");
-						GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Axe = Data->m_SqlData->results->getInt("Axe");
-						GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Pickaxe = Data->m_SqlData->results->getInt("Pickaxe");
-						
+
+						str_format(buf, sizeof(buf), "SELECT * "
+						"FROM %s_Resource WHERE UserID=%d;", Data->m_SqlData->prefix, Data->m_SqlData->results->getInt("UserID"));
+
+						Data->m_SqlData->results = Data->m_SqlData->statement->executeQuery(buf);
+
+						if(Data->m_SqlData->results->next())
+						{
+							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_LOG] = Data->m_SqlData->results->getInt("Log");
+							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_COAL] = Data->m_SqlData->results->getInt("Coal");
+							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_COPPER] = Data->m_SqlData->results->getInt("Copper");
+							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_IRON] = Data->m_SqlData->results->getInt("Iron");
+							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_GOLD] = Data->m_SqlData->results->getInt("Gold");
+							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_DIAMOND] = Data->m_SqlData->results->getInt("Diamond");
+							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_ENEGRY] = Data->m_SqlData->results->getInt("Enegry");
+							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_ZOMBIEHEART] = Data->m_SqlData->results->getInt("ZombieHeart");
+							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Sword = Data->m_SqlData->results->getInt("Sword");
+							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Axe = Data->m_SqlData->results->getInt("Axe");
+							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Pickaxe = Data->m_SqlData->results->getInt("Pickaxe");
+						}
 						// login should be the last thing
 						GameServer()->m_apPlayers[Data->m_ClientID]->LoggedIn = true;
 						dbg_msg("SQL", "Account '%s' logged in sucessfully", Data->name);
@@ -416,25 +445,30 @@ static void SyncThread(void *user)
 				{
 					str_format(buf, sizeof(buf), "SELECT * "
 					"FROM %s_Account WHERE UserID=%d;", Data->m_SqlData->prefix, Data->UserID[Data->m_ClientID]);
-					
-					// create results
 					Data->m_SqlData->results = Data->m_SqlData->statement->executeQuery(buf);
 					
 					// if match jump to it
 					if(Data->m_SqlData->results->next())
 					{
 						GameServer()->m_apPlayers[Data->m_ClientID]->m_AccData.m_UserID = Data->m_SqlData->results->getInt("UserID");
-						GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_LOG] = Data->m_SqlData->results->getInt("Log");
-						GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_COAL] = Data->m_SqlData->results->getInt("Coal");
-						GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_COPPER] = Data->m_SqlData->results->getInt("Copper");
-						GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_IRON] = Data->m_SqlData->results->getInt("Iron");
-						GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_GOLD] = Data->m_SqlData->results->getInt("Gold");
-						GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_DIAMOND] = Data->m_SqlData->results->getInt("Diamond");
-						GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_ENEGRY] = Data->m_SqlData->results->getInt("Enegry");
-						GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_ZOMBIEHEART] = Data->m_SqlData->results->getInt("ZombieHeart");
-						GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Sword = Data->m_SqlData->results->getInt("Sword");
-						GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Axe = Data->m_SqlData->results->getInt("Axe");
-						GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Pickaxe = Data->m_SqlData->results->getInt("Pickaxe");
+						str_format(buf, sizeof(buf), "SELECT * "
+						"FROM %s_Resource WHERE UserID=%d;", Data->m_SqlData->prefix, GameServer()->m_apPlayers[Data->m_ClientID]->m_AccData.m_UserID);
+
+						Data->m_SqlData->results = Data->m_SqlData->statement->executeQuery(buf);
+						if(Data->m_SqlData->results->next())
+						{
+							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_LOG] = Data->m_SqlData->results->getInt("Log");
+							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_COAL] = Data->m_SqlData->results->getInt("Coal");
+							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_COPPER] = Data->m_SqlData->results->getInt("Copper");
+							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_IRON] = Data->m_SqlData->results->getInt("Iron");
+							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_GOLD] = Data->m_SqlData->results->getInt("Gold");
+							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_DIAMOND] = Data->m_SqlData->results->getInt("Diamond");
+							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_ENEGRY] = Data->m_SqlData->results->getInt("Enegry");
+							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_ZOMBIEHEART] = Data->m_SqlData->results->getInt("ZombieHeart");
+							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Sword = Data->m_SqlData->results->getInt("Sword");
+							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Axe = Data->m_SqlData->results->getInt("Axe");
+							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Pickaxe = Data->m_SqlData->results->getInt("Pickaxe");
+						}
 					}
 				}
 				else
@@ -484,7 +518,7 @@ static void update_thread(void *user)
 					lock_unlock(SQLLock);
 					return;
 				}
-				str_format(buf, sizeof(buf), "UPDATE %s_Account SET " \
+				str_format(buf, sizeof(buf), "UPDATE %s_Resource SET " \
 				"Log=%d,Coal=%d,Copper=%d,Iron=%d,Gold=%d,Diamond=%d,Enegry=%d,ZombieHeart=%d,Sword=%d,Axe=%d,Pickaxe=%d " \
 				"WHERE UserID=%d", \
 				Data->m_SqlData->prefix,
@@ -565,7 +599,7 @@ static void UpdateResourceThread(void *user)
 					lock_unlock(SQLLock);
 					return;
 				}
-				str_format(buf, sizeof(buf), "UPDATE %s_Account SET %s=%s%s WHERE UserID=%d;", Data->m_SqlData->prefix, Data->m_Resource, Data->m_Resource, Data->m_Num, Data->UserID[Data->m_ClientID]);
+				str_format(buf, sizeof(buf), "UPDATE %s_Resource SET %s=%s%s WHERE UserID=%d;", Data->m_SqlData->prefix, Data->m_Resource, Data->m_Resource, Data->m_Num, Data->UserID[Data->m_ClientID]);
 				Data->m_SqlData->statement->execute(buf);
 			}
 			else
@@ -611,15 +645,15 @@ void CSQL::update_all()
 				if(results->next())
 				{
 					CPlayer *p = GameServer()->m_apPlayers[i];
-					str_format(buf, sizeof(buf), "UPDATE %s_Account SET "
+					str_format(buf, sizeof(buf), "UPDATE %s_Resource SET "
 					"Log=%d,Coal=%d,Copper=%d,Iron=%d,Gold=%d,Diamond=%d,Enegry=%d,ZombieHeart=%d,Sword=%d,Axe=%d,Pickaxe=%d "
 					"WHERE UserID=%d;",
 					prefix,
 					p->m_Knapsack.m_Resource[RESOURCE_LOG],p->m_Knapsack.m_Resource[RESOURCE_COAL],p->m_Knapsack.m_Resource[RESOURCE_COPPER],
 					p->m_Knapsack.m_Resource[RESOURCE_IRON],p->m_Knapsack.m_Resource[RESOURCE_GOLD],p->m_Knapsack.m_Resource[RESOURCE_DIAMOND],
-					p->m_Knapsack.m_Resource[RESOURCE_ENEGRY],p->m_Knapsack.m_Resource[RESOURCE_ZOMBIEHEART],p->m_Knapsack.m_Sword,
-					p->m_Knapsack.m_Axe,p->m_Knapsack.m_Pickaxe,p->m_AccData.m_UserID
-					);
+					p->m_Knapsack.m_Resource[RESOURCE_ENEGRY],p->m_Knapsack.m_Resource[RESOURCE_ZOMBIEHEART],
+
+					p->m_Knapsack.m_Sword,p->m_Knapsack.m_Axe,p->m_Knapsack.m_Pickaxe,p->m_AccData.m_UserID);
 
 					// create results
 					results = statement->executeQuery(buf);

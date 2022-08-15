@@ -16,6 +16,12 @@ enum
     CK_GOLD,
     CK_DIAMONAD,
 	CK_ENEGRY,
+	CK_Abyss_LumSub,
+	CK_Abyss_Agar,
+	CK_Abyss_ScrapMetal,
+	CK_Abyss_ScrapMatal_S,
+	CK_Abyss_NuclearWaste_S,
+	CK_Abyss_Remnant,
 };
 
 class CKs : public CEntity

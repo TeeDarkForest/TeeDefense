@@ -260,8 +260,16 @@ void IGameController::StartRound()
 	Server()->DemoRecorder_HandleAutoStart();
 
 	//Zomb2
-	for(int i = ZOMBIE_START+1; i < ZOMBIE_END; i++)//bugfix
+	for(int i = 0; i < MAX_CLIENTS; i++)//bugfix
+	{
+		if(!GameServer()->m_apPlayers[i])
+			continue;
+
+		if(!GameServer()->m_apPlayers[i]->GetZomb())
+			continue;
+
 		GameServer()->OnZombieKill(i);
+	}
 	m_Wave++;
 	StartWave(m_Wave);
 
@@ -596,8 +604,16 @@ void IGameController::Tick()
 			//Zomb2: Do this ONLY when the Game ended, that must be BEFORE the round restarts
 			m_aTeamscore[TEAM_HUMAN] = 0;
 			m_aTeamscore[TEAM_ZOMBIE] = g_Config.m_SvLives;
-			for(int i = ZOMBIE_START+1; i < ZOMBIE_END; i++)
+			for(int i = 0; i < MAX_CLIENTS; i++)//bugfix
+			{
+				if(!GameServer()->m_apPlayers[i])
+					continue;
+
+				if(!GameServer()->m_apPlayers[i]->GetZomb())
+					continue;
+
 				GameServer()->OnZombieKill(i);
+			}
 			DoWarmup(g_Config.m_SvWarmup);
 			m_GameOverTick = -1;
 			m_RoundStartTick = Server()->Tick();
@@ -1089,13 +1105,17 @@ void IGameController::CheckZombie()
 {
 	if(m_Warmup || !m_Wave || EndWave())
 		return;
-	for(int i = ZOMBIE_START+1; i < ZOMBIE_END; i++)//...
+	for(int i = 0; i < MAX_CLIENTS; i++)//...
 	{
 		if(!GameServer()->m_apPlayers[i])//Check if the CID is free
 		{
 			int Random = RandZomb();
 			if(Random == -1)
-				break;;
+				break;
+
+			if(GameServer()->NumZombiesAlive() > 48)
+				break;
+			
 			GameServer()->OnZombie(i, Random+1);//Create a Zombie Finally
 			m_Zombie[Random]--;
 		}
@@ -1130,8 +1150,16 @@ bool IGameController::EndWave()
 	}
 	if(!PlayerCount)//No Players - reset round
 	{
-		for(int i = ZOMBIE_START+1; i < ZOMBIE_END; i++)
+		for(int i = 0; i < MAX_CLIENTS; i++)//bugfix
+		{
+			if(!GameServer()->m_apPlayers[i])
+				continue;
+
+			if(!GameServer()->m_apPlayers[i]->GetZomb())
+				continue;
+
 			GameServer()->OnZombieKill(i);
+		}
 		//HandleTop();
 		m_Wave = 0;
 		return true;
@@ -1141,9 +1169,9 @@ bool IGameController::EndWave()
 		if(m_Zombie[j])
 			return false;
 	}
-	for(int i = ZOMBIE_START; i < ZOMBIE_END; i++)
+	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
+		if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetZomb() && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
 			return false;
 	}	
 	DoWarmup(g_Config.m_SvZombWarmup+5*m_Wave);

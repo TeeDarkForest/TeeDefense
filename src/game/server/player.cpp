@@ -174,6 +174,7 @@ void CPlayer::PostTick()
 
 void CPlayer::Snap(int SnappingClient)
 {
+
 #ifdef CONF_DEBUG
 	if(!g_Config.m_DbgDummies || m_ClientID < MAX_CLIENTS-g_Config.m_DbgDummies)
 #endif
@@ -182,10 +183,50 @@ void CPlayer::Snap(int SnappingClient)
 
 	int id = m_ClientID;
 	if (!Server()->Translate(id, SnappingClient)) return;
+	if (GetCharacter()->NetworkClipped(SnappingClient)) return;
 
 	CNetObj_ClientInfo *pClientInfo = static_cast<CNetObj_ClientInfo *>(Server()->SnapNewItem(NETOBJTYPE_CLIENTINFO, id, sizeof(CNetObj_ClientInfo)));
 	if(!pClientInfo)
 		return;
+
+	/*if(!GetZomb())
+		if(SnappingClient <= ZOMBIE_START && SnappingClient != id)
+		{
+			dbg_msg("QQ","WW");
+			int MaxClient = ZOMBIE_START;
+			int MinRange1;
+			int MaxRange1;
+			int MinRange2;
+			int MaxRange2;
+			int RealID = SnappingClient+1;
+			if(RealID+16>=MaxClient)
+			{
+				MinRange1 = RealID-16;
+				MaxRange1 = MaxClient;
+				MinRange2 = 0;
+				MaxRange2 = 0+(16 - (MaxClient-RealID));
+			}
+			else if(RealID-16<0)
+			{
+				MinRange1 = 0;
+				MaxRange1 = RealID+16;
+				MinRange2 = MaxClient-(32-(MinRange1+MinRange2));
+				MaxRange2 = MaxClient;
+			}
+			else
+			{
+				MinRange1 = RealID-16;
+				MaxRange1 = MinRange2 = RealID;
+				MinRange2 = RealID+16;
+			}
+
+			if(!((id > MinRange1 && id < MaxRange1) || (id > MinRange2 && id < MaxRange2)))
+			{
+				return;
+			}
+			else
+				dbg_msg("ssss","sawdw");
+		}*/
 
 	if(m_Zomb)
 	{
@@ -194,7 +235,7 @@ void CPlayer::Snap(int SnappingClient)
 		pClientInfo->m_Country = 1000;
 		pClientInfo->m_ColorBody = 16776960;
 		pClientInfo->m_ColorFeet = 16776960;
-		m_Team = 10; // Don't snap Zombies at Scorebroad.
+		m_Team = 1; // Don't snap Zombies at Scorebroad.
 		if(m_Zomb == 1)//Zaby
 		{
 			StrToInts(&pClientInfo->m_Name0, 4, "Zaby");

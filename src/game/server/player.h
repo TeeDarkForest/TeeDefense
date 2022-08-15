@@ -142,6 +142,8 @@ private:
 
 	char m_aLanguage[16];
 
+public:
+	int m_SnappingNum;
 
 private:
 	void HandleTuningParams(); //This function will send the new parameters if needed

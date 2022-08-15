@@ -111,6 +111,8 @@ public:
 
 	bool m_InVehicle;
 
+	int m_SnappingNum;
+
 private:
 	// player controlling this character
 	class CPlayer *m_pPlayer;

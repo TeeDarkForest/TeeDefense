@@ -453,7 +453,7 @@ int CServer::GetClientInfo(int ClientID, CClientInfo *pInfo)
 	dbg_assert(ClientID >= 0 && ClientID < MAX_CLIENTS, "client_id is not valid");
 	dbg_assert(pInfo != 0, "info can not be null");
 
-	if(m_aClients[ClientID].m_State == CClient::STATE_INGAME || m_aClients[ClientID].m_State == CClient::STATE_ZOMB)
+	if(m_aClients[ClientID].m_State == CClient::STATE_INGAME)
 	{
 		pInfo->m_pName = m_aClients[ClientID].m_aName;
 		pInfo->m_Latency = m_aClients[ClientID].m_Latency;
@@ -552,7 +552,7 @@ int CServer::SendMsgEx(CMsgPacker *pMsg, int Flags, int ClientID, bool System)
 			// broadcast
 			int i;
 			for(i = 0; i < MAX_CLIENTS; i++)
-				if(m_aClients[i].m_State == CClient::STATE_INGAME || m_aClients[i].m_State == CClient::STATE_ZOMB)
+				if(m_aClients[i].m_State == CClient::STATE_INGAME)
 				{
 					Packet.m_ClientID = i;
 					m_NetServer.Send(&Packet);
@@ -587,7 +587,7 @@ void CServer::DoSnapshot()
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		// client must be ingame to recive snapshots
-		if(m_aClients[i].m_State != CClient::STATE_INGAME || m_aClients[i].m_State == CClient::STATE_ZOMB)
+		if(m_aClients[i].m_State != CClient::STATE_INGAME)
 			continue;
 
 		// this client is trying to recover, don't spam snapshots

@@ -444,7 +444,7 @@ int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 	
 	if(pVictim->GetPlayer()->GetZomb())
 	{
-		if(GameServer()->IsAbyss())
+		if(!GameServer()->IsAbyss())
 		{
 			int rando = rand()%100 + 1;
 			if(rando <= 50)

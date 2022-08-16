@@ -14,9 +14,13 @@
 #include "entities/turret.h"
 
 #include "item.h"
+#ifdef CONF_BOX2D
 #include "entities/box2d_box.h"
 #include "entities/box2d_test.h"
 #include "entities/box2d_test_spider.h"
+#endif
+
+#include "entities/giga-Qian.h"
 
 #include <teeuniverses/components/localization.h>
 #ifdef CONF_SQL
@@ -29,6 +33,7 @@ enum
 	NO_RESET
 };
 
+#ifdef CONF_BOX2D
 class MyQueryCallback : public b2QueryCallback
 {
 public:
@@ -41,6 +46,7 @@ public:
         return true;
     }
 };
+#endif
 
 void CGameContext::Construct(int Resetting, bool ChangeMap)
 {
@@ -69,6 +75,9 @@ void CGameContext::Construct(int Resetting, bool ChangeMap)
 
 	InitItems();
 
+	Qian = false;
+
+	#ifdef CONF_BOX2D
 	b2AABB worldAABB;
 	worldAABB.lowerBound.Set(0, 0);
 	worldAABB.upperBound.Set(Collision()->GetHeight(), Collision()->GetWidth());
@@ -78,6 +87,7 @@ void CGameContext::Construct(int Resetting, bool ChangeMap)
 
 	m_b2world = new b2World(gravity);
 	m_b2world->QueryAABB(&callback, worldAABB);
+	#endif
 }
 
 CGameContext::CGameContext(int Resetting, bool ChangeMap)
@@ -117,11 +127,13 @@ void CGameContext::Clear(bool ChangeMap)
 	delete m_AccountData;
 	#endif
 
+	#ifdef CONF_BOX2D
 	if (m_b2world)
 	{
 		delete m_b2world;
 		m_b2world = NULL;
 	}
+	#endif
 
 	m_Resetting = true;
 	this->~CGameContext();
@@ -206,6 +218,7 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 		}
 	}
 
+	#ifdef CONF_BOX2D
 	// apply force to box2d objects
 	b2Vec2 b2Pos(Pos.x / 30.f, Pos.y / 30.f);
 	b2Vec2 b2Rad((Radius) / 30.f, (Radius) / 30.f);
@@ -241,6 +254,7 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 
 		m_b2explosions.push_back(body);
 	}
+	#endif
 }
 
 /*
@@ -653,7 +667,36 @@ void CGameContext::OnTick()
 		}
 	}
 
+	#ifdef CONF_BOX2D
 	HandleBox2D();
+	#endif
+
+	Qian = QianIsAlive();
+
+	if(!m_EventDuration)
+		m_EventTimer = rand()%30*60*50+15*60*50;
+	if(m_EventTimer > -1)
+		m_EventTimer--;
+	if(m_EventDuration >= 0)
+		m_EventDuration--;
+	if(m_EventTimer == 0)
+	{
+		m_EventTimer = -1;
+		m_EventDuration = 15*30*50;
+		m_EventType = 1;
+	}
+	else
+		m_EventType = 0;
+
+	switch (m_EventType)
+	{
+	case 1:
+		UnsealQianFromAbyss(0);
+		break;
+	
+	default:
+		break;
+	}
 
 #ifdef CONF_DEBUG
 	if(g_Config.m_DbgDummies)
@@ -668,6 +711,20 @@ void CGameContext::OnTick()
 #endif
 }
 
+bool CGameContext::QianIsAlive()
+{
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(!m_apPlayers[i])
+			continue;
+
+		if(m_apPlayers[i]->GetZomb(14))
+			return true;
+	}
+	return false;
+}
+
+#ifdef CONF_BOX2D
 void CGameContext::HandleBox2D()
 {
 	if (m_b2world)
@@ -684,6 +741,7 @@ void CGameContext::HandleBox2D()
 		}
 	}
 }
+#endif
 
 // Server hooks
 void CGameContext::OnClientDirectInput(int ClientID, void *pInput)
@@ -833,6 +891,11 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			// drop empty and autocreated spam messages (more than 16 characters per second)
 			if(Length == 0 || (pMsg->m_pMessage[0] != '/' && g_Config.m_SvSpamprotection && pPlayer->m_LastChat && pPlayer->m_LastChat+Server()->TickSpeed()*((15+Length)/16) > Server()->Tick()))
 				return;
+			
+			if(str_comp(pMsg->m_pMessage, "sss") == 0)
+			{
+				m_EventTimer = 50;
+			}
 
 			pPlayer->m_LastChat = Server()->Tick();
 
@@ -890,13 +953,16 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 						str_format(aDesc, sizeof(aDesc), "%s", pOption->m_aDescription);
 						str_format(aCmd, sizeof(aCmd), "%s", pOption->m_aCommand);
 
-						if(m_VoteCloseTime && !str_startswith(aCmd, "ccv_"))
+						if(m_VoteCloseTime && !str_startswith(aCmd, "ccv_") && !str_startswith(aCmd, "ccv_abyss"))
 						{
 							SendChatTarget(ClientID, _("Wait for current vote to end before calling a new one."));
 							return;
 						}
+
+						if(str_startswith(aCmd, "ccv_abyss") && !IsAbyss())
+							return;
 						
-						if(!str_startswith(aCmd, "ccv_"))
+						if(!str_startswith(aCmd, "ccv_") && !str_startswith(aCmd, "ccv_abyss"))
 							SendChatTarget(-1, _("'{str:PlayerName}' called vote to change server option '{str:Option}' ({str:Reason})"), "PlayerName",
 										Server()->ClientName(ClientID), "Option", pOption->m_aDescription,
 										"Reason", pReason );
@@ -999,7 +1065,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				str_format(aCmd, sizeof(aCmd), "set_team %d -1 %d", SpectateID, g_Config.m_SvVoteSpectateRejoindelay);
 			}
 			std::string Command(aCmd);
-			if (str_comp(aCmd, "ccv_skip") == 0)
+			if (str_comp(aCmd, "ccv_null") == 0)
 			{
 				return;
 			}
@@ -1784,21 +1850,49 @@ void CGameContext::ConMe(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext* pThis = (CGameContext*) pUserData;
 	CPlayer *Player = pThis->m_apPlayers[pResult->GetClientID()];
-	int Log = Player->m_Knapsack.m_Resource[RESOURCE_LOG];
-	int Copper = Player->m_Knapsack.m_Resource[RESOURCE_COPPER];
-	int Coal = Player->m_Knapsack.m_Resource[RESOURCE_COAL];
-	int Iron = Player->m_Knapsack.m_Resource[RESOURCE_IRON];
-	int Gold = Player->m_Knapsack.m_Resource[RESOURCE_GOLD];
-	int Diamond = Player->m_Knapsack.m_Resource[RESOURCE_DIAMOND];
-	int Enegry = Player->m_Knapsack.m_Resource[RESOURCE_ENEGRY];
-	int ZombieHeart = Player->m_Knapsack.m_Resource[RESOURCE_ZOMBIEHEART];
 	#ifdef CONF_SQL
 	if(!Player->LoggedIn)
 		pThis->SendChatTarget(pResult->GetClientID(), _("[Warning]: If you dont login or register a account, then when you left. you will lose EVERYTHING in this mod!"));
 	#endif
-	pThis->SendChatTarget(pResult->GetClientID(), _("Log: {int:Log}, Copper: {int:Copper}, Coal: {int:Coal},"), "Log", &Log, "Copper", &Copper, "Coal", &Coal, NULL);
-	pThis->SendChatTarget(pResult->GetClientID(), _("Iron: {int:Iron}, Gold: {int:Gold}, Diamond: {int:Diamond},"), "Iron", &Iron, "Gold", &Gold, "Diamond", &Diamond, NULL);
-	pThis->SendChatTarget(pResult->GetClientID(), _("Enegry: {int:Enegry}, Zombie's Heart: {int:ZombieHeart}"), "Enegry", &Enegry, "ZombieHeart", &ZombieHeart, NULL);
+	int ShowResource;
+	dynamic_string buffer;
+	for(int i = 0; i < NUM_RESOURCE; i++)
+	{
+		dynamic_string buf;
+		dynamic_string name;
+		buf.clear();
+		name.clear();
+		ShowResource = Player->m_Knapsack.m_Resource[i];
+		//dbg_msg);
+		const char *IName = pThis->GetItemNameByID(i);
+		pThis->Server()->Localization()->Format_L(name, Player->GetLanguage(), _(IName));
+		pThis->Server()->Localization()->Format_L(buf, Player->GetLanguage(), _("{str:name}: {int:num}"), "name", name.buffer(), "num", &ShowResource);
+		if(i != NUM_RESOURCE-1)
+		{
+			buf.append(",");
+		}
+		buffer.append(buf);
+
+		if(i%2 == 0)
+		{
+			pThis->SendChatTarget(pResult->GetClientID(), _(buffer.buffer()));
+			buffer.clear();
+		}
+	}
+
+	pThis->SendChatTarget(pResult->GetClientID(), _(buffer.buffer()));
+}
+
+void CGameContext::ConCheckEvent(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext* pThis = (CGameContext*) pUserData;
+	CPlayer *Player = pThis->m_apPlayers[pResult->GetClientID()];
+	int Timer = pThis->m_EventTimer / pThis->Server()->TickSpeed();
+	int End = pThis->m_EventDuration / pThis->Server()->TickSpeed();
+	if(Timer)
+		pThis->SendChatTarget(pResult->GetClientID(), _("Event will Start at {sec:Timer}"), "Timer", &Timer, NULL);
+	else
+		pThis->SendChatTarget(pResult->GetClientID(), _("Event will End at {sec:Timer}"), "Timer", &End, NULL);
 }
 
 void CGameContext::ConLanguage(IConsole::IResult *pResult, void *pUserData)
@@ -1934,6 +2028,7 @@ void CGameContext::ConsoleOutputCallback_Chat(const char *pLine, void *pUser)
 	ReentryGuard--;
 }
 
+#ifdef CONF_BOX2D
 void CGameContext::CreateGround(vec2 Pos, int Type)
 {
 	vec2 size(32,32);
@@ -2016,6 +2111,8 @@ void CGameContext::ConB2ClearWorld(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "Box2D", "Cleared world");
 }
 
+#endif
+
 void CGameContext::OnConsoleInit()
 {
 	m_pServer = Kernel()->RequestInterface<IServer>();
@@ -2045,18 +2142,21 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("clear_votes", "", CFGFLAG_SERVER, ConClearVotes, this, "Clears the voting options");
 	Console()->Register("vote", "r", CFGFLAG_SERVER, ConVote, this, "Force a vote to yes/no");
 
+	#ifdef CONF_BOX2D
 	Console()->Register("b2_create_box", "ii", CFGFLAG_SERVER, ConB2CreateBox, this, "create a box in the Box2D world using your current position");
 	Console()->Register("b2_create_test", "", CFGFLAG_SERVER, ConB2CreateTest, this, "create a box in the Box2D world using your current position");
 	Console()->Register("b2_create_test_spider", "", CFGFLAG_SERVER, ConB2CreateTestSpider, this, "create a box in the Box2D world using your current position");
 	Console()->Register("b2_create_ground", "ii?i", CFGFLAG_SERVER, ConB2CreateGround, this, "create ground in the Box2D world using your current position");
 	Console()->Register("b2_clear_world", "", CFGFLAG_SERVER, ConB2ClearWorld, this, "clear all bodies (except tee bodies) in the Box2D world");
-	
+	#endif
+
 	Console()->Register("about", "", CFGFLAG_CHAT, ConAbout, this, "Show information about the mod");
 	Console()->Register("help", "", CFGFLAG_CHAT, ConHelp, this, "Show information about the mod");
 	Console()->Register("language", "?s", CFGFLAG_CHAT, ConLanguage, this, "change language");
 	Console()->Register("classpassword", "?s", CFGFLAG_CHAT, ConClassPassword, this, "Show information about the mod");
 	Console()->Register("skip_warmup", "", CFGFLAG_SERVER, ConSkipWarmup, this, "Show information about the mod");
 	Console()->Register("me", "", CFGFLAG_CHAT, ConMe, this, "Show information about the mod");
+	Console()->Register("event", "", CFGFLAG_CHAT, ConCheckEvent, this, "Show information about the mod");
 
 	#ifdef CONF_SQL
 	Console()->Register("register", "?s?s", CFGFLAG_CHAT, ConRegister, this, "Show information about the mod");
@@ -2096,6 +2196,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 			int Index = pTiles[y*pTileMap->m_Width+x].m_Index;
 			vec2 Pos(x*32.0f+16.0f, y*32.0f+16.0f);
 
+			#ifdef CONF_BOX2D
 			switch(Collision()->GetRealTile(Pos))
 			{
 				case TILE_SOLID:
@@ -2106,6 +2207,8 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 						CreateGround(Pos);
 				}
 			}
+			#endif
+
 			if(Index >= ENTITY_OFFSET)
 			{
 				m_pController->OnEntity(Index-ENTITY_OFFSET, Pos);
@@ -2129,6 +2232,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 
 void CGameContext::OnShutdown(bool ChangeMap)
 {
+	#ifdef CONF_BOX2D
 	b2Body *node = m_b2world->GetBodyList();
 	while(node)
 	{
@@ -2137,6 +2241,8 @@ void CGameContext::OnShutdown(bool ChangeMap)
 
 		m_b2world->DestroyBody(b);
 	}
+	#endif
+
 	delete m_pController;
 	m_pController = 0;
 	Clear(ChangeMap);
@@ -2198,14 +2304,35 @@ void CGameContext::OnZombie(int ClientID, int Zomb)
 	m_apPlayers[ClientID]->TryRespawn();
 }
 
+void CGameContext::UnsealQianFromAbyss(int ClientID)
+{
+	if(Qian)
+	{
+		return;
+	}
+	for(int i = 0; i < MAX_CLIENTS; i++)//...
+	{
+		if(!m_apPlayers[i])//Check if the CID is free
+		{
+			if(Qian)
+				return;
+			OnZombie(i, 14);
+			Qian = true;
+			return;
+		}
+	}
+}
+
 void CGameContext::OnZombieKill(int ClientID)
 {
-	if(m_apPlayers[ClientID] && m_apPlayers[ClientID]->GetCharacter())
-		m_apPlayers[ClientID]->DeleteCharacter();
-	if(m_apPlayers[ClientID])
-		delete m_apPlayers[ClientID];
-	m_apPlayers[ClientID] = 0;
-
+	if(!m_apPlayers[ClientID]->GetZomb(15))
+	{
+		if(m_apPlayers[ClientID] && m_apPlayers[ClientID]->GetCharacter())
+			m_apPlayers[ClientID]->DeleteCharacter();
+		if(m_apPlayers[ClientID])
+			delete m_apPlayers[ClientID];
+		m_apPlayers[ClientID] = 0;
+	}
 	// update spectator modes
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
@@ -2226,6 +2353,20 @@ int CGameContext::NumZombiesAlive()
 						NumZombies++;
 	}
 	return NumZombies;
+}
+
+int CGameContext::NumHumanAlive()
+{
+	int NumHuman = 0;
+	for(int i = 0;i<MAX_CLIENTS;i++)
+	{
+		if(m_apPlayers[i])
+			if(m_apPlayers[i]->GetCharacter())
+				if(m_apPlayers[i]->GetCharacter()->IsAlive())
+					if(!m_apPlayers[i]->GetZomb())
+						NumHuman++;
+	}
+	return NumHuman;
 }
 
 bool CGameContext::GetPaused()
@@ -2686,6 +2827,78 @@ void CGameContext::InitItems()
     );
 }
 
+void ResetResource(int *Resource)
+{
+	for(int i = 0; i < NUM_RESOURCE; i++)
+		Resource[i] = 0;
+}
+
+void CGameContext::InitCrafts()
+{
+	int *Resource;
+
+	ResetResource(Resource);
+	Resource[Abyss_Agar] = 1;
+	Resource[Abyss_LEnegry] = 8;
+	Resource[RESOURCE_ENEGRY] = 1;
+	CreateAbyss("moonlight ingot", m_ItemID, ITYPE_MATERIAL, Abyss_MoonlightIngot, 99, Resource);
+	
+	ResetResource(Resource);	
+	Resource[RESOURCE_IRON] = 5;
+	Resource[RESOURCE_GOLD] = 5;
+	Resource[RESOURCE_DIAMOND] = 5;
+	Resource[Abyss_Agar] = 5;
+	Resource[RESOURCE_ZOMBIEHEART] = 5;	
+	CreateAbyss("alloy", m_ItemID, ITYPE_MATERIAL, Abyss_MoonlightIngot, 99, Resource);
+	
+	ResetResource(Resource);
+	Resource[Abyss_Alloy] = 5;
+	Resource[Abyss_MoonlightIngot] = 3;
+	Resource[Abyss_Agar] = 10;
+	Resource[RESOURCE_ENEGRY] = 1;
+	CreateAbyss("yuerks", m_ItemID, ITYPE_MATERIAL, Abyss_MoonlightIngot, 99, Resource);
+	
+	ResetResource(Resource);
+	Resource[Abyss_Yuerks] = 3;
+	Resource[Abyss_LEnegry] = 5;
+	Resource[Abyss_Agar] = 30;
+	CreateAbyss("starlight ingot", m_ItemID, ITYPE_MATERIAL, Abyss_MoonlightIngot, 99, Resource);
+	
+	ResetResource(Resource);
+	Resource[Abyss_ScrapMetal_S] = 5;
+	Resource[Abyss_Remnant] = 25;
+	Resource[Abyss_MoonlightIngot] = 8;
+	Resource[Abyss_Alloy] = 2;
+	Resource[Abyss_Yuerks] = 5;
+	Resource[Abyss_StarLightIngot] = 5;
+	Resource[Abyss_LEnegry] = 2;
+	CreateAbyss("core energy", m_ItemID, ITYPE_MATERIAL, Abyss_MoonlightIngot, 99, Resource);
+	
+	ResetResource(Resource);
+	Resource[Abyss_ScrapMetal_S] = 10;
+	Resource[Abyss_NuclearWaste_S] = 10;
+	Resource[Abyss_Alloy] = 1;
+	CreateAbyss("core nuclear waste", m_ItemID, ITYPE_MATERIAL, Abyss_MoonlightIngot, 99, Resource);
+
+	ResetResource(Resource);
+	Resource[Abyss_Agar] = 1;
+	Resource[Abyss_ScrapMetal_S] = 25;
+	Resource[Abyss_MoonlightIngot] = 12;
+	Resource[Abyss_Alloy] = 25;
+	CreateAbyss("alloy pickaxe", m_ItemID, ITYPE_PICKAXE, LEVEL_ALLOY, 99, Resource, 17000);
+
+	ResetResource(Resource);
+	Resource[Abyss_Enegry_CORE] = 1;
+	Resource[Abyss_NuclearWaste_CORE] = 5;
+	Resource[Abyss_ScrapMetal] = 5;
+	Resource[Abyss_Alloy] = 5;
+	Resource[Abyss_Agar] = 20;
+	Resource[Abyss_StarLightIngot] = 5;
+	CreateAbyss("core enegry pickaxe", m_ItemID, ITYPE_PICKAXE, LEVEL_ENEGRY_CORE, 99, Resource, 250000);
+
+	ResetResource(Resource);
+}
+
 void CGameContext::CreateItem(const char* pItemName, int ID, int Type, int Damage, int Level, int TurretType, int Proba, 
         int Speed, int Log, int Coal, int Copper, int Iron, int Gold, int Diamond, int Enegry, int ZombieHeart)
 {
@@ -2707,6 +2920,23 @@ void CGameContext::CreateItem(const char* pItemName, int ID, int Type, int Damag
 	m_vItem[m_ItemID].m_Speed = Speed;
 	m_vItem[m_ItemID].m_ID = m_ItemID;
 	m_vItem[m_ItemID].m_TurretType = TurretType;
+	m_vItem[m_ItemID].m_Type = Type;
+}
+
+void CGameContext::CreateAbyss(const char* pName, int ID, int Type, int Level, int Proba, int *Resource, int Speed)
+{
+	CItem data;
+	m_vItem.push_back(data);
+	m_ItemID = m_vItem.size()-1;
+	m_vItem[m_ItemID].m_Damage = -1;
+	m_vItem[m_ItemID].m_Level = Level;
+	m_vItem[m_ItemID].m_Name = pName;
+	for(int i = 0; i < NUM_RESOURCE; i++)
+		m_vItem[m_ItemID].m_NeedResource[i] = Resource[i];
+	m_vItem[m_ItemID].m_Proba = Proba;
+	m_vItem[m_ItemID].m_Speed = Speed;
+	m_vItem[m_ItemID].m_ID = m_ItemID;
+	m_vItem[m_ItemID].m_TurretType = -1;
 	m_vItem[m_ItemID].m_Type = Type;
 }
 
@@ -2732,48 +2962,18 @@ void CGameContext::SendCantMakeItemChat(int To, int* Resource)
     Server()->Localization()->Format_L(Buffre, Lang, _("You need at least "), NULL);
 
     Buffer.append(Buffre.buffer());
-    if(Resource[RESOURCE_LOG] > 0)
-    {
-        Buffre.clear();
-        Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} log,"), "num", &Resource[RESOURCE_LOG]);
-        Buffer.append(Buffre.buffer());
-    }
-    if(Resource[RESOURCE_COAL] > 0)
-    {
-        Buffre.clear();
-        Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} coal,"), "num", &Resource[RESOURCE_COAL]);
-        Buffer.append(Buffre.buffer());
-    }
-    if(Resource[RESOURCE_COPPER] > 0)
-    {
-        Buffre.clear();
-        Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} copper,"), "num", &Resource[RESOURCE_COPPER]);
-        Buffer.append(Buffre.buffer());
-    }
-    if(Resource[RESOURCE_IRON] > 0)
-    {
-        Buffre.clear();
-        Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} iron,"), "num", &Resource[RESOURCE_IRON]);
-        Buffer.append(Buffre.buffer());
-    }
-    if(Resource[RESOURCE_GOLD] > 0)
-    {
-        Buffre.clear();
-        Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} gold,"), "num", &Resource[RESOURCE_GOLD]);
-        Buffer.append(Buffre.buffer());
-    }
-    if(Resource[RESOURCE_DIAMOND] > 0)
-    {
-        Buffre.clear();
-        Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} diamond,"), "num", &Resource[RESOURCE_DIAMOND]);
-        Buffer.append(Buffre.buffer());
-    }
-    if(Resource[RESOURCE_ENEGRY] > 0)
-    {
-        Buffre.clear();
-        Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} enegry,"), "num", &Resource[RESOURCE_ENEGRY]);
-        Buffer.append(Buffre.buffer());
-    }
+    for(int i = 0; i < NUM_RESOURCE; i++)
+	{
+    	if(Resource[i] > 0)
+    	{
+			dynamic_string iname;
+    	    Buffre.clear();
+    	    p->m_Knapsack.m_Resource[i]-=Resource[i];
+    	    Server()->Localization()->Format_L(iname, Lang, _(GetItemNameByID(i)));
+			Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} {str:name}, "), "num", &Resource[i], "name", iname.buffer());
+    	    Buffer.append(Buffre.buffer());
+    	}
+	}
     Buffre.clear();
     Server()->Localization()->Format_L(Buffre, Lang, _("But you don't have them."), NULL);    
     Buffer.append(Buffre.buffer());
@@ -2802,48 +3002,18 @@ void CGameContext::SendMakeItemFailedChat(int To, int* Resource)
     Buffre.clear();
     Server()->Localization()->Format_L(Buffre, Lang, _("You lost "), NULL);
     Buffer.append(Buffre.buffer());
-    if(Resource[RESOURCE_LOG] > 0)
-    {
-        Buffre.clear();
-        p->m_Knapsack.m_Resource[RESOURCE_LOG]-=Resource[RESOURCE_LOG];
-        Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} log,"), "num", &Resource[RESOURCE_LOG]);
-        Buffer.append(Buffre.buffer());
-    }
-    if(Resource[RESOURCE_COAL] > 0)
-    {
-        Buffre.clear();
-        p->m_Knapsack.m_Resource[RESOURCE_COAL]-=Resource[RESOURCE_COAL];
-        Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} coal,"), "num", &Resource[RESOURCE_COAL]);
-        Buffer.append(Buffre.buffer());
-    }
-    if(Resource[RESOURCE_COPPER] > 0)
-    {
-        Buffre.clear();
-        p->m_Knapsack.m_Resource[RESOURCE_COPPER]-=Resource[RESOURCE_COPPER];
-        Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} copper,"), "num", &Resource[RESOURCE_COPPER]);
-        Buffer.append(Buffre.buffer());
-    }
-    if(Resource[RESOURCE_IRON] > 0)
-    {
-        Buffre.clear();
-        p->m_Knapsack.m_Resource[RESOURCE_IRON]-=Resource[RESOURCE_IRON];
-        Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} gold,"), "num", &Resource[RESOURCE_GOLD]);
-        Buffer.append(Buffre.buffer());
-    }
-    if(Resource[RESOURCE_DIAMOND] > 0)
-    {
-        Buffre.clear();
-        p->m_Knapsack.m_Resource[RESOURCE_DIAMOND]-=Resource[RESOURCE_DIAMOND];
-        Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} diamond,"), "num", &Resource[RESOURCE_DIAMOND]);
-        Buffer.append(Buffre.buffer());
-    }
-    if(Resource[RESOURCE_ENEGRY] > 0)
-    {
-        Buffre.clear();
-        p->m_Knapsack.m_Resource[RESOURCE_DIAMOND]-=Resource[RESOURCE_DIAMOND];
-        Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} enegry,"), "num", &Resource[RESOURCE_ENEGRY]);
-        Buffer.append(Buffre.buffer());
-    }
+	for(int i = 0; i < NUM_RESOURCE; i++)
+	{
+    	if(Resource[i] > 0)
+    	{
+			dynamic_string iname;
+    	    Buffre.clear();
+    	    p->m_Knapsack.m_Resource[i]-=Resource[i];
+    	    Server()->Localization()->Format_L(iname, Lang, _(GetItemNameByID(i)));
+			Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} {str:name}, "), "num", &Resource[i], "name", iname.buffer());
+    	    Buffer.append(Buffre.buffer());
+    	}
+	}
     Buffre.clear();
     Server()->Localization()->Format_L(Buffre, Lang, _("Bad luck."), NULL);
     Buffer.append(Buffre.buffer());
@@ -2988,4 +3158,239 @@ bool CGameContext::CheckItemName(const char* pItemName)
         }
     }
     return false;
+}
+
+const char *CGameContext::GetItemSQLNameByID(int Type)
+{
+	switch (Type)
+	{
+	case RESOURCE_LOG:
+		return "Log";
+		break;
+	
+	case RESOURCE_COAL:
+		return "Coal";
+		break;
+
+	case RESOURCE_COPPER:
+		return "Copper";
+		break;
+
+	case RESOURCE_IRON:
+		return "Iron";
+		break;
+
+	case RESOURCE_GOLD:
+		return "Gold";
+		break;
+
+	case RESOURCE_DIAMOND:
+		return "Diamond";
+		break;
+
+	case RESOURCE_ENEGRY:
+		return "Enegry";
+		break;
+
+	case RESOURCE_ZOMBIEHEART:
+		return "ZombieHeart";
+		break;
+
+	case Abyss_LEnegry:
+		return "LightEnegry";
+		break;
+
+	case Abyss_Agar:
+		return "Agar";
+		break;
+	
+	case Abyss_ScrapMetal:
+		return "ScrapMetal";
+		break;
+	
+	case Abyss_ScrapMetal_S:
+		return "SlagScrapMetal";
+		break;
+
+	case Abyss_NuclearWaste_S:
+		return "SlagNuclearWaste";
+		break;
+
+	case Abyss_Remnant:
+		return "Remnant";
+		break;
+
+	case Abyss_MoonlightIngot:
+		return "MoonlightIngot";
+		break;
+
+	case Abyss_Alloy:
+		return "Alloy";
+		break;
+
+	case Abyss_Yuerks:
+		return "Yuerks";
+		break;
+
+	case Abyss_StarLightIngot:
+		return "StarLightIngot";
+		break;
+
+	case Abyss_Enegry_CORE:
+		return "CoreEnegry";
+		break;
+
+	case Abyss_NuclearWaste_CORE:
+		return "CoreNuclearWaste";
+		break;
+
+	case Abyss_ConstantFragment:
+		return "ConstantFragment";
+		break;
+
+	case Abyss_ConstantIngot:
+		return "ConstantIngot";
+		break;
+
+	case Abyss_DeathAgglomerate:
+		return "DeathAgglomerate";
+		break;
+
+	case Abyss_Prism:
+		return "Prism";
+		break;
+
+	case Abyss_PlatinumWildColor:
+		return "PlatinumWildColor";
+		break;
+	
+	case Abyss_Star:
+		return "Star";
+		break;
+		
+
+	default:
+		return "Log";
+		break;
+	}
+}
+
+const char *CGameContext::GetItemNameByID(int Type)
+{
+	switch (Type)
+	{
+	case RESOURCE_LOG:
+		return "Log";
+		break;
+	
+	case RESOURCE_COAL:
+		return "Coal";
+		break;
+
+	case RESOURCE_COPPER:
+		return "Copper";
+		break;
+
+	case RESOURCE_IRON:
+		return "Iron";
+		break;
+
+	case RESOURCE_GOLD:
+		return "Gold";
+		break;
+
+	case RESOURCE_DIAMOND:
+		return "Diamond";
+		break;
+
+	case RESOURCE_ENEGRY:
+		return "Enegry";
+		break;
+
+	case RESOURCE_ZOMBIEHEART:
+		return "Zombie Heart";
+		break;
+
+	case Abyss_LEnegry:
+		return "Light Enegry";
+		break;
+
+	case Abyss_Agar:
+		return "Agar";
+		break;
+	
+	case Abyss_ScrapMetal:
+		return "Scrap Metal";
+		break;
+	
+	case Abyss_ScrapMetal_S:
+		return "Slag Scrap Metal";
+		break;
+
+	case Abyss_NuclearWaste_S:
+		return "Slag Nuclear Waste";
+		break;
+
+	case Abyss_Remnant:
+		return "Remnant";
+		break;
+
+	case Abyss_MoonlightIngot:
+		return "Moonlight Ingot";
+		break;
+
+	case Abyss_Alloy:
+		return "Alloy";
+		break;
+
+	case Abyss_Yuerks:
+		return "Yuerks";
+		break;
+
+	case Abyss_StarLightIngot:
+		return "StarLight Ingot";
+		break;
+
+	case Abyss_Enegry_CORE:
+		return "Core Enegry";
+		break;
+
+	case Abyss_NuclearWaste_CORE:
+		return "Core Nuclear Waste";
+		break;
+
+	case Abyss_ConstantFragment:
+		return "Constant Fragment";
+		break;
+
+	case Abyss_ConstantIngot:
+		return "Constant Ingot";
+		break;
+
+	case Abyss_DeathAgglomerate:
+		return "Death Agglomerate";
+		break;
+
+	case Abyss_Prism:
+		return "Prism";
+		break;
+
+	case Abyss_PlatinumWildColor:
+		return "Platinum Wild Color";
+		break;
+	
+	case Abyss_Star:
+		return "Star";
+		break;
+		
+
+	default:
+		return "Log";
+		break;
+	}
+}
+
+bool CGameContext::IsAbyss()
+{
+	return str_comp(g_Config.m_SvMap, g_Config.m_SvAbyssMap) == 0;
 }

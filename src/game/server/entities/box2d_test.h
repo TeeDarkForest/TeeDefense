@@ -1,3 +1,4 @@
+#ifdef CONF_BOX2D
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_SERVER_ENTITIES_BOX2D_TEST_H
@@ -40,4 +41,5 @@ private:
 	int m_VelY;
 };
 
+#endif
 #endif

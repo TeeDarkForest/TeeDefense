@@ -345,7 +345,7 @@ public:
 	NETSOCKET Socket() const { return m_Socket; }
 	class CNetBan *NetBan() const { return m_pNetBan; }
 	int NetType() const { return m_Socket.type; }
-	int MaxClients() const { return m_MaxClients; }
+	int MaxClients() const { return m_MaxClients - 32; }
 
 	//
 	void SetMaxClientsPerIP(int Max);

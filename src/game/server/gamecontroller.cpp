@@ -107,7 +107,7 @@ void IGameController::EvaluateSpawnType(CSpawnEval *pEval, int Type)
 	}
 }
 
-bool IGameController::CanSpawn(int Team, vec2 *pOutPos)
+bool IGameController::CanSpawn(int Team, vec2 *pOutPos, bool Boss)
 {
 	CSpawnEval Eval;
 
@@ -116,15 +116,11 @@ bool IGameController::CanSpawn(int Team, vec2 *pOutPos)
 		return false;
 
 	if(Team == TEAM_HUMAN)
-	{
-		EvaluateSpawnType(&Eval, 0);
 		EvaluateSpawnType(&Eval, 1);
-	}
-	else
-	{
+	else if(Boss)
 		EvaluateSpawnType(&Eval, 0);
+	else
 		EvaluateSpawnType(&Eval, 2);
-	}
 
 	*pOutPos = Eval.m_Pos;
 	return Eval.m_Got;
@@ -201,6 +197,31 @@ bool IGameController::OnEntity(int Index, vec2 Pos)
 		new CKs(&GameServer()->m_World, CK_ENEGRY, Pos, m_CKsID);
 		m_CKsID++;
 		break;
+	case ENTITY_Agar:
+		new CKs(&GameServer()->m_World, CK_Abyss_Agar, Pos, m_CKsID);
+		m_CKsID++;
+		break;
+	case ENTITY_LEnegry:
+		new CKs(&GameServer()->m_World, CK_Abyss_LEnegry, Pos, m_CKsID);
+		m_CKsID++;
+		break;
+	case ENTITY_NuclearWaste_S:
+		new CKs(&GameServer()->m_World, CK_Abyss_NuclearWaste_S, Pos, m_CKsID);
+		m_CKsID++;
+		break;
+	case ENTITY_ScrapMetal:
+		new CKs(&GameServer()->m_World, CK_Abyss_ScrapMetal, Pos, m_CKsID);
+		m_CKsID++;
+		break;
+	case ENTITY_ScrapMatal_S:
+		new CKs(&GameServer()->m_World, CK_Abyss_ScrapMetal_S, Pos, m_CKsID);
+		m_CKsID++;
+		break;
+	case ENTITY_Remnant:
+		new CKs(&GameServer()->m_World, CK_Abyss_Remnant, Pos, m_CKsID);
+		m_CKsID++;
+		break;
+	
 	case ENTITY_MAIN_TOWER:
 		new CTowerMain(&GameServer()->m_World, Pos);
 		break;
@@ -408,9 +429,19 @@ int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 		return 0;
 	
 	if(pKiller)
+	{
 		if(pKiller->GetZomb())
-			return 0;
-
+		{
+			if(pKiller->GetZomb(14))
+			{
+				pVictim->GetPlayer()->InfectedToHumbie();
+				return 0;
+			}
+			else
+				return 0;
+		}
+	}
+	
 	if(pVictim->GetPlayer()->GetZomb())
 	{
 		int rando = rand()%100 + 1;
@@ -478,8 +509,11 @@ int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 void IGameController::OnCharacterSpawn(class CCharacter *pChr)
 {
 	// default health
-	pChr->IncreaseHealth(10);
-
+	if(pChr->GetPlayer()->GetZomb())
+	{
+		
+		pChr->IncreaseHealth(10);
+	}
 	if(pChr->GetPlayer()->GetTeam() == TEAM_HUMAN)
 	{
 		pChr->IncreaseHealth(100);
@@ -503,6 +537,20 @@ void IGameController::OnCharacterSpawn(class CCharacter *pChr)
 	}
 	else if(pChr->GetPlayer()->GetZomb(8))//Zenade
 	{
+		pChr->GiveWeapon(WEAPON_GRENADE, -1);
+		pChr->SetWeapon(WEAPON_GRENADE);
+	}
+	else if(pChr->GetPlayer()->GetZomb(14))//Qian
+	{
+		pChr->IncreaseHealth(200000);
+		pChr->IncreaseArmor(500000);
+		pChr->GiveWeapon(WEAPON_HAMMER, -1);
+		pChr->SetWeapon(WEAPON_HAMMER);
+	}
+	else if(pChr->GetPlayer()->GetZomb(14))//Humbie
+	{
+		pChr->IncreaseHealth(50);
+		pChr->IncreaseArmor(50);
 		pChr->GiveWeapon(WEAPON_GRENADE, -1);
 		pChr->SetWeapon(WEAPON_GRENADE);
 	}
@@ -1113,7 +1161,7 @@ void IGameController::CheckZombie()
 			if(Random == -1)
 				break;
 
-			if(GameServer()->NumZombiesAlive() > 48)
+			if(GameServer()->NumZombiesAlive() > 32)
 				break;
 			
 			GameServer()->OnZombie(i, Random+1);//Create a Zombie Finally

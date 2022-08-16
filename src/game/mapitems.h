@@ -48,6 +48,12 @@ enum
 	ENTITY_DIAMOND,
 	ENTITY_MAIN_TOWER,
 	ENTITY_ENERGY,
+	ENTITY_LEnegry,
+	ENTITY_Agar,
+	ENTITY_ScrapMetal,
+	ENTITY_ScrapMatal_S,
+	ENTITY_NuclearWaste_S,
+	ENTITY_Remnant,	
 	NUM_ENTITIES,
 
 	TILE_AIR=0,

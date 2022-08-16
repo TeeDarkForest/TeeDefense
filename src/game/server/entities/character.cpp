@@ -113,6 +113,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 
 	m_IsFrozen = false;
 
+	#ifdef CONF_BOX2D
 	// box2d
 	b2BodyDef BodyDef;
 	BodyDef.position = b2Vec2(m_Pos.x / 30.f, (m_Pos.y / 30.f)+2);
@@ -155,7 +156,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	FixtureDef1.density = 1.0f;
 	FixtureDef1.shape = &PolygonShape;
 	m_Tee->CreateFixture(&FixtureDef1);*/
-
+	#endif
 
 	m_InVehicle = false;
 	return true;
@@ -164,10 +165,12 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 void CCharacter::Destroy()
 {
 	GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCID()] = 0;
+	#ifdef CONF_BOX2D
 	if(m_b2Body) GameServer()->m_b2world->DestroyBody(m_b2Body);
 	if(m_DummyBody) GameServer()->m_b2world->DestroyBody(m_DummyBody);
 	m_b2Body = 0;
 	m_DummyBody = 0;
+	#endif
 	m_Alive = false;
 }
 
@@ -438,9 +441,11 @@ void CCharacter::FireWeapon()
 				}
 			}
 
+			#ifdef CONF_BOX2D
 			m_b2HammerTick = 0;
 			m_b2HammerTickAdd = 10;
 			m_b2HammerJointDir = Direction;
+			#endif
 
 			// if we Hit anything, we have to wait for the reload
 			if(Hits)
@@ -827,6 +832,7 @@ void CCharacter::TickDefered()
 		}
 	}
 
+	#ifdef CONF_BOX2D
 	b2Vec2 pos(m_Core.m_Pos.x / 30.f, m_Core.m_Pos.y / 30.f);
 	if (m_TeeJoint)
 	{
@@ -841,6 +847,7 @@ void CCharacter::TickDefered()
 
 		m_TeeJoint->SetTarget(pos);
 	}
+	#endif
 }
 
 void CCharacter::TickPaused()
@@ -863,7 +870,7 @@ bool CCharacter::IncreaseHealth(int Amount)
 	if(!m_pPlayer->GetZomb())
 		maxHealth = 25;
 	else
-		maxHealth = 100;
+		maxHealth = 500000;
 	if(m_Health >= maxHealth)
 		return false;
 	m_Health = clamp(m_Health+Amount, 0, maxHealth);
@@ -872,9 +879,14 @@ bool CCharacter::IncreaseHealth(int Amount)
 
 bool CCharacter::IncreaseArmor(int Amount)
 {
-	if(m_Armor >= 10)
+	int maxArmor;
+	if(!m_pPlayer->GetZomb())
+		maxArmor = 25;
+	else
+		maxArmor = 500000;
+	if(m_Armor >= maxArmor)
 		return false;
-	m_Armor = clamp(m_Armor+Amount, 0, 10);
+	m_Armor = clamp(m_Armor+Amount, 0, maxArmor);
 	return true;
 }
 
@@ -914,10 +926,12 @@ void CCharacter::Die(int Killer, int Weapon)
 	GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCID()] = 0;
 	GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID());
 
+	#ifdef CONF_BOX2D
 	if(m_b2Body) GameServer()->m_b2world->DestroyBody(m_b2Body);
 	if(m_DummyBody) GameServer()->m_b2world->DestroyBody(m_DummyBody);
 	m_b2Body = 0;
 	m_DummyBody = 0;
+	#endif
 
 	m_InVehicle = false;
 	if(m_pPlayer->m_Zomb)
@@ -1102,6 +1116,7 @@ void CCharacter::Snap(int SnappingClient)
 		m_SendCore.Write(pCharacter);
 	}
 
+	#ifdef CONF_BOX2D
 	if (g_Config.m_B2TeeLaser)
 	{
 		CNetObj_Laser *pB2Body = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, Id, sizeof(CNetObj_Laser)));
@@ -1109,6 +1124,8 @@ void CCharacter::Snap(int SnappingClient)
 		pB2Body->m_FromY = pB2Body->m_Y = m_b2Body->GetPosition().y * 30.f;
 		pB2Body->m_StartTick = Server()->Tick();
 	}
+	#endif
+	
 	// set emote
 	if (m_EmoteStop < Server()->Tick())
 	{
@@ -1418,7 +1435,7 @@ void CCharacter::DoZombieAim(vec2 VictimPos, int VicCID, vec2 NearZombPos, int N
 		}
 
 		//Zooker
-		if(m_pPlayer->GetZomb(3))
+		if(m_pPlayer->GetZomb(3) || m_pPlayer->GetZomb(15))
 		{
 			if(VicCID != -1 && distance(m_Pos, VictimPos) < 380.0f && GameServer()->GetPlayerChar(VicCID))//Look hooklenght in tuning.h
 			{

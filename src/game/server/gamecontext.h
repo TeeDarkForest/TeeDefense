@@ -2,7 +2,10 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_SERVER_GAMECONTEXT_H
 #define GAME_SERVER_GAMECONTEXT_H
+
+#ifdef CONF_BOX2D
 #include <box2d/box2d.h>
+#endif
 
 #include <engine/server.h>
 #include <engine/console.h>
@@ -57,6 +60,8 @@ typedef unsigned __int64 uint64_t;
 
 */
 
+#ifdef CONF_BOX2D
+
 class CBox2DBox;
 class CBox2DTest;
 class CBox2DTestSpider;
@@ -98,7 +103,7 @@ public:
 		return true;
 	}
 };
-
+#endif
 
 class CGameContext : public IGameServer
 {
@@ -149,14 +154,16 @@ class CGameContext : public IGameServer
 	static void ConLogout(IConsole::IResult *pResult, void *pUserData);
 	static void ConRegister(IConsole::IResult *pResult, void *pUserData);
 	static void ConLogin(IConsole::IResult *pResult, void *pUserData);
+	static void ConCheckEvent(IConsole::IResult *pResult, void *pUserData);
 
+	#ifdef CONF_BOX2D
 	static void ConB2CreateBox(IConsole::IResult *pResult, void *pUserData);
 	static void ConB2CreateTest(IConsole::IResult *pResult, void *pUserData);
 	static void ConB2CreateTestSpider(IConsole::IResult *pResult, void *pUserData);
 	static void ConB2CreateCrank(IConsole::IResult *pResult, void *pUserData);
 	static void ConB2CreateGround(IConsole::IResult *pResult, void *pUserData);
 	static void ConB2ClearWorld(IConsole::IResult *pResult, void *pUserData);
-	
+	#endif
 
 	CGameContext(int Resetting, bool ChangeMap);
 	void Construct(int Resetting, bool ChangeMap);
@@ -169,6 +176,7 @@ public:
 	int m_ChatResponseTargetID;
 	int m_ChatPrintCBIndex;
 
+#ifdef CONF_BOX2D
 public:
 	b2World *m_b2world;
 	std::vector<CBox2DBox*> m_b2bodies;
@@ -183,7 +191,9 @@ public:
 
 	void CreateGround(vec2 Pos, int Type = 0);
 	void HandleBox2D();
+#endif
 
+#ifdef CONF_BOX2D
 private:
 	struct Actor
 	{
@@ -191,6 +201,7 @@ private:
 
 		bool IsDead() {return m_Dead;}
 	};
+#endif
 
 public:
 	IServer *Server() const { return m_pServer; }
@@ -258,7 +269,7 @@ public:
 	void CreateSoundGlobal(int Sound, int Target=-1);
 
 	int NumZombiesAlive();
-
+	int NumHumanAlive();
 
 	enum
 	{
@@ -317,6 +328,9 @@ public:
 	void OnZombie(int ClientID, int Zomb);
 	void OnZombieKill(int ClientID);
 
+	void UnsealQianFromAbyss(int ClientID);
+	bool Qian;
+
 	// Tee Defense
 	bool m_NeedResetTower;
 	bool GetPaused();
@@ -324,8 +338,14 @@ public:
 
 	int m_ItemID;
 	void InitItems();
+	void InitCrafts();
 	void CreateItem(const char* pItemName, int ID, int Type, int Damage, int Level, int TurretType, int Proba, 
 		        int Speed, int Log, int Coal, int Copper, int Iron, int Gold, int Diamond, int Enegry, int ZombieHeart = 0);
+	void CreateAbyss(const char* pName, int ID, int Type, int Level, int Proba, int *NeedResource, int Speed = -1);
+
+	const char *GetItemSQLNameByID(int Type);
+	const char *GetItemNameByID(int Type);
+	
 	struct CItem
 	{
 		const char* m_Name;
@@ -356,6 +376,13 @@ public:
     void SendMakeItemFailedChat(int To, int* Resource);
 		
 	std::vector<CItem> m_vItem;
+
+	int m_EventTimer;
+	int m_EventType;
+	int m_EventDuration;
+
+	bool QianIsAlive();
+	bool IsAbyss();
 };
 
 inline Mask128 CmaskAll() { return Mask128(); }

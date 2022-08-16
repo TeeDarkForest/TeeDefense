@@ -12,65 +12,7 @@ CKs::CKs(CGameWorld *pGameWorld, int Type, vec2 Pos, int ID, int SubType)
 	m_ProximityRadius = PhysSize;
 	m_Pos = Pos;
 
-	switch (m_Type)
-	{
-	case CK_WOOD:
-		m_Health = 50;
-		break;
-	
-	case CK_COAL:
-		m_Health = 8000;
-		break;
-	
-	case CK_COPPER:
-		m_Health = 16000;
-		break;
-
-	case CK_IRON:
-		m_Health = 40000;
-		break;
-
-	case CK_GOLD:
-		m_Health = 60000;
-		break;
-
-	case CK_DIAMONAD:
-		m_Health = 500000;
-		break;
-
-	case CK_ENEGRY:
-		m_Health = 3000000;
-		break;
-
-	case CK_Abyss_LumSub:
-		m_Health = 500000;
-		break;
-
-	case CK_Abyss_Agar:
-		m_Health = 500000;
-		break;
-	
-	case CK_Abyss_ScrapMetal:
-		m_Health = 3000000;
-		break;
-
-	case CK_Abyss_ScrapMatal_S:
-		m_Health = 4500000;
-		break;
-
-	case CK_Abyss_NuclearWaste_S:
-		m_Health = 4250000;
-		break;
-
-	case CK_Abyss_Remnant:
-		m_Health = 5000000;
-		break;
-
-	
-	default:
-		m_Health = 99999999;
-		break;
-	}
+	m_Health = GetMaxHealth(m_Type);
 
 	m_LockPlayer = -1;
 
@@ -110,14 +52,8 @@ void CKs::Tick()
 	if(pChr && pChr->IsAlive() && !pChr->GetPlayer()->GetZomb())
 	{
 		/* NOW U CHANCE TO BE A [[BIG SHOT]]!         */
-		/*           --------  Spamton G. Spamton   */
-		
-		
-		/*If u have wooden pickaxe, u can mine all 'CKs' low then Iron(not include logs)*/
-		/*          copper                                        Gold                  */
-		/*          iron                                          Diamond               */
-		/*          gold                                          NULL                  */
-
+		/*           --------  Spamton G. Spamton     */
+		// BE A BIG  BE A BIG  BE A [[BIGEST SHOT]]   //
 		int RespawnTime = -1;
 		int PickSpeed = 1;
 		
@@ -164,26 +100,6 @@ void CKs::Tick()
 			int CID = pChr->GetCID();
 			switch (m_Type)
 			{
-				case CK_COAL:
-					pChr->m_InMining = true;
-					GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP);
-					Picking(PickSpeed, pChr->GetPlayer());
-					break;
-				case CK_IRON:
-					pChr->m_InMining = true;
-					GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP);
-					Picking(PickSpeed, pChr->GetPlayer());
-					break;
-				case CK_COPPER:
-					pChr->m_InMining = true;
-					GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP);
-					Picking(PickSpeed, pChr->GetPlayer());
-					break;
-				case CK_GOLD:
-					pChr->m_InMining = true;
-					GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP);
-					Picking(PickSpeed, pChr->GetPlayer());
-					break;
 				case CK_DIAMONAD:
 					if(pChr->GetPlayer()->m_Knapsack.m_Pickaxe < LEVEL_GOLD)
 					{
@@ -215,6 +131,9 @@ void CKs::Tick()
 				
 
 				default:
+					pChr->m_InMining = true;
+					GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP);
+					Picking(PickSpeed, pChr->GetPlayer());
 					break;
 			}
 			
@@ -228,110 +147,20 @@ void CKs::Picking(int Time, CPlayer *Player)
 	int CID = Player->GetCID();
 	if(m_Health <= 0)
 	{
-		switch (m_Type)
+		#ifdef CONF_SQL
+		if(Player->LoggedIn)
 		{
-		case CK_WOOD:
-			#ifdef CONF_SQL
-			if(Player->LoggedIn)
-			{
-				GameServer()->Sql()->UpdateCK(Player->GetCID(), "Log", "+1");
-			}
-			else
-				Player->m_Knapsack.m_Resource[RESOURCE_LOG]++;
-			#else
-			Player->m_Knapsack.m_Resource[RESOURCE_LOG]++;
-			#endif
-			GameServer()->SendChatTarget(CID, _("You picked up a Log"));
-			m_Health = 50;
-			break;
-		case CK_COAL:
-			#ifdef CONF_SQL
-			if(Player->LoggedIn)
-			{
-				GameServer()->Sql()->UpdateCK(Player->GetCID(), "Coal", "+1");
-			}
-			else
-				Player->m_Knapsack.m_Resource[RESOURCE_COAL]++;
-			#else
-			Player->m_Knapsack.m_Resource[RESOURCE_COAL]++;
-			#endif
-			GameServer()->SendChatTarget(CID, _("You picked up a Coal"));
-			m_Health = 8000;
-			break;
-		case CK_COPPER:
-			#ifdef CONF_SQL
-			if(Player->LoggedIn)
-			{
-				GameServer()->Sql()->UpdateCK(Player->GetCID(), "Copper", "+1");
-			}
-			else
-				Player->m_Knapsack.m_Resource[RESOURCE_COPPER]++;
-			#else
-			Player->m_Knapsack.m_Resource[RESOURCE_COPPER]++;
-			#endif
-			GameServer()->SendChatTarget(CID, _("You picked up a Copper"));
-			m_Health = 16000;
-			break;
-		case CK_IRON:
-			#ifdef CONF_SQL
-			if(Player->LoggedIn)
-			{
-				GameServer()->Sql()->UpdateCK(Player->GetCID(), "Iron", "+1");
-			}
-			else
-				Player->m_Knapsack.m_Resource[RESOURCE_IRON]++;
-			#else
-			Player->m_Knapsack.m_Resource[RESOURCE_IRON]++;
-			#endif
-			GameServer()->SendChatTarget(CID, _("You picked up a Iron"));
-			m_Health = 40000;
-			break;
-		case CK_GOLD:
-			#ifdef CONF_SQL
-			if(Player->LoggedIn)
-			{
-				GameServer()->Sql()->UpdateCK(Player->GetCID(), "Gold", "+1");
-			}
-			else
-				Player->m_Knapsack.m_Resource[RESOURCE_GOLD]++;
-			#else
-			Player->m_Knapsack.m_Resource[RESOURCE_GOLD]++;
-			#endif
-			GameServer()->SendChatTarget(CID, _("You picked up a Gold"));
-			m_Health = 60000;
-			break;
-		case CK_DIAMONAD:
-			#ifdef CONF_SQL
-			if(Player->LoggedIn)
-			{
-				GameServer()->Sql()->UpdateCK(Player->GetCID(), "Diamond", "+1");
-			}
-			else
-				Player->m_Knapsack.m_Resource[RESOURCE_DIAMOND]++;
-			#else
-			Player->m_Knapsack.m_Resource[RESOURCE_DIAMOND]++;
-			#endif
-			GameServer()->SendChatTarget(CID, _("You picked up a Diamond"));
-			m_Health = 500000;
-			break;
-		case CK_ENEGRY:
-			#ifdef CONF_SQL
-			if(Player->LoggedIn)
-			{
-				GameServer()->Sql()->UpdateCK(Player->GetCID(), "Enegry", "+1");
-			}
-			else
-				Player->m_Knapsack.m_Resource[RESOURCE_ENEGRY]++;
-			#else
-			Player->m_Knapsack.m_Resource[RESOURCE_ENEGRY]++;
-			#endif
-			GameServer()->SendChatTarget(CID, _("You picked up a Enegry"));
-			m_Health = 3000000;
-			break;
-		
-		default:
-			break;
+			GameServer()->Sql()->UpdateCK(Player->GetCID(), GetRealNameByType(m_Type), "+1");
 		}
+		else
+			Player->m_Knapsack.m_Resource[GetResourceID(m_Type)]++;
+		#else
+		Player->m_Knapsack.m_Resource[GetResourceID(m_Type)]++;
+		#endif
+		dynamic_string buf;
+		Server()->Localization()->Format_L(buf, Player->GetLanguage(), _(GetNameByType(m_Type)));
+		GameServer()->SendChatTarget(CID, _("You picked up a {str:Resource}"), "Resource", buf.buffer());
+		m_Health = GetMaxHealth(m_Type);
 	}
 	GameServer()->SendBroadcast_VL(_("{int:Health} left. Keep hit!"), CID, "Health", &m_Health);
 	Player->m_MiningTick = 25;
@@ -357,4 +186,318 @@ void CKs::Snap(int SnappingClient)
 	else
 		pP->m_Type = POWERUP_ARMOR;
 	pP->m_Subtype = 0;
+}
+
+
+
+int CKs::GetMaxHealth(int Type)
+{
+	switch (Type)
+	{
+	case CK_WOOD:
+		return 50;
+		break;
+	
+	case CK_COAL:
+		return 8000;
+		break;
+
+	case CK_COPPER:
+		return 1600;
+		break;
+	
+	case CK_IRON:
+		return 4000;
+		break;
+	
+	case CK_GOLD:
+		return 6000;
+		break;
+	
+	case CK_DIAMONAD:
+		return 60000;
+		break;
+	
+	case CK_ENEGRY:
+		return 3000000;
+		break;
+	
+	case CK_Abyss_Agar:
+		return 500000;
+		break;
+	
+	case CK_Abyss_LEnegry:
+		return 500000;
+		break;
+	
+	case CK_Abyss_ScrapMetal:
+		return 3000000;
+		break;
+	
+	case CK_Abyss_ScrapMetal_S:
+		return 4500000;
+		break;
+	
+	case CK_Abyss_NuclearWaste_S:
+		return 4250000;
+		break;
+
+	case CK_Abyss_Remnant:
+		return 5000000;
+		break;
+	
+	case CK_Abyss_ConstantFragment:
+		return 25;
+		break;
+
+	case CK_Abyss_DeathAgglomerate:
+		return 70000000;
+		break;
+	
+	case CK_Abyss_DeepPrism:
+		return 65000000;
+		break;
+
+	case CK_Abyss_PlatinumWildColor:
+		return 10000000;
+		break;
+	
+	default:
+		return 99999999999999;
+		break;
+	}
+}
+
+int CKs::GetResourceID(int Type)
+{
+	switch (Type)
+	{
+	case CK_WOOD:
+		return RESOURCE_LOG;
+		break;
+	
+	case CK_COAL:
+		return RESOURCE_COAL;
+		break;
+
+	case CK_COPPER:
+		return RESOURCE_COPPER;
+		break;
+	
+	case CK_IRON:
+		return RESOURCE_IRON;
+		break;
+	
+	case CK_GOLD:
+		return RESOURCE_GOLD;
+		break;
+	
+	case CK_DIAMONAD:
+		return RESOURCE_DIAMOND;
+		break;
+	
+	case CK_ENEGRY:
+		return RESOURCE_ENEGRY;
+		break;
+	
+	case CK_Abyss_Agar:
+		return Abyss_Agar;
+		break;
+	
+	case CK_Abyss_LEnegry:
+		return Abyss_LEnegry;
+		break;
+	
+	case CK_Abyss_ScrapMetal:
+		return Abyss_ScrapMetal;
+		break;
+	
+	case CK_Abyss_ScrapMetal_S:
+		return Abyss_ScrapMetal_S;
+		break;
+	
+	case CK_Abyss_NuclearWaste_S:
+		return Abyss_NuclearWaste_S;
+		break;
+
+	case CK_Abyss_Remnant:
+		return Abyss_Remnant;
+		break;
+
+	case CK_Abyss_ConstantFragment:
+		return Abyss_ConstantFragment;
+		break;
+
+	case CK_Abyss_DeathAgglomerate:
+		return Abyss_DeathAgglomerate;
+		break;
+	
+	case CK_Abyss_DeepPrism:
+		return Abyss_Prism;
+		break;
+
+	case CK_Abyss_PlatinumWildColor:
+		return Abyss_PlatinumWildColor;
+		break;
+	
+	default:
+		return RESOURCE_LOG;
+		break;
+	}
+}
+
+const char* CKs::GetNameByType(int Type)
+{
+	switch (Type)
+	{
+	case CK_WOOD:
+		return "Log";
+		break;
+	
+	case CK_COAL:
+		return "Coal";
+		break;
+
+	case CK_COPPER:
+		return "Copper";
+		break;
+	
+	case CK_IRON:
+		return "Iron";
+		break;
+	
+	case CK_GOLD:
+		return "Gold";
+		break;
+	
+	case CK_DIAMONAD:
+		return "Diamond";
+		break;
+	
+	case CK_ENEGRY:
+		return "Enegry";
+		break;
+	
+	case CK_Abyss_Agar:
+		return "Agar";
+		break;
+	
+	case CK_Abyss_LEnegry:
+		return "Light Enegry";
+		break;
+	
+	case CK_Abyss_ScrapMetal:
+		return "Scrap Metal";
+		break;
+	
+	case CK_Abyss_ScrapMetal_S:
+		return "Slag Scrap Matal";
+		break;
+	
+	case CK_Abyss_NuclearWaste_S:
+		return "Slag Nuclear Waste";
+		break;
+
+	case CK_Abyss_Remnant:
+		return "Remnant";
+		break;
+	
+	case CK_Abyss_ConstantFragment:
+		return "Contant Fragment";
+		break;
+
+	case CK_Abyss_DeathAgglomerate:
+		return "Death Agglomerate";
+		break;
+	
+	case CK_Abyss_DeepPrism:
+		return "Abyss Prism";
+		break;
+
+	case CK_Abyss_PlatinumWildColor:
+		return "Platinum Wild Color";
+		break;
+
+	default:
+		return "SB";
+		break;
+	}
+}
+
+const char* CKs::GetRealNameByType(int Type)
+{
+	switch (Type)
+	{
+	case CK_WOOD:
+		return "Log";
+		break;
+	
+	case CK_COAL:
+		return "Coal";
+		break;
+
+	case CK_COPPER:
+		return "Copper";
+		break;
+	
+	case CK_IRON:
+		return "Iron";
+		break;
+	
+	case CK_GOLD:
+		return "Gold";
+		break;
+	
+	case CK_DIAMONAD:
+		return "Diamond";
+		break;
+	
+	case CK_ENEGRY:
+		return "Enegry";
+		break;
+	
+	case CK_Abyss_Agar:
+		return "Agar";
+		break;
+	
+	case CK_Abyss_LEnegry:
+		return "LightEnegry";
+		break;
+	
+	case CK_Abyss_ScrapMetal:
+		return "ScrapMetal";
+		break;
+	
+	case CK_Abyss_ScrapMetal_S:
+		return "SlagScrapMatal";
+		break;
+	
+	case CK_Abyss_NuclearWaste_S:
+		return "SlagNuclearWaste";
+		break;
+
+	case CK_Abyss_Remnant:
+		return "Remnant";
+		break;
+
+	case CK_Abyss_ConstantFragment:
+		return "ContantFragment";
+		break;
+
+	case CK_Abyss_DeathAgglomerate:
+		return "DeathAgglomerate";
+		break;
+	
+	case CK_Abyss_DeepPrism:
+		return "Prism";
+		break;
+
+	case CK_Abyss_PlatinumWildColor:
+		return "PlatinumWildColor";
+		break;
+	
+	default:
+		return "SB";
+		break;
+	}
 }

@@ -1,3 +1,4 @@
+#ifdef CONF_BOX2D
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
@@ -173,3 +174,4 @@ void CBox2DBox::Snap(int SnappingClient)
 	pObj3->m_StartTick = Server()->Tick();
 	pObj4->m_StartTick = Server()->Tick();
 }
+#endif

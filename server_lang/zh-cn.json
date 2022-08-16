@@ -313,60 +313,16 @@
             "value": "xswl，笨手笨脚的这都做不出来。"
         },
         {
-            "key": "You picked up a Log",
-            "value": "你砍下了一块木头"
-        },
-        {
-            "key": "You picked up a Coal",
-            "value": "你挖到了一块煤炭"
-        },
-        {
-            "key": "You picked up a Copper",
-            "value": "你挖到了一块铜锭"
-        },
-        {
-            "key": "You picked up a Iron",
-            "value": "你挖到了一块铁锭"
-        },
-        {
-            "key": "You picked up a Gold",
-            "value": "你挖到了一块金锭"
-        },
-        {
-            "key": "You picked up a Diamond",
-            "value": "你挖到了一块钻石"
-        },
-        {
-            "key": "You picked up a Enegry",
-            "value": "你加载了一点能量，可惜你**目前**只能用他制作物品..."
+            "key": "You picked up a {str:Resource}",
+            "value": "你砍下了一块{str:Resource}"
         },
         {
             "key": "{int:num} log,",
             "value": "{int:num}块木头, "
         },
         {
-            "key": "{int:num} coal,",
-            "value": "{int:num}块煤炭, "
-        },
-        {
-            "key": "{int:num} copper,",
-            "value": "{int:num}块铜锭, "
-        },
-        {
-            "key": "{int:num} iron,",
-            "value": "{int:num}块铁锭, "
-        },
-        {
-            "key": "{int:num} gold,",
-            "value": "{int:num}块金锭, "
-        },
-        {
-            "key": "{int:num} diamond,",
-            "value": "{int:num}块钻石, "
-        },
-        {
-            "key": "{int:num} enegry,",
-            "value": "{int:num}点能量, "
+            "key": "{int:num} {str:Resource}, ",
+            "value": "{int:num}块{str:Resource}, "
         },
         {
             "key": "You lost ",
@@ -485,10 +441,182 @@
         {
             "key": "freeze gun turret",
             "value": "冰冻枪炮塔"
-        },        
+        },
         {
-            "key": "space",
-            "value": "空"
+            "key": "Log",
+            "value": "木头"
+        },
+        {
+            "key": "Coal",
+            "value": "煤炭"
+        },
+        {
+            "key": "Copper",
+            "value": "铜锭"
+        },
+        {
+            "key": "Iron",
+            "value": "铁锭"
+        },
+        {
+            "key": "Gold",
+            "value": "金子"
+        },
+        {
+            "key": "Diamond",
+            "value": "钻石"
+        },
+        {
+            "key": "Enegry",
+            "value": "能量"
+        },
+        {
+            "key": "Zombie Heart",
+            "value": "僵尸之心"
+        },
+        {
+            "key": "Light Enegry",
+            "value": "发光能量体"
+        },
+        {
+            "key": "Agar",
+            "value": "琼脂"
+        },
+        {
+            "key": "Scrap Metal",
+            "value": "废金属"
+        },
+        {
+            "key": "Slag Scrap Metal",
+            "value": "熔渣废金属"
+        },
+        {
+            "key": "Slag Nuclear Waste",
+            "value": "熔渣核废料"
+        },
+        {
+            "key": "Remnant",
+            "value": "深渊残块"
+        },
+        {
+            "key": "Moonlight Ingot",
+            "value": "月光锭"
+        },
+        {
+            "key": "Alloy",
+            "value": "合金锭"
+        },
+        {
+            "key": "Yuerks",
+            "value": "跃尔克斯"
+        },
+        {
+            "key": "StarLight Ingot",
+            "value": "星光锭"
+        },
+        {
+            "key": "Core Enegry",
+            "value": "能量核心"
+        },
+        {
+            "key": "Core Nuclear Waste",
+            "value": "核废料融体"
+        },
+        {
+            "key": "Constant Fragment",
+            "value": "恒量碎块"
+        },
+        {
+            "key": "Constant Ingot",
+            "value": "恒量锭"
+        },
+        {
+            "key": "Death Agglomerate",
+            "value": "动植物融合体"
+        },
+        {
+            "key": "Prism",
+            "value": "深渊棱镜"
+        },
+        {
+            "key": "Platinum Wild Color",
+            "value": "铂野彩"
+        },
+        {
+            "key": "Star",
+            "value": "深渊之星"
+        },
+        {
+            "key": "{int:num} {str:name}, ",
+            "value": "{int:num} {str:name}, "
+        },
+        {
+            "key": "moonlight ingot",
+            "value": "月光锭"
+        },
+        {
+            "key": "alloy",
+            "value": "合金锭"
+        },
+        {
+            "key": "yuerks",
+            "value": "跃尔克斯"
+        },
+        {
+            "key": "starlight ingot",
+            "value": "星光锭"
+        },
+        {
+            "key": "core energy",
+            "value": "能量核心"
+        },
+        {
+            "key": "core nuclear waste",
+            "value": "核废料融体"
+        },
+        {
+            "key": "alloy pickaxe",
+            "value": "合金镐"
+        },
+        {
+            "key": "core enegry pickaxe",
+            "value": "宇宙无敌超级核心之能量镐子!"
+        },
+        {
+            "key": "This Account is already logged in.",
+            "value": "这个账号正在被使用!"
+        },
+        {
+            "key": "You are now logged in.",
+            "value": "你现在已经登录"
+        },
+        {
+            "key": "Welcome {str:Name}!",
+            "value": "欢迎{str:Name}进入游戏！"
+        },
+        {
+            "key": "The password you entered is wrong.",
+            "value": "你输入的密码是错误的"
+        },
+        {
+            "key": "This Account does not exists.",
+            "value": "这个账号不存在"
+        },
+        {
+            "key": "Please register first. (/register <user> <pass>)",
+            "value": "请先注册. (/register <用户名> <密码>)"
+        },
+        {
+            "key": "This acoount already exists!",
+            "value": "这个账号已经存在了"
+        },
+        {
+            "key": "Acoount was created successfully.",
+            "value": "账号创建成功."
+        },
+        {
+            "key": "",
+            "value": ""
         }
     ]
 }

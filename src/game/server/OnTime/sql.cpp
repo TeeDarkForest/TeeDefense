@@ -102,6 +102,23 @@ void CSQL::create_tables()
 			"Gold BIGINT DEFAULT 0, "
 			"Diamond BIGINT DEFAULT 0, "
 			"Enegry BIGINT DEFAULT 0, "
+			"LightEnegry BIGINT DEFAULT 0, "
+			"Agar BIGINT DEFAULT 0, "
+			"ScrapMetal BIGINT DEFAULT 0, "
+			"SlagScrapMetal BIGINT DEFAULT 0, "
+			"Remnant BIGINT DEFAULT 0, "
+			"MoonlightIngot BIGINT DEFAULT 0, "
+			"Alloy BIGINT DEFAULT 0, "
+			"Yuerks BIGINT DEFAULT 0, "
+			"StarLightIngot BIGINT DEFAULT 0, "
+			"CoreEnegry BIGINT DEFAULT 0, "
+			"CoreNuclearWaste BIGINT DEFAULT 0, "
+			"ConstantFragment BIGINT DEFAULT 0, "
+			"ConstantIngot BIGINT DEFAULT 0, "
+			"DeathAgglomerate BIGINT DEFAULT 0, "
+			"Prism BIGINT DEFAULT 0, "
+			"PlatinumWildColor BIGINT DEFAULT 0, "
+			"Star BIGINT DEFAULT 0, "
 			"ZombieHeart BIGINT DEFAULT 0, "
 			"Sword BIGINT DEFAULT 0, "
 			"Axe BIGINT DEFAULT 0, "
@@ -145,7 +162,7 @@ static void create_account_thread(void *user)
 					// Account found
 					dbg_msg("SQL", "Account '%s' already exists", Data->name);
 					
-					GameServer()->SendChatTarget(Data->m_ClientID, "This acoount already exists!");
+					GameServer()->SendChatTarget(Data->m_ClientID, _("This acoount already exists!"));
 				}
 				else
 				{
@@ -168,7 +185,7 @@ static void create_account_thread(void *user)
 					Data->m_SqlData->statement->execute(buf);
 					dbg_msg("SQL", "Account '%s' was successfully created", Data->name);
 					
-					GameServer()->SendChatTarget(Data->m_ClientID, "Acoount was created successfully.");
+					GameServer()->SendChatTarget(Data->m_ClientID, _("Acoount was created successfully."));
 					Data->m_SqlData->login(Data->name, Data->pass, Data->m_ClientID);
 				}
 				
@@ -356,14 +373,10 @@ static void login_thread(void *user)
 
 						if(Data->m_SqlData->results->next())
 						{
-							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_LOG] = Data->m_SqlData->results->getInt("Log");
-							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_COAL] = Data->m_SqlData->results->getInt("Coal");
-							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_COPPER] = Data->m_SqlData->results->getInt("Copper");
-							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_IRON] = Data->m_SqlData->results->getInt("Iron");
-							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_GOLD] = Data->m_SqlData->results->getInt("Gold");
-							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_DIAMOND] = Data->m_SqlData->results->getInt("Diamond");
-							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_ENEGRY] = Data->m_SqlData->results->getInt("Enegry");
-							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_ZOMBIEHEART] = Data->m_SqlData->results->getInt("ZombieHeart");
+							for(int i = 0; i < NUM_RESOURCE; i++)
+							{
+								GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[i] = Data->m_SqlData->results->getInt(GameServer()->GetItemSQLNameByID(i));
+							}
 							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Sword = Data->m_SqlData->results->getInt("Sword");
 							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Axe = Data->m_SqlData->results->getInt("Axe");
 							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Pickaxe = Data->m_SqlData->results->getInt("Pickaxe");
@@ -457,14 +470,10 @@ static void SyncThread(void *user)
 						Data->m_SqlData->results = Data->m_SqlData->statement->executeQuery(buf);
 						if(Data->m_SqlData->results->next())
 						{
-							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_LOG] = Data->m_SqlData->results->getInt("Log");
-							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_COAL] = Data->m_SqlData->results->getInt("Coal");
-							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_COPPER] = Data->m_SqlData->results->getInt("Copper");
-							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_IRON] = Data->m_SqlData->results->getInt("Iron");
-							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_GOLD] = Data->m_SqlData->results->getInt("Gold");
-							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_DIAMOND] = Data->m_SqlData->results->getInt("Diamond");
-							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_ENEGRY] = Data->m_SqlData->results->getInt("Enegry");
-							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[RESOURCE_ZOMBIEHEART] = Data->m_SqlData->results->getInt("ZombieHeart");
+							for(int i = 0; i < NUM_RESOURCE; i++)
+							{
+								GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[i] = Data->m_SqlData->results->getInt(GameServer()->GetItemSQLNameByID(i));
+							}
 							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Sword = Data->m_SqlData->results->getInt("Sword");
 							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Axe = Data->m_SqlData->results->getInt("Axe");
 							GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Pickaxe = Data->m_SqlData->results->getInt("Pickaxe");
@@ -519,15 +528,27 @@ static void update_thread(void *user)
 					return;
 				}
 				str_format(buf, sizeof(buf), "UPDATE %s_Resource SET " \
-				"Log=%d,Coal=%d,Copper=%d,Iron=%d,Gold=%d,Diamond=%d,Enegry=%d,ZombieHeart=%d,Sword=%d,Axe=%d,Pickaxe=%d " \
+				"Sword=%d,Axe=%d,Pickaxe=%d " \
 				"WHERE UserID=%d", \
 				Data->m_SqlData->prefix,
-				p->m_Knapsack.m_Resource[RESOURCE_LOG],p->m_Knapsack.m_Resource[RESOURCE_COAL],p->m_Knapsack.m_Resource[RESOURCE_COPPER], \
-				p->m_Knapsack.m_Resource[RESOURCE_IRON],p->m_Knapsack.m_Resource[RESOURCE_GOLD],p->m_Knapsack.m_Resource[RESOURCE_DIAMOND], \
-				p->m_Knapsack.m_Resource[RESOURCE_ENEGRY],p->m_Knapsack.m_Resource[RESOURCE_ZOMBIEHEART],p->m_Knapsack.m_Sword, \
-				p->m_Knapsack.m_Axe,p->m_Knapsack.m_Pickaxe,Data->UserID[Data->m_ClientID] \
+				p->m_Knapsack.m_Sword, p->m_Knapsack.m_Axe,p->m_Knapsack.m_Pickaxe,Data->UserID[Data->m_ClientID] \
 				);
 				Data->m_SqlData->statement->execute(buf);
+
+				std::string abuffer("UPDATE tw_Resource SET ");
+				for(int j = 0; j < NUM_RESOURCE; j++)
+				{
+					char buffer[256];
+					str_format(buffer, sizeof(buffer), " %s=%d", GameServer()->GetItemSQLNameByID(j), GameServer()->m_apPlayers[Data->m_ClientID]->m_Knapsack.m_Resource[j]);
+					abuffer.append(buffer);
+					if(j != NUM_RESOURCE-1)
+					{
+						abuffer.append(",");
+					}
+				}
+
+				Data->m_SqlData->statement->execute(abuffer.c_str());
+				
 				// get Account name from database
 				str_format(buf, sizeof(buf), "SELECT Username FROM %s_Account WHERE UserID=%d;", Data->m_SqlData->prefix, Data->UserID[Data->m_ClientID]);
 				// create results
@@ -646,24 +667,22 @@ void CSQL::update_all()
 				{
 					CPlayer *p = GameServer()->m_apPlayers[i];
 					str_format(buf, sizeof(buf), "UPDATE %s_Resource SET "
-					"Log=%d,Coal=%d,Copper=%d,Iron=%d,Gold=%d,Diamond=%d,Enegry=%d,ZombieHeart=%d,Sword=%d,Axe=%d,Pickaxe=%d "
+					"Sword=%d,Axe=%d,Pickaxe=%d "
 					"WHERE UserID=%d;",
-					prefix,
-					p->m_Knapsack.m_Resource[RESOURCE_LOG],p->m_Knapsack.m_Resource[RESOURCE_COAL],p->m_Knapsack.m_Resource[RESOURCE_COPPER],
-					p->m_Knapsack.m_Resource[RESOURCE_IRON],p->m_Knapsack.m_Resource[RESOURCE_GOLD],p->m_Knapsack.m_Resource[RESOURCE_DIAMOND],
-					p->m_Knapsack.m_Resource[RESOURCE_ENEGRY],p->m_Knapsack.m_Resource[RESOURCE_ZOMBIEHEART],
+					prefix,p->m_Knapsack.m_Sword,p->m_Knapsack.m_Axe,p->m_Knapsack.m_Pickaxe,p->m_AccData.m_UserID);
+					statement->executeQuery(buf);
 
-					p->m_Knapsack.m_Sword,p->m_Knapsack.m_Axe,p->m_Knapsack.m_Pickaxe,p->m_AccData.m_UserID);
-
-					// create results
-					results = statement->executeQuery(buf);
-
-					// jump to result
-					results->next();
-					
-					// finally the name is there \o/	
-					str_copy(acc_name, results->getString("Username").c_str(), sizeof(acc_name));
-					dbg_msg("SQL", "Account '%s' was saved successfully", acc_name);
+					std::string buf("UPDATE tw_Resource SET ");
+					for(int j = 0; j < NUM_RESOURCE; j++)
+					{
+						char buffer[256];
+						str_format(buffer, sizeof(buffer), " %s=%d", GameServer()->GetItemSQLNameByID(j), GameServer()->m_apPlayers[i]->m_Knapsack.m_Resource[j]);
+						buf.append(buffer);
+						if(j != NUM_RESOURCE-1)
+						{
+							buf.append(",");
+						}
+					}
 				}
 				else
 					dbg_msg("SQL", "Account seems to be deleted");

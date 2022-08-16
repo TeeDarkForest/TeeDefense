@@ -74,6 +74,7 @@ endif()
 
 option(GEOLOCATION "Enable geolocation support" ON)
 option(MYSQL "Enable mysql support" ON)
+option(BOX2D "Enable Box2D fun box" ON)
 option(PREFER_BUNDLED_LIBS "Prefer bundled libraries over system libraries" ${AUTO_DEPENDENCIES_DEFAULT})
 option(DEV "Don't generate stuff necessary for packaging" OFF)
 
@@ -318,6 +319,10 @@ if(MYSQL)
   show_dependency_status("MySQL" MYSQL)
 endif()
 
+if(BOX2D)
+  show_dependency_status("Box2D" BOX2D)
+endif()
+
 if(NOT(PYTHONINTERP_FOUND))
   message(SEND_ERROR "You must install Python to compile TeeDefense")
 endif()
@@ -340,8 +345,9 @@ else()
   endif()
 endif()
 
-add_subdirectory(box2d)
-
+if(BOX2D)
+  add_subdirectory(box2d)
+endif()
 ########################################################################
 # DEPENDENCY COMPILATION
 ########################################################################
@@ -606,7 +612,11 @@ set_glob(GAME_SERVER GLOB_RECURSE src/game/server
   entities/tower-main.h
   entities/turret.cpp
   entities/turret.h
-  
+  entities/growingexplosion.cpp
+  entities/growingexplosion.h
+  entities/giga-Qian.cpp
+  entities/giga-Qian.h
+
   OnTime/sql.cpp
   OnTime/sql.h
   entity.cpp
@@ -650,8 +660,10 @@ add_executable(${TARGET_SERVER}
   $<TARGET_OBJECTS:game-shared>
 )
 target_link_libraries(${TARGET_SERVER} ${LIBS_SERVER})
-target_link_libraries(${TARGET_SERVER} box2d)
-target_link_libraries(${TARGET_SERVER} ICU::i18n)
+if(BOX2D)
+  target_link_libraries(${TARGET_SERVER} box2d)
+endif()
+  target_link_libraries(${TARGET_SERVER} ICU::i18n)
 target_link_libraries(${TARGET_SERVER} ICU::uc)
 list(APPEND TARGETS_OWN ${TARGET_SERVER})
 list(APPEND TARGETS_LINK ${TARGET_SERVER})
@@ -1009,6 +1021,11 @@ foreach(target ${TARGETS_OWN})
   if(MYSQL)
     target_compile_definitions(${target} PRIVATE CONF_SQL)
     target_include_directories(${target} SYSTEM PRIVATE ${MYSQL_INCLUDE_DIRS})
+  endif()
+
+  if(BOX2D)
+    target_compile_definitions(${target} PRIVATE CONF_BOX2D)
+    target_include_directories(${target} SYSTEM PRIVATE ${BOX2D_INCLUDE_DIRS})
   endif()
 
   if(OPENSSL_FOUND)

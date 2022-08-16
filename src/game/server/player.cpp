@@ -3,7 +3,7 @@
 #include <new>
 #include <engine/shared/config.h>
 #include "player.h"
-
+#include "entities/giga-Qian.h"
 
 MACRO_ALLOC_POOL_ID_IMPL(CPlayer, MAX_CLIENTS)
 
@@ -45,6 +45,7 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team, int Zomb)
 	m_Zomb = Zomb;
 	mem_zero(m_SubZomb, sizeof(m_SubZomb));
 
+	#ifdef CONF_BOX2D
 	b2CircleShape shape;
 	shape.m_radius = 1.6f;
 
@@ -52,7 +53,7 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team, int Zomb)
 	sd.density = 1.0f;
 	sd.shape = &shape;
 	sd.filter.groupIndex = -1;
-	
+	#endif
 }
 
 CPlayer::~CPlayer()
@@ -172,6 +173,13 @@ void CPlayer::PostTick()
 		m_ViewPos = GameServer()->m_apPlayers[m_SpectatorID]->m_ViewPos;
 }
 
+void CPlayer::InfectedToHumbie()
+{
+	if(GetZomb())
+		return;
+	m_Zomb = 15; // Humbie..
+}
+
 void CPlayer::Snap(int SnappingClient)
 {
 
@@ -183,7 +191,6 @@ void CPlayer::Snap(int SnappingClient)
 
 	int id = m_ClientID;
 	if (!Server()->Translate(id, SnappingClient)) return;
-	if (GetCharacter()->NetworkClipped(SnappingClient)) return;
 
 	CNetObj_ClientInfo *pClientInfo = static_cast<CNetObj_ClientInfo *>(Server()->SnapNewItem(NETOBJTYPE_CLIENTINFO, id, sizeof(CNetObj_ClientInfo)));
 	if(!pClientInfo)
@@ -300,6 +307,21 @@ void CPlayer::Snap(int SnappingClient)
 		{
 			StrToInts(&pClientInfo->m_Name0, 4, "Zeater");
 			StrToInts(&pClientInfo->m_Skin0, 6, "warpaint");
+		}
+		else if(m_Zomb == 14)//Zeater
+		{
+			StrToInts(&pClientInfo->m_Name0, 4, "Qian");
+			StrToInts(&pClientInfo->m_Skin0, 6, "blacktee");
+		}
+		else if(m_Zomb == 15)
+		{
+			StrToInts(&pClientInfo->m_Name0, 4, Server()->ClientName(m_ClientID));
+			StrToInts(&pClientInfo->m_Clan0, 3, Server()->ClientClan(m_ClientID));
+			pClientInfo->m_Country = Server()->ClientCountry(m_ClientID);
+			pClientInfo->m_UseCustomColor = m_TeeInfos.m_UseCustomColor;
+			pClientInfo->m_ColorBody = m_TeeInfos.m_ColorBody;
+			pClientInfo->m_ColorFeet = m_TeeInfos.m_ColorFeet;
+			StrToInts(&pClientInfo->m_Skin0, 6, m_TeeInfos.m_SkinName);
 		}
 	}
 	else
@@ -472,12 +494,23 @@ void CPlayer::TryRespawn()
 {
 	vec2 SpawnPos;
 
-	if(!GameServer()->m_pController->CanSpawn(m_Team, &SpawnPos))
+	if(!GameServer()->m_pController->CanSpawn(m_Team, &SpawnPos, m_Zomb == 14))
 		return;
 
 	m_Spawning = false;
 	m_pCharacter = new(m_ClientID) CCharacter(&GameServer()->m_World);
 	m_pCharacter->Spawn(this, SpawnPos);
+
+	if(m_Zomb == 14)
+	{
+		for(CQian *pChr = (CQian*) GameServer()->m_World.FindFirst(CGameWorld::ENTTYPE_QIAN); pChr; pChr = (CQian *)pChr->TypeNext())
+    	{
+			if(pChr)
+				return;
+		}
+		new CQian(&GameServer()->m_World, 0, m_ClientID, GetCharacter()->m_Pos);
+	}
+
 	GameServer()->CreatePlayerSpawn(SpawnPos);
 }
 

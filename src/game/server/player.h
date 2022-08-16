@@ -121,12 +121,16 @@ public:
 	//11 = Zele
 	//12 = Zinvis
 	//13 = Zeater
+	//14 = Qian
+	//15 = Humbie
 	////////////////////////////////
 
 	//Zomb2
 	void DeleteCharacter();
 	int GetZomb() { return m_Zomb; };
 	bool GetZomb(int Zomb);
+
+	void InfectedToHumbie();
 
 private:
 	CCharacter *m_pCharacter;

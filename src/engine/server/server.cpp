@@ -423,7 +423,7 @@ int64 CServer::TickStartTime(int Tick)
 
 int CServer::Init()
 {
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	for(int i = 1; i < MAX_CLIENTS; i++)
 	{
 		m_aClients[i].m_State = CClient::STATE_EMPTY;
 		m_aClients[i].m_aName[0] = 0;
@@ -1215,7 +1215,7 @@ void CServer::SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool Sen
 			p.AddString(aBuf, 64);
 		}
 	}
-	p.AddString(pMapName, 32);
+	p.AddString("Inf.Time", 32);
 
 	if(Type == SERVERINFO_EXTENDED)
 	{

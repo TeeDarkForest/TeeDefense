@@ -8,7 +8,11 @@
 #include <game/generated/protocol.h>
 
 #include <game/gamecore.h>
+
+#ifdef CONF_BOX2D
 #include <box2d/box2d.h>
+#endif
+
 enum
 {
 	WEAPON_GAME = -3, // team switching etc
@@ -178,6 +182,7 @@ private:
     bool m_IsVisible;
     vec2 m_PrevPos;
 
+#ifdef CONF_BOX2D
 public:
 	b2Body* m_b2Body;
 	b2Body* m_DummyBody;
@@ -186,6 +191,7 @@ public:
 	int m_b2HammerTick, m_b2HammerTickAdd;
 
 	b2Body *m_Tee;
+#endif
 };
 
 #endif

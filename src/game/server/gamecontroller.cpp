@@ -444,40 +444,94 @@ int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 	
 	if(pVictim->GetPlayer()->GetZomb())
 	{
-		int rando = rand()%100 + 1;
-		if(rando <= 50)
+		if(GameServer()->IsAbyss())
 		{
-			#ifdef CONF_SQL
-			if(pKiller->LoggedIn)
-				GameServer()->Sql()->UpdateCK(pKiller->GetCID(), "Log", "+1");
-			else
-				pKiller->m_Knapsack.m_Resource[RESOURCE_LOG]++;
-			#else
-				pKiller->m_Knapsack.m_Resource[RESOURCE_LOG]++;
-			#endif
-			GameServer()->SendChatTarget(pKiller->GetCID(), _("You got 1 Log from the Zombie"));
+			int rando = rand()%100 + 1;
+			if(rando <= 50)
+			{
+				#ifdef CONF_SQL
+				if(pKiller->LoggedIn)
+					GameServer()->Sql()->UpdateCK(pKiller->GetCID(), "Log", "+1");
+				else
+					pKiller->m_Knapsack.m_Resource[RESOURCE_LOG]++;
+				#else
+					pKiller->m_Knapsack.m_Resource[RESOURCE_LOG]++;
+				#endif
+				GameServer()->SendChatTarget(pKiller->GetCID(), _("You got 1 Log from the Zombie"));
+			}
+			else if(rando >= 51 && rando <= 75)
+			{
+				#ifdef CONF_SQL
+				if(pKiller->LoggedIn)
+					GameServer()->Sql()->UpdateCK(pKiller->GetCID(), "Copper", "+1");
+				else
+					pKiller->m_Knapsack.m_Resource[RESOURCE_COPPER]++;
+				#endif
+				GameServer()->SendChatTarget(pKiller->GetCID(), _("You got 1 Copper from the Zombie"));
+			}
+			else if(rando <= 99)
+			{
+				#ifdef CONF_SQL
+				if(pKiller->LoggedIn)
+					GameServer()->Sql()->UpdateCK(pKiller->GetCID(), "Gold", "+1");
+				else
+					pKiller->m_Knapsack.m_Resource[RESOURCE_GOLD]++;
+				#else
+					pKiller->m_Knapsack.m_Resource[RESOURCE_GOLD]++;
+				#endif
+				GameServer()->SendChatTarget(pKiller->GetCID(), _("You picked up a Gold"));
+			}
 		}
-		else if(rando >= 51 && rando <= 75)
+		else
 		{
-			#ifdef CONF_SQL
-			if(pKiller->LoggedIn)
-				GameServer()->Sql()->UpdateCK(pKiller->GetCID(), "Copper", "+1");
+			int random = rand()%10;
+			if(random == 5)
+			{
+				#ifdef CONF_SQL
+				if(pKiller->LoggedIn)
+					GameServer()->Sql()->UpdateCK(pKiller->GetCID(), "Enegry", "+5");
+				else
+					pKiller->m_Knapsack.m_Resource[RESOURCE_GOLD]++;
+				#else
+					pKiller->m_Knapsack.m_Resource[RESOURCE_GOLD]++;
+				#endif
+				GameServer()->SendChatTarget(pKiller->GetCID(), _("You picked up 5 Enegry"));
+			}
+			else if(random < 5)
+			{
+				#ifdef CONF_SQL
+				if(pKiller->LoggedIn)
+					GameServer()->Sql()->UpdateCK(pKiller->GetCID(), "Log", "+50");
+				else
+					pKiller->m_Knapsack.m_Resource[RESOURCE_LOG]++;
+				#else
+					pKiller->m_Knapsack.m_Resource[RESOURCE_LOG]++;
+				#endif
+				GameServer()->SendChatTarget(pKiller->GetCID(), _("You got 50 Log from the Zombie"));
+			}
+			else if(random > 5 && random <= 7)
+			{
+				#ifdef CONF_SQL
+				if(pKiller->LoggedIn)
+					GameServer()->Sql()->UpdateCK(pKiller->GetCID(), "Diamond", "+10");
+				else
+					pKiller->m_Knapsack.m_Resource[RESOURCE_COPPER]++;
+				#endif
+				GameServer()->SendChatTarget(pKiller->GetCID(), _("You got 10 Diamond from the Zombie"));
+			}
 			else
-				pKiller->m_Knapsack.m_Resource[RESOURCE_COPPER]++;
-			#endif
-			GameServer()->SendChatTarget(pKiller->GetCID(), _("You got 1 Copper from the Zombie"));
-		}
-		else if(rando <= 99)
-		{
-			#ifdef CONF_SQL
-			if(pKiller->LoggedIn)
-				GameServer()->Sql()->UpdateCK(pKiller->GetCID(), "Gold", "+1");
-			else
-				pKiller->m_Knapsack.m_Resource[RESOURCE_GOLD]++;
-			#else
-				pKiller->m_Knapsack.m_Resource[RESOURCE_GOLD]++;
-			#endif
-			GameServer()->SendChatTarget(pKiller->GetCID(), _("You picked up a Gold"));
+			{
+				#ifdef CONF_SQL
+				if(pKiller->LoggedIn)
+					GameServer()->Sql()->UpdateCK(pKiller->GetCID(), "Gold", "+1");
+				else
+					pKiller->m_Knapsack.m_Resource[RESOURCE_GOLD]++;
+				#else
+					pKiller->m_Knapsack.m_Resource[RESOURCE_GOLD]++;
+				#endif
+				GameServer()->SendChatTarget(pKiller->GetCID(), _("You picked up a Gold"));
+			}
+
 		}
 		#ifdef CONF_SQL
 		if(pKiller->LoggedIn)
@@ -509,11 +563,10 @@ int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 void IGameController::OnCharacterSpawn(class CCharacter *pChr)
 {
 	// default health
-	if(pChr->GetPlayer()->GetZomb())
-	{
-		
+	if(GameServer()->IsAbyss())
+		pChr->IncreaseHealth(10*50);
+	else
 		pChr->IncreaseHealth(10);
-	}
 	if(pChr->GetPlayer()->GetTeam() == TEAM_HUMAN)
 	{
 		pChr->IncreaseHealth(100);

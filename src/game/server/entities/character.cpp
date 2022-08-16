@@ -980,6 +980,9 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 		}
 	}
 
+	if(GameServer()->IsAbyss() && GameServer()->m_apPlayers[From]->GetZomb())
+		Dmg*=3;
+
 	if(Dmg)
 	{
 		if(m_Armor)

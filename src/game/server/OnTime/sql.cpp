@@ -106,6 +106,7 @@ void CSQL::create_tables()
 			"Agar BIGINT DEFAULT 0, "
 			"ScrapMetal BIGINT DEFAULT 0, "
 			"SlagScrapMetal BIGINT DEFAULT 0, "
+			"SlagNuclearWaste BIGINT DEFAULT 0, "
 			"Remnant BIGINT DEFAULT 0, "
 			"MoonlightIngot BIGINT DEFAULT 0, "
 			"Alloy BIGINT DEFAULT 0, "

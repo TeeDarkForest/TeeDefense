@@ -74,6 +74,7 @@ void CGameContext::Construct(int Resetting, bool ChangeMap)
 	#endif
 
 	InitItems();
+	InitCrafts();
 
 	Qian = false;
 
@@ -767,7 +768,18 @@ void CGameContext::OnClientEnter(int ClientID)
 	str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' team=%d", ClientID, Server()->ClientName(ClientID), m_apPlayers[ClientID]->GetTeam());
 	Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 
+	if(str_comp(Server()->ClientName(ClientID), "FlowerFell-Sans") == 0)
+	{
+		SendChatTarget(-1, _("欢迎模式作者FlowerFell-Sans进入服务器!"));
+	}
+	if(str_comp(Server()->ClientName(ClientID), "EDreemurr") == 0)
+	{
+		SendChatTarget(-1, _("欢迎模式作者EDreemurr进入服务器!"));
+	}
+
 	m_VoteUpdate = true;
+
+	ClearVotes(ClientID);
 }
 
 void CGameContext::OnClientConnected(int ClientID)
@@ -797,15 +809,6 @@ void CGameContext::OnClientConnected(int ClientID)
 	SetClientLanguage(ClientID, "zh-cn");
 	SendChatTarget(ClientID, _("Use command '/language en' to change language English"));
 	SendChatTarget(ClientID, _("上面那消息是给外国人看的，咱中国人不用管！awa"));
-	
-	if(str_comp(Server()->ClientName(ClientID), "FlowerFell-Sans") == 0)
-	{
-		SendChatTarget(-1, _("欢迎模式作者FlowerFell-Sans进入服务器!"));
-	}
-	if(str_comp(Server()->ClientName(ClientID), "EDreemurr") == 0)
-	{
-		SendChatTarget(-1, _("欢迎模式作者EDreemurr进入服务器!"));
-	}
 	// send motd
 	CNetMsg_Sv_Motd Msg;
 	Msg.m_pMessage = g_Config.m_SvMotd;
@@ -1994,6 +1997,7 @@ void CGameContext::SetClientLanguage(int ClientID, const char *pLanguage)
 	if(m_apPlayers[ClientID])
 	{
 		m_apPlayers[ClientID]->SetLanguage(pLanguage);
+		ClearVotes(ClientID);
 	}
 }
 
@@ -2830,7 +2834,7 @@ void ResetResource(int *Resource)
 
 void CGameContext::InitCrafts()
 {
-	int *Resource;
+	int Resource[NUM_RESOURCE];
 
 	ResetResource(Resource);
 	Resource[Abyss_Agar] = 1;
@@ -2903,6 +2907,7 @@ void CGameContext::CreateItem(const char* pItemName, int ID, int Type, int Damag
 	m_vItem[m_ItemID].m_Damage = Damage;
 	m_vItem[m_ItemID].m_Level = Level;
 	m_vItem[m_ItemID].m_Name = pItemName;
+	ResetResource(m_vItem[m_ItemID].m_NeedResource);
 	m_vItem[m_ItemID].m_NeedResource[RESOURCE_LOG] = Log;
 	m_vItem[m_ItemID].m_NeedResource[RESOURCE_COAL] = Coal;
 	m_vItem[m_ItemID].m_NeedResource[RESOURCE_COPPER] = Copper;
@@ -3388,4 +3393,114 @@ const char *CGameContext::GetItemNameByID(int Type)
 bool CGameContext::IsAbyss()
 {
 	return str_comp(g_Config.m_SvMap, g_Config.m_SvAbyssMap) == 0;
+}
+
+// MMOTee
+void CGameContext::AddVote(const char *Desc, const char *Cmd, int ClientID)
+{
+	while(*Desc && *Desc == ' ')
+		Desc++;
+
+	if(ClientID == -2)
+		return;
+
+	CVoteOptions Vote;	
+	str_copy(Vote.m_aDescription, Desc, sizeof(Vote.m_aDescription));
+	str_copy(Vote.m_aCommand, Cmd, sizeof(Vote.m_aCommand));
+	m_PlayerVotes[ClientID].add(Vote);
+	
+	// inform clients about added option
+	CNetMsg_Sv_VoteOptionAdd OptionMsg;	
+	OptionMsg.m_pDescription = Vote.m_aDescription;
+	Server()->SendPackMsg(&OptionMsg, MSGFLAG_VITAL, ClientID);
+}
+
+void CGameContext::AddVote_VL(int To, const char* aCmd, const char* pText, ...)
+{
+	int Start = (To < 0 ? 0 : To);
+	int End = (To < 0 ? MAX_CLIENTS : To+1);
+	
+	dynamic_string Buffer;
+	
+	va_list VarArgs;
+	va_start(VarArgs, pText);
+	
+	for(int i = Start; i < End; i++)
+	{
+		if(m_apPlayers[i])
+		{
+			Buffer.clear();
+			Server()->Localization()->Format_VL(Buffer, m_apPlayers[i]->GetLanguage(), pText, VarArgs);
+			AddVote(Buffer.buffer(), aCmd, i);
+		}
+	}
+	
+	Buffer.clear();
+	va_end(VarArgs);
+}
+
+void CGameContext::InitVotes(int ClientID)
+{
+	AddVote_VL(ClientID, "ccv_null", _("解锁完整功能请加服务器官方群"));
+	AddVote_VL(ClientID, "ccv_null", _("Q群群号:895105949"));
+	AddVote_VL(ClientID, "ccv_null", _("==================="));
+	AddVote_VL(ClientID, "skip_warmup", _("跳过热身,开始召唤僵尸（谨慎选择）"));
+	AddVote_VL(ClientID, "ccv_null", _("==================="));
+	AddVote_VL(ClientID, "ccv_sync", _("点我同步账号数据！（用于被赠送物品/QQ群内签到后使用）"));
+	AddVote_VL(ClientID, "sv_map TDef-Shwar", _("地图：深层矿井"));
+	AddVote_VL(ClientID, "sv_map TDef-Zero", _("地图：0号地区"));
+	AddVote_VL(ClientID, "sv_map TDef-Deeply", _("地图：继续深入"));
+	AddVote_VL(ClientID, "sv_map Mine-Craft", _("地图：我的世界"));
+	AddVote_VL(ClientID, "sv_map yours_minecrafts", _("地图：你的《Minecraft》"));
+	AddVote_VL(ClientID, "sv_abyss_map TDef-Abyss;sv_map TDef-Abyss", _("地图：深渊-永无止境"));
+	AddVote_VL(ClientID, "sv_abyss_map TDef-City;sv_map TDef-City", _("地图：深渊-古代城市"));
+	AddVote_VL(ClientID, "ccv_null", _("======= 材料 ======="));
+	AddVote_VL(ClientID, "ccv_make moonlight ingot", _("合成月光锭"));
+	AddVote_VL(ClientID, "ccv_make alloy", _("合成合金锭"));
+	AddVote_VL(ClientID, "ccv_make yuerks", _("合成跃尔克斯"));
+	AddVote_VL(ClientID, "ccv_make starlight ingot", _("合成星光锭"));
+	AddVote_VL(ClientID, "ccv_make core energy", _("合成能量核心"));
+	AddVote_VL(ClientID, "ccv_make core nuclear waste", _("合成核废料融体"));
+	AddVote_VL(ClientID, "ccv_null", _("======= 工具 ======="));
+	AddVote_VL(ClientID, "ccv_null", _("------ 斧头 ------"));
+	AddVote_VL(ClientID, "ccv_make wooden axe", _("制作木斧"));
+	AddVote_VL(ClientID, "ccv_make copper axe", _("制作铜斧"));
+	AddVote_VL(ClientID, "ccv_make iron axe", _("制作铁斧"));
+	AddVote_VL(ClientID, "ccv_make golden axe", _("制作金斧"));
+	AddVote_VL(ClientID, "ccv_make diamond axe", _("制作钻石斧"));
+	AddVote_VL(ClientID, "ccv_null", _("------ 镐子 ------"));
+	AddVote_VL(ClientID, "ccv_make wooden pickaxe", _("制作木镐"));
+	AddVote_VL(ClientID, "ccv_make copper pickaxe", _("制作铜镐"));
+	AddVote_VL(ClientID, "ccv_make iron pickaxe", _("制作铁镐"));
+	AddVote_VL(ClientID, "ccv_make golden pickaxe", _("制作金镐"));
+	AddVote_VL(ClientID, "ccv_make diamond pickaxe", _("制作钻石镐"));
+	AddVote_VL(ClientID, "ccv_make enegry pickaxe", _("制作宇宙无敌终极能量镐"));
+	AddVote_VL(ClientID, "ccv_make alloy pickaxe", _("制作合金镐"));
+	AddVote_VL(ClientID, "ccv_make core enegry pickaxe", _("制作宇宙无敌超级终极全世界第一核心·能量镐"));
+	AddVote_VL(ClientID, "ccv_null", _("------ 短剑 ------"));
+	AddVote_VL(ClientID, "ccv_make wooden sword", _("制作木剑"));
+	AddVote_VL(ClientID, "ccv_make iron sword", _("制作铁剑"));
+	AddVote_VL(ClientID, "ccv_make golden sword", _("制作金剑"));
+	AddVote_VL(ClientID, "ccv_make diamond sword", _("制作钻石剑"));
+	AddVote_VL(ClientID, "ccv_make enegry sword", _("制作宇宙无敌终极能量剑"));
+	AddVote_VL(ClientID, "ccv_null", _("======= 炮塔 ======="));
+	AddVote_VL(ClientID, "ccv_null", _("= 会在你所在的位置生成炮塔"));
+	AddVote_VL(ClientID, "ccv_make gun turret", _("制作普通手枪炮塔"));
+	AddVote_VL(ClientID, "ccv_make shotgun turret", _("制作普通散弹枪炮塔"));
+	AddVote_VL(ClientID, "ccv_make follow grenade turret", _("制作跟踪榴弹炮塔"));
+	AddVote_VL(ClientID, "ccv_make laser turret", _("制作激光枪炮塔"));
+	AddVote_VL(ClientID, "ccv_make shotgun2077 turret", _("制作<[xX__=散弹:2077=__Xx]>炮塔"));
+	AddVote_VL(ClientID, "ccv_make freeze gun turret", _("制作冰冻枪炮塔"));
+	AddVote_VL(ClientID, "ccv_make laser2077 turret", _("制作<[xX__=激光炮塔:2077=__Xx]>"));
+}
+
+void CGameContext::ClearVotes(int ClientID)
+{
+	m_PlayerVotes[ClientID].clear();
+	
+	// send vote options
+	CNetMsg_Sv_VoteClearOptions ClearMsg;
+	Server()->SendPackMsg(&ClearMsg, MSGFLAG_VITAL, ClientID);
+
+	InitVotes(ClientID);
 }

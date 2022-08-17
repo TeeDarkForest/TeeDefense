@@ -388,9 +388,8 @@ void CPlayer::FakeSnap(int SnappingClient)
 void CPlayer::OnDisconnect(const char *pReason)
 {
 	#ifdef CONF_SQL
-	if(!GetZomb() && LoggedIn)
+	if(LoggedIn)
 	{
-		dbg_msg("saa","LO");
 		GameServer()->LogoutAccount(m_ClientID);
 	}
 	#endif

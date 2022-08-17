@@ -140,6 +140,7 @@ class CGameContext : public IGameServer
 	static void ConForceVote(IConsole::IResult *pResult, void *pUserData);
 	static void ConClearVotes(IConsole::IResult *pResult, void *pUserData);
 	static void ConVote(IConsole::IResult *pResult, void *pUserData);
+	static void ConSetEventTimer(IConsole::IResult *pResult, void *pUserData);
 	static void ConchainSpecialMotdupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 	static void ConLanguage(IConsole::IResult *pResult, void *pUserData);
@@ -259,6 +260,15 @@ public:
 	CVoteOptionServer *m_pVoteOptionFirst;
 	CVoteOptionServer *m_pVoteOptionLast;
 
+	// MMOTee
+	struct CVoteOptions
+	{
+		char m_aDescription[VOTE_DESC_LENGTH] = { 0 };
+		char m_aCommand[VOTE_CMD_LENGTH] = { 0 };
+		void* data = { 0 };
+	};
+	array<CVoteOptions> m_PlayerVotes[MAX_CLIENTS];
+
 	// helper functions
 	void CreateDamageInd(vec2 Pos, float AngleMod, int Amount, Mask128 Mask=Mask128());
 	void CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, Mask128 Mask=Mask128());
@@ -287,7 +297,9 @@ public:
 	void SendBroadcast(const char *pText, int ClientID);
 	void SendBroadcast_VL(const char *pText, int ClientID, ...);
 	void SetClientLanguage(int ClientID, const char *pLanguage);
-
+	// MMOTee
+	void AddVote_VL(int To, const char* aCmd, const char* pText, ...);
+	void AddVote(const char *Desc, const char *Cmd, int ClientID = -1);
 
 
 	//
@@ -345,6 +357,9 @@ public:
 
 	const char *GetItemSQLNameByID(int Type);
 	const char *GetItemNameByID(int Type);
+
+	void InitVotes(int ClientID);
+	void ClearVotes(int ClientID);
 	
 	struct CItem
 	{

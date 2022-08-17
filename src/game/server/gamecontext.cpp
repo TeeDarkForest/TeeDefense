@@ -1893,6 +1893,14 @@ void CGameContext::ConCheckEvent(IConsole::IResult *pResult, void *pUserData)
 		pThis->SendChatTarget(pResult->GetClientID(), _("Event will End at {sec:Timer}"), "Timer", &End, NULL);
 }
 
+void CGameContext::ConSetEventTimer(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext* pThis = (CGameContext*) pUserData;
+	CPlayer *Player = pThis->m_apPlayers[pResult->GetClientID()];
+	if(pResult->NumArguments())
+		pThis->m_EventTimer = pResult->GetInteger(0);
+}
+
 void CGameContext::ConLanguage(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -2140,6 +2148,7 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("force_vote", "ss?r", CFGFLAG_SERVER, ConForceVote, this, "Force a voting option");
 	Console()->Register("clear_votes", "", CFGFLAG_SERVER, ConClearVotes, this, "Clears the voting options");
 	Console()->Register("vote", "r", CFGFLAG_SERVER, ConVote, this, "Force a vote to yes/no");
+	Console()->Register("set_event_timer", "i", CFGFLAG_SERVER, ConSetEventTimer, this, "Set Abyss Event timer.(50 = 1s)");
 
 	#ifdef CONF_BOX2D
 	Console()->Register("b2_create_box", "ii", CFGFLAG_SERVER, ConB2CreateBox, this, "create a box in the Box2D world using your current position");
@@ -2315,6 +2324,7 @@ void CGameContext::UnsealQianFromAbyss(int ClientID)
 		{
 			if(Qian)
 				return;
+			SendChatTarget(-1, _("You feeling the air around you getting closer to her temperature.."));
 			OnZombie(i, 14);
 			Qian = true;
 			return;
@@ -2361,9 +2371,8 @@ int CGameContext::NumHumanAlive()
 	{
 		if(m_apPlayers[i])
 			if(m_apPlayers[i]->GetCharacter())
-				if(m_apPlayers[i]->GetCharacter()->IsAlive())
-					if(!m_apPlayers[i]->GetZomb())
-						NumHuman++;
+				if(!m_apPlayers[i]->GetZomb())
+					NumHuman++;
 	}
 	return NumHuman;
 }

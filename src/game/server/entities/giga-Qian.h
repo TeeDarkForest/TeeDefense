@@ -85,5 +85,7 @@ private:
     float m_Angle;
 
     vec2 m_Vel;
+
+    int m_LastChat;
 };
 #endif 

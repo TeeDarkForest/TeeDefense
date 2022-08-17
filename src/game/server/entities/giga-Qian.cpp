@@ -40,6 +40,7 @@ CQian::CQian(CGameWorld *pGameWorld, int m_CoreID, int Owner, vec2 Pos) :
     new CLaserEyes(pGameWorld, CLaserEyes::TYPE_RIGHT, this);
     new CLaserEyes(pGameWorld, CLaserEyes::TYPE_UP, this);
     new CLaserEyes(pGameWorld, CLaserEyes::TYPE_DOWN, this);
+    new CLaserEyes(pGameWorld, CLaserEyes::TYPE_FREEGO, this);
 
     for (unsigned i = 0; i < sizeof(m_IDs) / sizeof(int); i ++)
         m_IDs[i] = Server()->SnapNewID();
@@ -305,15 +306,29 @@ void CQian::CLaserEyes::Tick()
         break;
     }*/
 
-    float AngleStep = 2.0f * pi / 4;
-    float Radius = 3.0f*32.0f;
-
-
-    MoveTo(pOwnerQian->m_Pos + (GetDir((m_Degres-m_Type*90.0f)*pi/180) * 320));
-    CCharacter *pTarget = FindTee();
-    if(pTarget && Server()->Tick()%(2*50) == 0)
+    if(m_Type < TYPE_FREEGO)
     {
-        Fire(pTarget);
+        float AngleStep = 2.0f * pi / 4;
+        float Radius = 3.0f*32.0f;
+
+
+        MoveTo(pOwnerQian->m_Pos + (GetDir((m_Degres-m_Type*90.0f)*pi/180) * 320));
+        CCharacter *pTarget = FindTee();
+        if(pTarget && Server()->Tick()%(2*50) == 0)
+        {
+            Fire(pTarget);
+        }
+    }
+
+    if(m_Type == TYPE_FREEGO)
+    {
+        CCharacter *pTarget = FindTee();
+        if(pTarget && pTarget->IsAlive())
+        {
+            m_Pos = m_Pos - pTarget->m_Pos/2.0f;
+        }
+        else
+            MoveTo(pOwnerQian->m_Pos);
     }
 }
 

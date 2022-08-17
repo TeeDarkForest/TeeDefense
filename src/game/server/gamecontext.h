@@ -192,9 +192,7 @@ public:
 
 	void CreateGround(vec2 Pos, int Type = 0);
 	void HandleBox2D();
-#endif
-
-#ifdef CONF_BOX2D
+	
 private:
 	struct Actor
 	{
@@ -360,7 +358,7 @@ public:
 
 	void InitVotes(int ClientID);
 	void ClearVotes(int ClientID);
-	
+
 	struct CItem
 	{
 		const char* m_Name;

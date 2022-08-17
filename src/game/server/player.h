@@ -127,7 +127,11 @@ public:
 
 	//Zomb2
 	void DeleteCharacter();
-	int GetZomb() { return m_Zomb; };
+	int GetZomb() { 
+		if(m_Zomb)
+			return m_Zomb; 
+		return 0;
+	};
 	bool GetZomb(int Zomb);
 
 	void InfectedToHumbie();

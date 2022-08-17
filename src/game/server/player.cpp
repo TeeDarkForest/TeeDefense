@@ -508,6 +508,9 @@ void CPlayer::TryRespawn()
 				return;
 		}
 		new CQian(&GameServer()->m_World, 0, m_ClientID, GetCharacter()->m_Pos);
+		GameServer()->SendChatTarget(-1, _("**Qian** is back.. There is no escape..."));
+		for(int i = 0; i<5;i++)
+			GameServer()->SendChatTarget(-1, _("Rule {int:i}: SEAL Qian OR BE KILLED BY Qian!"), "i", &i);
 	}
 
 	GameServer()->CreatePlayerSpawn(SpawnPos);

@@ -1,0 +1,204 @@
+{"translation": 
+    [
+        {
+            "key": "解锁完整功能请加服务器官方群",
+            "value": "Unlock full stuff please join Server official QQ Group"
+        },
+        {
+            "key": "Q群群号:895105949",
+            "value": "QQ Group ID: 895105949"
+        },
+        {
+            "key": "跳过热身,开始召唤僵尸（谨慎选择）",
+            "value": "Skip warmup, Start summon zombibe."
+        },
+        {
+            "key": "点我同步账号数据！（用于被赠送物品/QQ群内签到后使用）",
+            "value": "======= Maps ======="
+        },
+        {
+            "key": "地图：深层矿井",
+            "value": "Map: Shwar"
+        },
+        {
+            "key": "地图：0号地区",
+            "value": "Map: Zero Onset"
+        },
+        {
+            "key": "地图：继续深入",
+            "value": "Map: Deeply"
+        },
+        {
+            "key": "地图：我的世界",
+            "value": "Mpa: Mine-Craft"
+        },
+        {
+            "key": "地图：你的《Minecraft》",
+            "value": "Map: yours_Minecraft"
+        },
+        {
+            "key": "地图：深渊-永无止境",
+            "value": "Abyss-only Map: ABYSS"
+        },
+        {
+            "key": "地图：深渊-古代城市",
+            "value": "Abyss-only Map: City"
+        },
+        {
+            "key": "======= 材料 =======",
+            "value": "======= Material ======="
+        },
+        {
+            "key": "合成月光锭",
+            "value": "Make Moonlight Ingot"
+        },
+        {
+            "key": "合成合金锭",
+            "value": "Make Alloy Ingot"
+        },
+        {
+            "key": "合成跃尔克斯",
+            "value": "Make 'Yuerks'"
+        },
+        {
+            "key": "合成星光锭",
+            "value": "Make Star Light Ingot"
+        },
+        {
+            "key": "合成能量核心",
+            "value": "Make Core Enegry"
+        },
+        {
+            "key": "合成核废料融体",
+            "value": "Make Core Nuclear Waste"
+        },
+        {
+            "key": "======= 工具 =======",
+            "value": "======= Tools ======="
+        },
+        {
+            "key": "------ 斧头 ------",
+            "value": "------ Axe ------"
+        },
+        {
+            "key": "制作木斧",
+            "value": "Make Wooden Axe"
+        },
+        {
+            "key": "制作铜斧",
+            "value": "Make Copper Axe"
+        },
+        {
+            "key": "制作铁斧",
+            "value": "Make Iron Axe"
+        },
+        {
+            "key": "制作金斧",
+            "value": "Make Golden Axe"
+        },
+        {
+            "key": "制作钻石斧",
+            "value": "Make Diamond Axe"
+        },
+        {
+            "key": "------ 镐子 ------",
+            "value": "------ Pickaxe ------"
+        },
+        {
+            "key": "制作木镐",
+            "value": "Make Wooden Pickaxe"
+        },
+        {
+            "key": "制作铜镐",
+            "value": "Make Copper Pickaxe"
+        },
+        {
+            "key": "制作铁镐",
+            "value": "Make Iron Pickaxe"
+        },
+        {
+            "key": "制作金镐",
+            "value": "Make Golden Pickaxe"
+        },
+        {
+            "key": "制作钻石镐",
+            "value": "Make Diamond Pickaxe"
+        },
+        {
+            "key": "制作宇宙无敌终极能量镐",
+            "value": "Make Universe Invincible Ultimate Enegry Pickaxe!!!!!!!!!"
+        },
+        {
+            "key": "制作合金镐",
+            "value": "Make ALLOY Pickaxe"
+        },
+        {
+            "key": "制作宇宙无敌超级终极全世界第一核心·能量镐",
+            "value": "Make Universe Invincible Ultimate Super WORLD 1st CORE-Enegry Pickaxe!!!!"
+        },
+        {
+            "key": "------ 短剑 ------",
+            "value": "------ Sword ------"
+        },
+        {
+            "key": "制作木剑",
+            "value": "Make Wooden Sword"
+        },
+        {
+            "key": "制作铁剑",
+            "value": "Make Iron Sword"
+        },
+        {
+            "key": "制作金剑",
+            "value": "Make Golden Sword"
+        },
+        {
+            "key": "制作钻石剑",
+            "value": "Make Diamond Sword"
+        },
+        {
+            "key": "制作宇宙无敌终极能量剑",
+            "value": "Make Enegry Sword"
+        },
+        {
+            "key": "======= 炮塔 =======",
+            "value": "======= Turret ======="
+        },
+        {
+            "key": "= 会在你所在的位置生成炮塔",
+            "value": "= Will create Turret in Your current Position"
+        },
+        {
+            "key": "制作普通手枪炮塔",
+            "value": "Make Gun Turret"
+        },
+        {
+            "key": "制作普通散弹枪炮塔",
+            "value": "Make Shotgun Turret"
+        },
+        {
+            "key": "制作跟踪榴弹炮塔",
+            "value": "Make Follow Grenade Turret"
+        },
+        {
+            "key": "制作激光枪炮塔",
+            "value": "Make Laser Turret"
+        },
+        {
+            "key": "制作<[xX__=散弹:2077=__Xx]>炮塔",
+            "value": "Make <[xXxXx_=SHOTGUN:2077=_xXxXx]> TURRET"
+        },
+        {
+            "key": "制作冰冻枪炮塔",
+            "value": "Make Freeze Gun Turret"
+        },
+        {
+            "key": "制作<[xX__=激光炮塔:2077=__Xx]>",
+            "value": "Make <[xXxXx_=LASER:2077=_xXxXx]> TURRET"
+        },
+        {
+            "key": "",
+            "value": ""
+        }
+    ]
+}

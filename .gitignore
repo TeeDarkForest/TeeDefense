@@ -97,7 +97,6 @@ tags
 *.exe
 *.fifo
 *.filters
-*.json
 *.lnk
 *.log
 *.opensdf

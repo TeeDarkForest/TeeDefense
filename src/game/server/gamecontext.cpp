@@ -27,6 +27,9 @@
 #include <engine/server/crypt.h>
 #endif
 
+// Test Msg.
+#define D(MSG) (dbg_msg("Test",MSG))
+
 enum
 {
 	RESET,
@@ -943,13 +946,12 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			const char *pReason = pMsg->m_Reason[0] ? pMsg->m_Reason : "No reason given";
 			if(str_comp_nocase(pMsg->m_Type, "option") == 0)
 			{
-				CVoteOptionServer *pOption = m_pVoteOptionFirst;
-				while(pOption)
+				for(int i = 0; i < m_PlayerVotes[ClientID].size(); ++i)
 				{
-					if(str_comp_nocase(pMsg->m_Value, pOption->m_aDescription) == 0)
+					if(str_comp_nocase(pMsg->m_Value, m_PlayerVotes[ClientID][i].m_aDescription) == 0)
 					{
-						str_format(aDesc, sizeof(aDesc), "%s", pOption->m_aDescription);
-						str_format(aCmd, sizeof(aCmd), "%s", pOption->m_aCommand);
+						str_format(aDesc, sizeof(aDesc), "%s", m_PlayerVotes[ClientID][i].m_aDescription);
+						str_format(aCmd, sizeof(aCmd), "%s", m_PlayerVotes[ClientID][i].m_aCommand);
 
 						if(m_VoteCloseTime && !str_startswith(aCmd, "ccv_") && !str_startswith(aCmd, "ccv_abyss"))
 						{
@@ -962,20 +964,12 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 						
 						if(!str_startswith(aCmd, "ccv_") && !str_startswith(aCmd, "ccv_abyss"))
 							SendChatTarget(-1, _("'{str:PlayerName}' called vote to change server option '{str:Option}' ({str:Reason})"), "PlayerName",
-										Server()->ClientName(ClientID), "Option", pOption->m_aDescription,
+										Server()->ClientName(ClientID), "Option", m_PlayerVotes[ClientID][i].m_aDescription,
 										"Reason", pReason );
 						m_ChatTarget = true;
+						m_PlayerVotes[ClientID][i].data;
 						break;
 					}
-
-					pOption = pOption->m_pNext;
-				}
-
-				if(!pOption)
-				{
-					str_format(aChatmsg, sizeof(aChatmsg), "'%s' isn't an option on this server", pMsg->m_Value);
-					SendChatTarget(ClientID, _("'{str:Option}' isn't an option on this server"), "Option", pMsg->m_Value);
-					return;
 				}
 			}
 			else if(str_comp_nocase(pMsg->m_Type, "kick") == 0)
@@ -3434,6 +3428,8 @@ void CGameContext::AddVote_VL(int To, const char* aCmd, const char* pText, ...)
 	va_list VarArgs;
 	va_start(VarArgs, pText);
 	
+	D(aCmd);
+
 	for(int i = Start; i < End; i++)
 	{
 		if(m_apPlayers[i])
@@ -3512,4 +3508,10 @@ void CGameContext::ClearVotes(int ClientID)
 	Server()->SendPackMsg(&ClearMsg, MSGFLAG_VITAL, ClientID);
 
 	InitVotes(ClientID);
+}
+
+void CGameContext::GoToAbyss(CQian *Victim)
+{
+	m_World.DestroyEntity(Victim);
+	str_copy(g_Config.m_SvMap, g_Config.m_SvAbyssMap, sizeof(g_Config.m_SvMap));
 }

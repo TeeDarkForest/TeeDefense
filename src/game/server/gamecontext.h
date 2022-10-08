@@ -396,6 +396,7 @@ public:
 
 	bool QianIsAlive();
 	bool IsAbyss();
+	void GoToAbyss(CQian *Victim);
 };
 
 inline Mask128 CmaskAll() { return Mask128(); }

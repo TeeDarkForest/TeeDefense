@@ -181,9 +181,7 @@ void CQian::Reset()
 
     GetEyes()->Reset();
     
-    str_copy(g_Config.m_SvMap, g_Config.m_SvAbyssMap, sizeof(g_Config.m_SvMap));
-
-    GameServer()->m_World.DestroyEntity(this);
+    GameServer()->GoToAbyss(this);
 }
 
 void CQian::PonytailSkill()

@@ -23,6 +23,7 @@
 #include <vector>
 #include "item.h"
 
+#include "entities/giga-Qian.h"
 #ifdef CONF_SQL
 #include "OnTime/sql.h"
 #endif

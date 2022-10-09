@@ -41,23 +41,23 @@ typedef unsigned __int64 uint64_t;
 
 /*
 	Tick
-		Game Context (CGameContext::tick)
-			Game World (GAMEWORLD::tick)
-				Reset world if requested (GAMEWORLD::reset)
-				All entities in the world (ENTITY::tick)
-				All entities in the world (ENTITY::tick_defered)
-				Remove entities marked for deletion (GAMEWORLD::remove_entities)
-			Game Controller (GAMECONTROLLER::tick)
+		Game Context (CGameContext::Tick)
+			Game World (CGameWorld::Tick)
+				Reset world if requested (CGameWorld::Reset)
+				All entities in the world (CEntity::Tick)
+				All entities in the world (CEntity::TickDefered)
+				Remove entities marked for deletion (CGameWorld::RemoveEntity)
+			Game Controller (CGameController::Tick)
 			All players (CPlayer::tick)
 
 
 	Snap
-		Game Context (CGameContext::snap)
-			Game World (GAMEWORLD::snap)
-				All entities in the world (ENTITY::snap)
-			Game Controller (GAMECONTROLLER::snap)
-			Events handler (EVENT_HANDLER::snap)
-			All players (CPlayer::snap)
+		Game Context (CGameContext::Snap)
+			Game World (CGameWorld::Snap)
+				All Entities in the world (CEntity::Snap)
+			Game Controller (CGameController::Snap)
+			Events handler (CEventHandler::Snap)
+			All players (CPlayer::Snap)
 
 */
 
@@ -225,7 +225,7 @@ public:
 	CEventHandler m_Events;
 	CPlayer *m_apPlayers[MAX_CLIENTS];
 
-	IGameController *m_pController;
+	CGameController *m_pController;
 	CGameWorld m_World;
 
 	// helper functions

@@ -627,8 +627,6 @@ set_glob(GAME_SERVER GLOB_RECURSE src/game/server
   gamecontext.h
   gamecontroller.cpp
   gamecontroller.h
-  gamemodes/mod.cpp
-  gamemodes/mod.h
   gameworld.cpp
   gameworld.h
   player.cpp

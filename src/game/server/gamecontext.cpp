@@ -10,7 +10,6 @@
 #include <game/version.h>
 #include <game/collision.h>
 #include <game/gamecore.h>
-#include "gamemodes/mod.h"
 #include "entities/turret.h"
 
 #include "item.h"
@@ -2185,7 +2184,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	m_Layers.Init(Kernel());
 	m_Collision.Init(&m_Layers);
 	
-	m_pController = new CGameControllerMOD(this); 
+	m_pController = new CGameController(this); 
 
 	// create all entities from the game layer
 	CMapItemLayerTilemap *pTileMap = m_Layers.GameLayer();

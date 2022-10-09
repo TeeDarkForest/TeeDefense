@@ -19,7 +19,7 @@ typedef unsigned __int64 uint64_t;
 		Controls the main game logic. Keeping track of team and player score,
 		winning conditions and specific game logic.
 */
-class IGameController
+class CGameController
 {
 	vec2 m_aaSpawnPoints[3][128];
 	int m_aNumSpawnPoints[3];
@@ -75,8 +75,8 @@ public:
 	bool IsTeamplay() const;
 	bool IsGameOver() const { return m_GameOverTick != -1; }
 
-	IGameController(class CGameContext *pGameServer);
-	virtual ~IGameController();
+	CGameController(class CGameContext *pGameServer);
+	virtual ~CGameController();
 
 	virtual void DoWincheck();
 
@@ -169,6 +169,7 @@ public:
 	int GetZombieReihenfolge(int wavedrittel);
 
 	int m_CKsID;
+	int m_LastActivePlayers;
 };
 
 #endif

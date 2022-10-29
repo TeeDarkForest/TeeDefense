@@ -13,7 +13,7 @@ static const char GAME_RELEASE_VERSION[8] = "0.6.4";
 #define MOD_VERSION "v0.2.5"
 #define MOD_AUTHORS "FlowerFell-Sans, EDreemurr, xy_cloud"
 #define MOD_CREDITS "FlowerFell-Sans, EDreemurr, xy_cloud"
-#define MOD_THANKS "necropotame, GutZuFusss, AssassinTee, StarOnTheSky"
+#define MOD_THANKS "necropotame, GutZuFusss, AssassinTee, StarOnTheSky, Kurosio"
 #define MOD_SOURCES "https://github.com/TeeDarkForest/TeeDefense"
 #endif
 #endif

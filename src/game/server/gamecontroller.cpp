@@ -567,12 +567,12 @@ void CGameController::OnCharacterSpawn(class CCharacter *pChr)
 {
 	// default health
 	if(GameServer()->IsAbyss())
-		pChr->IncreaseHealth(10*50);
+		pChr->IncreaseHealth(25);
 	else
 		pChr->IncreaseHealth(10);
 	if(pChr->GetPlayer()->GetTeam() == TEAM_HUMAN)
 	{
-		pChr->IncreaseHealth(100);
+		pChr->IncreaseHealth(5000);
 		pChr->GiveWeapon(WEAPON_HAMMER, -1);
 		pChr->GiveWeapon(WEAPON_GUN, 10);
 	}

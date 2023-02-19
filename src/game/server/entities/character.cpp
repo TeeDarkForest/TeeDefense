@@ -7,6 +7,7 @@
 
 #include "character.h"
 #include "laser.h"
+#include "danger-laser.h"
 #include "projectile.h"
 #include "lightning.h"
 #include "turret.h"
@@ -868,7 +869,7 @@ bool CCharacter::IncreaseHealth(int Amount)
 {
 	int maxHealth;
 	if(!m_pPlayer->GetZomb())
-		maxHealth = 25;
+		maxHealth = 5000;
 	else
 		maxHealth = 500000;
 	if(m_Health >= maxHealth)

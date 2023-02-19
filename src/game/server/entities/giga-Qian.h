@@ -61,6 +61,12 @@ public:
             int m_IDs[16];
             CQian *pOwnerQian;
             int m_Degres;
+
+            int m_Breath;
+            bool m_BreathType;
+            vec2 m_Vel;
+
+            int m_PointID;
     };
 
     public:

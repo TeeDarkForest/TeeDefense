@@ -3437,8 +3437,6 @@ void CGameContext::AddVote_VL(int To, const char* aCmd, const char* pText, ...)
 	
 	va_list VarArgs;
 	va_start(VarArgs, pText);
-	
-	D(aCmd);
 
 	for(int i = Start; i < End; i++)
 	{

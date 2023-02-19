@@ -1592,7 +1592,7 @@ void CServer::UpdateRegisterServerInfo()
 			   JsonBool(g_Config.m_Password[0]),
 			   EscapeJson(aGameType, sizeof(aGameType), GameServer()->GameType()),
 			   EscapeJson(aName, sizeof(aName), g_Config.m_SvName),
-			   EscapeJson(aMapName, sizeof(aMapName), "LastDay"),
+			   EscapeJson(aMapName, sizeof(aMapName), g_Config.m_SvMap),
 			   aMapSha256,
 			   m_CurrentMapSize,
 			   EscapeJson(aVersion, sizeof(aVersion), GameServer()->Version()));

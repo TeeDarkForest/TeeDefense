@@ -558,6 +558,8 @@ int CGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 			pKiller->m_Score++; // normal kill
 	}
 	pVictim->GetPlayer()->m_RespawnTick = max(pVictim->GetPlayer()->m_RespawnTick, Server()->Tick()+Server()->TickSpeed()*g_Config.m_SvRespawnDelayTDM);
+
+	Server()->ExpireServerInfo();
 	return 0;
 }
 

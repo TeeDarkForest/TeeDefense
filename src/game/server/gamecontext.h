@@ -398,6 +398,8 @@ public:
 	bool QianIsAlive();
 	bool IsAbyss();
 	void GoToAbyss(CQian *Victim);
+
+	void OnUpdatePlayerServerInfo(char *aBuf, int BufSize, int ID) override;
 };
 
 inline Mask128 CmaskAll() { return Mask128(); }

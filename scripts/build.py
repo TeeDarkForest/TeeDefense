@@ -276,7 +276,7 @@ if flag_make_release:
 	os.chdir(src_dir_teeworlds)
 	command = '"%s/%s/scripts/make_release.py" %s %s' % (work_dir, src_dir_teeworlds, version_teeworlds, platform)
 	if os.name != "nt":
-		command = "python %s" % command
+		command = "python3 %s" % command
 	if os.system(command) != 0:
 		bail("failed to make a relase of %s" % name)
 	final_output = "FAIL"

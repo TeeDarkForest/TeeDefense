@@ -21,6 +21,11 @@ inline float sign(float f)
 	return f<0.0f?-1.0f:1.0f;
 }
 
+inline int round_truncate(float f)
+{
+	return (int)f;
+}
+
 inline int round_to_int(float f)
 {
 	if(f > 0)
@@ -37,7 +42,6 @@ inline T mix(const T a, const T b, TB amount)
 float random_float();
 bool random_prob(float f);
 int random_int(int Min, int Max);
-int random_distribution(double* pProb, double* pProb2);
 inline float frandom() { return rand()/(float)(RAND_MAX); }
 
 // float to fixed

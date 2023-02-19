@@ -167,6 +167,8 @@ public:
 	virtual void DemoRecorder_HandleAutoStart() = 0;
 	virtual bool DemoRecorder_IsRecording() = 0;
 
+	virtual void ExpireServerInfo() = 0;
+
 	virtual const char* GetClientLanguage(int ClientID) = 0;
 	virtual void SetClientLanguage(int ClientID, const char* pLanguage) = 0;
 	virtual int* GetIdMap(int ClientID) = 0;
@@ -206,6 +208,8 @@ public:
 	virtual class CLayers *Layers() = 0;
 
 	virtual bool GetPaused() = 0;
+
+	virtual void OnUpdatePlayerServerInfo(char *aBuf, int BufSize, int ID) = 0;
 public:
 	bool m_NeedResetTowers;
 };

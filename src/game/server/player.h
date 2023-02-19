@@ -70,7 +70,7 @@ public:
 	int m_LastKill;
 
 	// TODO: clean this up
-	struct
+	struct CTeeInfo
 	{
 		char m_SkinName[64];
 		int m_UseCustomColor;

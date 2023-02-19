@@ -26,6 +26,8 @@
 #include <engine/server/crypt.h>
 #endif
 
+#include <engine/shared/json.h>
+
 // Test Msg.
 #define D(MSG) (dbg_msg("Test",MSG))
 
@@ -770,18 +772,20 @@ void CGameContext::OnClientEnter(int ClientID)
 	str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' team=%d", ClientID, Server()->ClientName(ClientID), m_apPlayers[ClientID]->GetTeam());
 	Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 
-	if(str_comp(Server()->ClientName(ClientID), "FlowerFell-Sans") == 0)
+	if(str_comp(Server()->ClientName(ClientID), "FlowerFell-Sans") == 0 || str_comp(Server()->ClientName(ClientID), "Flower") == 0)
 	{
-		SendChatTarget(-1, _("欢迎模式作者FlowerFell-Sans进入服务器!"));
+		SendChatTarget(-1, _("欢迎模式作者FlowerFell-Sans | Flower 进入服务器!"));
 	}
-	if(str_comp(Server()->ClientName(ClientID), "EDreemurr") == 0)
+	if(str_comp(Server()->ClientName(ClientID), "ResetPower") == 0 || str_comp(Server()->ClientName(ClientID), "RemakePower") == 0)
 	{
-		SendChatTarget(-1, _("欢迎模式作者EDreemurr进入服务器!"));
+		SendChatTarget(-1, _("欢迎模式作者ResetPower | RemakePower进入服务器!"));
 	}
 
 	m_VoteUpdate = true;
 
 	ClearVotes(ClientID);
+
+	Server()->ExpireServerInfo();
 }
 
 void CGameContext::OnClientConnected(int ClientID)
@@ -815,6 +819,8 @@ void CGameContext::OnClientConnected(int ClientID)
 	CNetMsg_Sv_Motd Msg;
 	Msg.m_pMessage = g_Config.m_SvMotd;
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
+
+	Server()->ExpireServerInfo();
 }
 
 void CGameContext::OnClientDrop(int ClientID, const char *pReason)
@@ -833,6 +839,8 @@ void CGameContext::OnClientDrop(int ClientID, const char *pReason)
 		if(m_apPlayers[i] && m_apPlayers[i]->m_SpectatorID == ClientID)
 			m_apPlayers[i]->m_SpectatorID = SPEC_FREEVIEW;
 	}
+
+	Server()->ExpireServerInfo();
 }
 
 void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
@@ -942,12 +950,12 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			char aCmd[VOTE_CMD_LENGTH] = {0};
 			bool m_ChatTarget = false;
 			CNetMsg_Cl_CallVote *pMsg = (CNetMsg_Cl_CallVote *)pRawMsg;
-			const char *pReason = pMsg->m_Reason[0] ? pMsg->m_Reason : "No reason given";
-			if(str_comp_nocase(pMsg->m_Type, "option") == 0)
+			const char *pReason = pMsg->m_pReason[0] ? pMsg->m_pReason : "No reason given";
+			if(str_comp_nocase(pMsg->m_pType, "option") == 0)
 			{
 				for(int i = 0; i < m_PlayerVotes[ClientID].size(); ++i)
 				{
-					if(str_comp_nocase(pMsg->m_Value, m_PlayerVotes[ClientID][i].m_aDescription) == 0)
+					if(str_comp_nocase(pMsg->m_pValue, m_PlayerVotes[ClientID][i].m_aDescription) == 0)
 					{
 						str_format(aDesc, sizeof(aDesc), "%s", m_PlayerVotes[ClientID][i].m_aDescription);
 						str_format(aCmd, sizeof(aCmd), "%s", m_PlayerVotes[ClientID][i].m_aCommand);
@@ -971,7 +979,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					}
 				}
 			}
-			else if(str_comp_nocase(pMsg->m_Type, "kick") == 0)
+			else if(str_comp_nocase(pMsg->m_pType, "kick") == 0)
 			{
 				if(!g_Config.m_SvVoteKick)
 				{
@@ -994,7 +1002,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					}
 				}
 
-				int KickID = str_toint(pMsg->m_Value);
+				int KickID = str_toint(pMsg->m_pValue);
 				if(KickID < 0 || KickID >= MAX_CLIENTS || !m_apPlayers[KickID])
 				{
 					SendChatTarget(ClientID, _("Invalid client id to kick"));
@@ -1029,7 +1037,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					str_format(aCmd, sizeof(aCmd), "ban %s %d Banned by vote", aAddrStr, g_Config.m_SvVoteKickBantime);
 				}
 			}
-			else if(str_comp_nocase(pMsg->m_Type, "spectate") == 0)
+			else if(str_comp_nocase(pMsg->m_pType, "spectate") == 0)
 			{
 				if(!g_Config.m_SvVoteSpectate)
 				{
@@ -1037,7 +1045,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					return;
 				}
 
-				int SpectateID = str_toint(pMsg->m_Value);
+				int SpectateID = str_toint(pMsg->m_pValue);
 				if(SpectateID < 0 || SpectateID >= MAX_CLIENTS || !m_apPlayers[SpectateID] || m_apPlayers[SpectateID]->GetTeam() == TEAM_SPECTATORS)
 				{
 					SendChatTarget(ClientID, _("Invalid client id to move"));
@@ -1194,6 +1202,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			pPlayer->m_TeeInfos.m_ColorBody = pMsg->m_ColorBody;
 			pPlayer->m_TeeInfos.m_ColorFeet = pMsg->m_ColorFeet;
 			m_pController->OnPlayerInfoChange(pPlayer);
+
+			Server()->ExpireServerInfo();
 		}
 		else if (MsgID == NETMSGTYPE_CL_EMOTICON && !m_World.m_Paused)
 		{
@@ -1313,6 +1323,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			pPlayer->m_IsReady = true;
 			CNetMsg_Sv_ReadyToEnter m;
 			Server()->SendPackMsg(&m, MSGFLAG_VITAL|MSGFLAG_FLUSH, ClientID);
+
+			Server()->ExpireServerInfo();
 		}
 	}
 }
@@ -2203,7 +2215,6 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 				case TILE_SOLID:
 				case TILE_NOHOOK:
 				{
-					dbg_msg("s","%d", Collision()->GetRealTile(vec2(Pos.x, Pos.y-32	)));
 					if(!Collision()->CheckPoint(Pos.x, Pos.y+32) || !Collision()->CheckPoint(Pos.x, Pos.y-32) || !Collision()->CheckPoint(Pos.x+32, Pos.y) || !Collision()->CheckPoint(Pos.x-32, Pos.y))
 						CreateGround(Pos);
 				}
@@ -3513,4 +3524,46 @@ void CGameContext::GoToAbyss(CQian *Victim)
 {
 	m_World.DestroyEntity(Victim);
 	str_copy(g_Config.m_SvMap, g_Config.m_SvAbyssMap, sizeof(g_Config.m_SvMap));
+}
+
+void CGameContext::OnUpdatePlayerServerInfo(char *aBuf, int BufSize, int ID)
+{
+	if(!m_apPlayers[ID])
+		return;
+
+	char aCSkinName[64];
+
+	CPlayer::CTeeInfo &TeeInfo = m_apPlayers[ID]->m_TeeInfos;
+
+	char aJsonSkin[400];
+	aJsonSkin[0] = '\0';
+
+	// 0.6
+	if(TeeInfo.m_UseCustomColor)
+	{
+		str_format(aJsonSkin, sizeof(aJsonSkin),
+			"\"name\":\"%s\","
+			"\"color_body\":%d,"
+			"\"color_feet\":%d",
+			EscapeJson(aCSkinName, sizeof(aCSkinName), TeeInfo.m_SkinName),
+			TeeInfo.m_ColorBody,
+			TeeInfo.m_ColorFeet);
+	}
+	else
+	{
+		str_format(aJsonSkin, sizeof(aJsonSkin),
+			"\"name\":\"%s\"",
+			EscapeJson(aCSkinName, sizeof(aCSkinName), TeeInfo.m_SkinName));
+	}
+	
+
+	str_format(aBuf, BufSize,
+		",\"skin\":{"
+		"%s"
+		"},"
+		"\"afk\":%s,"
+		"\"team\":%d",
+		aJsonSkin,
+		JsonBool(false),
+		m_apPlayers[ID]->GetTeam());
 }

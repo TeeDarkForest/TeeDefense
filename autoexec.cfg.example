@@ -7,6 +7,6 @@ xc_password
 ed_password
 
 sv_max_clients 48
-sv_register 1
+sv_register ipv4
 
 sv_timelimit 0

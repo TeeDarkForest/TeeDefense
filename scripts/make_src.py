@@ -34,7 +34,7 @@ os.chdir(root_dir)
 if 1:
 	os.system("svn export svn://svn.teeworlds.com/teeworlds/%s teeworlds" % svn_tree)
 	os.chdir("teeworlds")
-	os.system("python scripts/make_release.py %s src" % version)
+	os.system("python3 scripts/make_release.py %s src" % version)
 	os.chdir(root_dir)
 	for f in os.listdir("teeworlds"):
 		if "teeworlds" in f and "src" in f and (".zip" in f or ".tar.gz" in f):

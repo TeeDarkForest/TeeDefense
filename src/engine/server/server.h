@@ -3,8 +3,15 @@
 #ifndef ENGINE_SERVER_SERVER_H
 #define ENGINE_SERVER_SERVER_H
 
-#include <engine/server.h>
+#include <base/hash.h>
 
+#include <engine/server.h>
+#include <engine/shared/uuid_manager.h>
+
+
+#include <list>
+#include <memory>
+#include <vector>
 
 class CSnapIDPool
 {
@@ -64,6 +71,7 @@ class CServer : public IServer
 	class IGameServer *m_pGameServer;
 	class IConsole *m_pConsole;
 	class IStorage *m_pStorage;
+	class IRegister *m_pRegister;
 public:
 	class IGameServer *GameServer() { return m_pGameServer; }
 	class IConsole *Console() { return m_pConsole; }
@@ -157,6 +165,7 @@ public:
 	//static NETADDR4 master_server;
 
 	char m_aCurrentMap[64];
+	SHA256_DIGEST m_CurrentMapSha256;
 	unsigned m_CurrentMapCrc;
 	unsigned char *m_pCurrentMapData;
 	int m_CurrentMapSize;
@@ -166,10 +175,9 @@ public:
 	int m_ServerInfoNumRequests;
 
 	CDemoRecorder m_DemoRecorder;
-	CRegister m_Register;
-	CMapChecker m_MapChecker;
 
 	CServer();
+	~CServer();
 
 	int TrySetClientName(int ClientID, const char *pName);
 
@@ -199,16 +207,17 @@ public:
 	bool ClientIngame(int ClientID);
 	int MaxClients() const;
 
-	virtual int SendMsg(CMsgPacker *pMsg, int Flags, int ClientID);
-	int SendMsgEx(CMsgPacker *pMsg, int Flags, int ClientID, bool System);
+	int SendMsg(CMsgPacker *pMsg, int Flags, int ClientID) override;
 
 	void DoSnapshot();
 	
 	static int ClientRejoinCallback(int ClientID, void *pUser);
-	static int NewClientCallback(int ClientID, void *pUser);
+	static int NewClientCallback(int ClientID, void *pUser, bool Sixup);
 	static int NewClientNoAuthCallback(int ClientID, void *pUser);
 	static int DelClientCallback(int ClientID, const char *pReason, void *pUser);
 
+	void SendRconType(int ClientID, bool UsernameReq);
+	void SendCapabilities(int ClientID);
 	void SendMap(int ClientID);
 	void SendConnectionReady(int ClientID);
 	void SendRconLine(int ClientID, const char *pLine);
@@ -220,16 +229,43 @@ public:
 
 	void ProcessClientPacket(CNetChunk *pPacket);
 
-	void SendServerInfoConnless(const NETADDR *pAddr, int Token, int Type);
-	void SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool SendClients);
-	void UpdateServerInfo();
+	class CCache
+	{
+	public:
+		class CCacheChunk
+		{
+		public:
+			CCacheChunk(const void *pData, int Size);
+			CCacheChunk(const CCacheChunk &) = delete;
 
-	void PumpNetwork();
+			std::vector<uint8_t> m_vData;
+		};
+
+		std::list<CCacheChunk> m_Cache;
+
+		CCache();
+		~CCache();
+
+		void AddChunk(const void *pData, int Size);
+		void Clear();
+	};
+	CCache m_aServerInfoCache[3 * 2];
+	CCache m_aSixupServerInfoCache[2];
+	bool m_ServerInfoNeedsUpdate;
+
+	void ExpireServerInfo() override;
+	void CacheServerInfo(CCache *pCache, int Type, bool SendClients);
+	void SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool SendClients);
+	bool RateLimitServerInfoConnless();
+	void SendServerInfoConnless(const NETADDR *pAddr, int Token, int Type);
+	void UpdateRegisterServerInfo();
+	void UpdateServerInfo(bool Resend = false);
+
+	void PumpNetwork(bool PacketWaiting);
 
 	char *GetMapName();
 	int LoadMap(const char *pMapName);
 
-	void InitRegister(CNetServer *pNetServer, IEngineMasterServer *pMasterServer, IConsole *pConsole);
 	int Run();
 
 	static void ConKick(IConsole::IResult *pResult, void *pUser);

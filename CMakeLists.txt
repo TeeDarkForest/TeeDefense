@@ -263,6 +263,7 @@ find_package(Threads)
 find_package(Wavpack)
 find_package(MaxMindDB REQUIRED)
 find_package(OpenSSL)
+find_package(Curl)
 if(MYSQL)
   find_package(MySQL)
 else()
@@ -299,6 +300,7 @@ function(show_dependency_status OUTPUT_NAME NAME)
   endif()
 endfunction()
 
+show_dependency_status("Curl" CURL)
 if(SERVER_COMPILE)
   show_dependency_status("OpenSSL" OPENSSL FALSE)
 endif()
@@ -443,10 +445,18 @@ generate_source("src/game/generated/server_data.h" "server_content_header")
 
 # Sources
 set_glob(BASE GLOB_RECURSE src/base
+  color.h
   detect.h
+  hash_bundled.cpp
+  hash_ctxt.h
+  hash_libtomcrypt.cpp
+  hash_openssl.cpp
+  hash.cpp
+  hash.h
+  lock_scope.h
   math.cpp
   math.h
-  system.c
+  system.cpp
   system.h
   tl/algorithm.h
   tl/allocator.h
@@ -475,6 +485,7 @@ set_glob(ENGINE_INTERFACE GLOB src/engine
   message.h
   server.h
   storage.h
+  uuid.h
 )
 set_glob(ENGINE_SHARED GLOB src/engine/shared
   compression.cpp
@@ -493,17 +504,19 @@ set_glob(ENGINE_SHARED GLOB src/engine/shared
   engine.cpp
   filecollection.cpp
   filecollection.h
+  global_uuid_manager.cpp
+  http.cpp
+  http.h
   huffman.cpp
   huffman.h
   jobs.cpp
   jobs.h
+  json.cpp
+  json.h
   kernel.cpp
   linereader.cpp
   linereader.h
   map.cpp
-  mapchecker.cpp
-  mapchecker.h
-  masterserver.cpp
   memheap.cpp
   memheap.h
   message.h
@@ -511,18 +524,30 @@ set_glob(ENGINE_SHARED GLOB src/engine/shared
   netban.h
   network.cpp
   network.h
+  network_client.cpp
   network_conn.cpp
   network_console.cpp
   network_console_conn.cpp
   network_server.cpp
+  network_stun.cpp
   packer.cpp
   packer.h
+  protocol_ex_msgs.h
+  protocol_ex.cpp
+  protocol_ex.h
   protocol.h
   ringbuffer.cpp
   ringbuffer.h
   snapshot.cpp
   snapshot.h
   storage.cpp
+  stun.cpp
+  stun.h
+  teehistorian_ex_chunks.h
+  teehistorian_ex.cpp
+  teehistorian_ex.h
+  uuid_manager.cpp
+  uuid_manager.h
 )
 set(ENGINE_GENERATED_SHARED src/game/generated/protocol.cpp src/game/generated/protocol.h)
 set_glob(GAME_SHARED GLOB src/game
@@ -535,6 +560,9 @@ set_glob(GAME_SHARED GLOB src/game
   localization.cpp
   localization.h
   mapitems.h
+  mapitems_ex_types.h
+  mapitems_ex.cpp
+  mapitems_ex.h
   tuning.h
   variables.h
   version.h
@@ -558,6 +586,7 @@ set(LIBS
   ICU::i18n
   ICU::uc
   ${CRYPTO_LIBRARIES}
+  ${CURL_LIBRARIES}
 )
 
 # Targets
@@ -1015,6 +1044,7 @@ foreach(target ${TARGETS_OWN})
   target_compile_definitions(${target} PRIVATE $<$<CONFIG:Debug>:CONF_DEBUG>)
   target_include_directories(${target} PRIVATE ${CURL_INCLUDE_DIRS})
   target_include_directories(${target} PRIVATE ${ZLIB_INCLUDE_DIRS})
+  target_include_directories(${target} PRIVATE ${CURL_INCLUDE_DIRS})
 
   if(MYSQL)
     target_compile_definitions(${target} PRIVATE CONF_SQL)

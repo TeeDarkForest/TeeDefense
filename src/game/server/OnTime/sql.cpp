@@ -1,5 +1,3 @@
-
-#ifdef CONF_SQL
 /* SQL class 0.5 by Sushi */
 /* SQL class 0.6 by FFS   */
 #include "../gamecontext.h"
@@ -735,4 +733,3 @@ void CSQL::UpdateCK(int ClientID, const char* CK, const char* Num)
 	pthread_detach((pthread_t)update_ck_thread);
 #endif
 }
-#endif

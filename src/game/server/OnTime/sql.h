@@ -1,4 +1,3 @@
-#ifdef CONF_SQL
 /* SQL Class by Sushi */
 
 #include <engine/shared/protocol.h>
@@ -70,4 +69,3 @@ struct CAccountData
 	
 	bool m_LoggedIn[MAX_CLIENTS];
 };
-#endif

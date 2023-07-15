@@ -147,16 +147,12 @@ void CKs::Picking(int Time, CPlayer *Player)
 	int CID = Player->GetCID();
 	if(m_Health <= 0)
 	{
-		#ifdef CONF_SQL
 		if(Player->LoggedIn)
 		{
 			GameServer()->Sql()->UpdateCK(Player->GetCID(), GetRealNameByType(m_Type), "+1");
 		}
 		else
 			Player->m_Knapsack.m_Resource[GetResourceID(m_Type)]++;
-		#else
-		Player->m_Knapsack.m_Resource[GetResourceID(m_Type)]++;
-		#endif
 		dynamic_string buf;
 		Server()->Localization()->Format_L(buf, Player->GetLanguage(), _(GetNameByType(m_Type)));
 		GameServer()->SendChatTarget(CID, _("You picked up a {str:Resource}"), "Resource", buf.buffer());

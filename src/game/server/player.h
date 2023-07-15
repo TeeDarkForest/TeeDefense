@@ -188,7 +188,6 @@ public:
 	// Check
 	bool PressTab();
 
-	#ifdef CONF_SQL
 	// Account
 	bool LoggedIn;
 	struct
@@ -199,7 +198,6 @@ public:
 
 		
 	} m_AccData;
-	#endif
 
 	void ResetKnapsack();
 	void Logout();

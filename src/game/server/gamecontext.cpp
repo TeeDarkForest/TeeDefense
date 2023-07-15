@@ -22,9 +22,8 @@
 #include "entities/giga-Qian.h"
 
 #include <teeuniverses/components/localization.h>
-#ifdef CONF_SQL
 #include <engine/server/crypt.h>
-#endif
+
 
 #include <engine/shared/json.h>
 
@@ -71,11 +70,9 @@ void CGameContext::Construct(int Resetting, bool ChangeMap)
 	if (Resetting == NO_RESET)
 		m_pVoteOptionHeap = new CHeap();
 
-#ifdef CONF_SQL
 	/* SQL */
 	m_AccountData = new CAccountData;
 	m_Sql = new CSQL(this);
-#endif
 
 	InitItems();
 	InitCrafts();
@@ -127,10 +124,8 @@ void CGameContext::Clear(bool ChangeMap)
 	int NumVoteOptions = m_NumVoteOptions;
 	CTuningParams Tuning = m_Tuning;
 
-#ifdef CONF_SQL
 	delete m_Sql;
 	delete m_AccountData;
-#endif
 
 #ifdef CONF_BOX2D
 	if (m_b2world)
@@ -1067,14 +1062,12 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					MakeItem(ItemName, ClientID);
 				return;
 			}
-#ifdef CONF_SQL
 			else if (Command.find("ccv_sync") == 0)
 			{
 				if (m_apPlayers[ClientID] && GetPlayerChar(ClientID) && GetPlayerChar(ClientID)->IsAlive() && m_apPlayers[ClientID]->LoggedIn)
 					Sql()->SyncAccountData((ClientID));
 				return;
 			}
-#endif
 
 			if (aCmd[0])
 			{
@@ -1871,10 +1864,9 @@ void CGameContext::ConMe(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pThis = (CGameContext *)pUserData;
 	CPlayer *Player = pThis->m_apPlayers[pResult->GetClientID()];
-#ifdef CONF_SQL
+
 	if (!Player->LoggedIn)
 		pThis->SendChatTarget(pResult->GetClientID(), _("[Warning]: If you dont login or register a account, then when you left. you will lose EVERYTHING in this mod!"));
-#endif
 	int ShowResource;
 	dynamic_string buffer;
 	for (int i = 0; i < NUM_RESOURCE; i++)
@@ -2197,11 +2189,10 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("me", "", CFGFLAG_CHAT, ConMe, this, "Show information about the mod");
 	Console()->Register("event", "", CFGFLAG_CHAT, ConCheckEvent, this, "Show information about the mod");
 
-#ifdef CONF_SQL
+
 	Console()->Register("register", "?s?s", CFGFLAG_CHAT, ConRegister, this, "Show information about the mod");
 	Console()->Register("login", "?s?s", CFGFLAG_CHAT, ConLogin, this, "Show information about the mod");
 	Console()->Register("logout", "", CFGFLAG_CHAT, ConLogout, this, "Show information about the mod");
-#endif
 
 	Console()->Chain("sv_motd", ConchainSpecialMotdupdate, this);
 }
@@ -2411,7 +2402,6 @@ bool CGameContext::GetPaused()
 	return m_World.m_Paused;
 }
 
-#ifdef CONF_SQL
 void CGameContext::ConRegister(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -2467,7 +2457,6 @@ void CGameContext::LogoutAccount(int ClientID)
 	pP->Logout();
 	SendChatTarget(pP->GetCID(), _("Logout succesful"));
 }
-#endif
 
 void CGameContext::InitItems()
 {
@@ -2880,7 +2869,7 @@ void CGameContext::InitCrafts()
 	Resource[Abyss_Agar] = 1;
 	Resource[Abyss_LEnegry] = 8;
 	Resource[RESOURCE_ENEGRY] = 1;
-	CreateAbyss("moonlight ingot", m_ItemID, ITYPE_MATERIAL, Abyss_MoonlightIngot, 99, Resource);
+	CreateCraft("moonlight ingot", m_ItemID, ITYPE_MATERIAL, Abyss_MoonlightIngot, 99, Resource);
 
 	ResetResource(Resource);
 	Resource[RESOURCE_IRON] = 5;
@@ -2888,20 +2877,20 @@ void CGameContext::InitCrafts()
 	Resource[RESOURCE_DIAMOND] = 5;
 	Resource[Abyss_Agar] = 5;
 	Resource[RESOURCE_ZOMBIEHEART] = 5;
-	CreateAbyss("alloy", m_ItemID, ITYPE_MATERIAL, Abyss_MoonlightIngot, 99, Resource);
+	CreateCraft("alloy", m_ItemID, ITYPE_MATERIAL, Abyss_MoonlightIngot, 99, Resource);
 
 	ResetResource(Resource);
 	Resource[Abyss_Alloy] = 5;
 	Resource[Abyss_MoonlightIngot] = 3;
 	Resource[Abyss_Agar] = 10;
 	Resource[RESOURCE_ENEGRY] = 1;
-	CreateAbyss("yuerks", m_ItemID, ITYPE_MATERIAL, Abyss_MoonlightIngot, 99, Resource);
+	CreateCraft("yuerks", m_ItemID, ITYPE_MATERIAL, Abyss_MoonlightIngot, 99, Resource);
 
 	ResetResource(Resource);
 	Resource[Abyss_Yuerks] = 3;
 	Resource[Abyss_LEnegry] = 5;
 	Resource[Abyss_Agar] = 30;
-	CreateAbyss("starlight ingot", m_ItemID, ITYPE_MATERIAL, Abyss_MoonlightIngot, 99, Resource);
+	CreateCraft("starlight ingot", m_ItemID, ITYPE_MATERIAL, Abyss_MoonlightIngot, 99, Resource);
 
 	ResetResource(Resource);
 	Resource[Abyss_ScrapMetal_S] = 5;
@@ -2911,20 +2900,20 @@ void CGameContext::InitCrafts()
 	Resource[Abyss_Yuerks] = 5;
 	Resource[Abyss_StarLightIngot] = 5;
 	Resource[Abyss_LEnegry] = 2;
-	CreateAbyss("core energy", m_ItemID, ITYPE_MATERIAL, Abyss_MoonlightIngot, 99, Resource);
+	CreateCraft("core energy", m_ItemID, ITYPE_MATERIAL, Abyss_MoonlightIngot, 99, Resource);
 
 	ResetResource(Resource);
 	Resource[Abyss_ScrapMetal_S] = 10;
 	Resource[Abyss_NuclearWaste_S] = 10;
 	Resource[Abyss_Alloy] = 1;
-	CreateAbyss("core nuclear waste", m_ItemID, ITYPE_MATERIAL, Abyss_MoonlightIngot, 99, Resource);
+	CreateCraft("core nuclear waste", m_ItemID, ITYPE_MATERIAL, Abyss_MoonlightIngot, 99, Resource);
 
 	ResetResource(Resource);
 	Resource[Abyss_Agar] = 1;
 	Resource[Abyss_ScrapMetal_S] = 25;
 	Resource[Abyss_MoonlightIngot] = 12;
 	Resource[Abyss_Alloy] = 25;
-	CreateAbyss("alloy pickaxe", m_ItemID, ITYPE_PICKAXE, LEVEL_ALLOY, 99, Resource, 17000);
+	CreateCraft("alloy pickaxe", m_ItemID, ITYPE_PICKAXE, LEVEL_ALLOY, 99, Resource, 17000);
 
 	ResetResource(Resource);
 	Resource[Abyss_Enegry_CORE] = 1;
@@ -2933,7 +2922,7 @@ void CGameContext::InitCrafts()
 	Resource[Abyss_Alloy] = 5;
 	Resource[Abyss_Agar] = 20;
 	Resource[Abyss_StarLightIngot] = 5;
-	CreateAbyss("core enegry pickaxe", m_ItemID, ITYPE_PICKAXE, LEVEL_ENEGRY_CORE, 99, Resource, 250000);
+	CreateCraft("core enegry pickaxe", m_ItemID, ITYPE_PICKAXE, LEVEL_ENEGRY_CORE, 99, Resource, 250000);
 
 	ResetResource(Resource);
 }
@@ -2963,7 +2952,7 @@ void CGameContext::CreateItem(const char *pItemName, int ID, int Type, int Damag
 	m_vItem[m_ItemID].m_Type = Type;
 }
 
-void CGameContext::CreateAbyss(const char *pName, int ID, int Type, int Level, int Proba, int *Resource, int Speed)
+void CGameContext::CreateCraft(const char *pName, int ID, int Type, int Level, int Proba, int *Resource, int Speed)
 {
 	CItem data;
 	m_vItem.push_back(data);
@@ -3088,9 +3077,8 @@ void CGameContext::MakeItem(const char *pItemName, int ClientID)
 		}
 	}
 
-#ifdef CONF_SQL
+
 	Sql()->SyncAccountData(ClientID);
-#endif
 
 	if (random_int(0, 100) < MakeItem.m_Proba)
 	{
@@ -3157,10 +3145,9 @@ void CGameContext::MakeItem(const char *pItemName, int ClientID)
 		SendMakeItemFailedChat(ClientID, MakeItem.m_NeedResource);
 		return;
 	}
-#ifdef CONF_SQL
+
 	if (m_apPlayers[ClientID]->LoggedIn)
 		Sql()->update(ClientID);
-#endif
 }
 
 int CGameContext::GetDmg(int Level)

@@ -24,9 +24,7 @@
 #include "item.h"
 
 #include "entities/giga-Qian.h"
-#ifdef CONF_SQL
 #include "OnTime/sql.h"
-#endif
 
 #ifdef _MSC_VER
 typedef __int32 int32_t;
@@ -115,11 +113,9 @@ class CGameContext : public IGameServer
 	CNetObjHandler m_NetObjHandler;
 	CTuningParams m_Tuning;
 
-	#ifdef CONF_SQL
 	/* SQL */
 	CSQL *m_Sql;
 	CAccountData *m_AccountData;
-	#endif
 
 	static void ConsoleOutputCallback_Chat(const char *pLine, void *pUser);
 
@@ -210,12 +206,10 @@ public:
 	CTuningParams *Tuning() { return &m_Tuning; }
 	virtual class CLayers *Layers() { return &m_Layers; }
 
-	#ifdef CONF_SQL
 	/* SQL */
 	CSQL *Sql() const { return m_Sql; };
 	CAccountData *AccountData() {return m_AccountData; };
 	void LogoutAccount(int ClientID);
-	#endif
 	
 	CGameContext();
 	~CGameContext();
@@ -352,7 +346,7 @@ public:
 	void InitCrafts();
 	void CreateItem(const char* pItemName, int ID, int Type, int Damage, int Level, int TurretType, int Proba, 
 		        int Speed, int Log, int Coal, int Copper, int Iron, int Gold, int Diamond, int Enegry, int ZombieHeart = 0);
-	void CreateAbyss(const char* pName, int ID, int Type, int Level, int Proba, int *NeedResource, int Speed = -1);
+	void CreateCraft(const char* pName, int ID, int Type, int Level, int Proba, int *NeedResource, int Speed = -1);
 
 	const char *GetItemSQLNameByID(int Type);
 	const char *GetItemNameByID(int Type);

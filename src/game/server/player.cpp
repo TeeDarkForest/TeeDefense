@@ -35,10 +35,8 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team, int Zomb)
 	}
 	idMap[0] = ClientID;
 
-	#ifdef CONF_SQL
 	m_AccData.m_UserID = 0;
 	LoggedIn = false;
-	#endif
 	if(!Zomb)
 		ResetKnapsack();
 	//Zomb2
@@ -387,12 +385,10 @@ void CPlayer::FakeSnap(int SnappingClient)
 
 void CPlayer::OnDisconnect(const char *pReason)
 {
-	#ifdef CONF_SQL
 	if(LoggedIn)
 	{
 		GameServer()->LogoutAccount(m_ClientID);
 	}
-	#endif
 
 	if(Server()->ClientIngame(m_ClientID) && !m_Zomb)
 	{
@@ -571,10 +567,9 @@ bool CPlayer::PressTab()
 		return true;
 	return false;
 }
-#ifdef CONF_SQL
+
 void CPlayer::Logout()
 {
 	m_AccData.m_UserID = 0;
 	LoggedIn = false;
 }
-#endif

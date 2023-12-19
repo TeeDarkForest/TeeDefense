@@ -7,7 +7,11 @@ CREATE TABLE `tw_Accounts`
 (
   `UserID` int NOT NULL,
   `Username` varchar(64) NOT NULL,
-  `Password` varchar(64) NOT NULL
+  `Password` varchar(64) NOT NULL,
+  `Language` varchar(64) NOT NULL DEFAULT 'zh-cn',
+  `Sword` int NOT NULL DEFAULT 0,
+  `Pickaxe` int NOT NULL DEFAULT 0,
+  `Axe` int NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `tw_Items`
@@ -15,7 +19,7 @@ CREATE TABLE `tw_Items`
   `UserID` int NOT NULL,
   `ItemID` int NOT NULL,
   `Num` int NOT NULL
-) ENGINE=InnoDB PRIMARY KEY(`UserID`) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 ALTER TABLE `tw_Accounts` ADD PRIMARY KEY(`UserID`);
 

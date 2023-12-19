@@ -27,7 +27,6 @@ bool CAccount::Register(int ClientID, const char *Username, const char *Password
                 str_format(aBuf, sizeof(aBuf), "INSERT INTO tw_Accounts(Username, Password) VALUES ('%s', '%s');", Username, Password);
                 DB()->Execute(aBuf);
                 GameServer()->SendChatTarget(ClientID, _("Account was created successfully."));
-                Login(ClientID, Username, Password);
             }
         }
         catch (sql::SQLException &e)
@@ -60,8 +59,13 @@ bool CAccount::Login(int ClientID, const char *Username, const char *Password)
                 if (Result->next())
                 {
                     P->m_AccData.m_UserID = Result->getInt("UserID");
+                    P->m_Holding[ITYPE_SWORD] = Result->getInt("Sword");
+                    P->m_Holding[ITYPE_AXE] = Result->getInt("Axe");
+                    P->m_Holding[ITYPE_PICKAXE] = Result->getInt("Pickaxe");
+
                     str_copy(P->m_AccData.m_aUsername, Result->getString("Username").c_str(), sizeof(P->m_AccData.m_aUsername));
                     str_copy(P->m_AccData.m_aPassword, Result->getString("Password").c_str(), sizeof(P->m_AccData.m_aPassword));
+                    P->SetLanguage(Result->getString("Language").c_str());
 
                     GameServer()->SendChatTarget(ClientID, _("You are now logged in."));
                     GameServer()->SendBroadcast_VL(_("Welcome {str:Name}!"), ClientID, "Name", GameServer()->Server()->ClientName(ClientID));
@@ -114,8 +118,13 @@ void CAccount::SyncAccountData(int ClientID, int Table)
                 case CGameContext::TABLE_ACCOUNT:
                 {
                     P->m_AccData.m_UserID = Result->getInt("UserID");
+                    P->m_Holding[ITYPE_SWORD] = Result->getInt("Sword");
+                    P->m_Holding[ITYPE_AXE] = Result->getInt("Axe");
+                    P->m_Holding[ITYPE_PICKAXE] = Result->getInt("Pickaxe");
+
                     str_copy(P->m_AccData.m_aUsername, Result->getString("Username").c_str(), sizeof(P->m_AccData.m_aUsername));
                     str_copy(P->m_AccData.m_aPassword, Result->getString("Password").c_str(), sizeof(P->m_AccData.m_aPassword));
+                    P->SetLanguage(Result->getString("Language").c_str());
                 }
                 break;
 
@@ -175,7 +184,10 @@ void CAccount::SaveAccountData(int ClientID, int Table)
                 {
                 case CGameContext::TABLE_ACCOUNT:
                 {
-                    str_format(aBuf, sizeof(aBuf), "UPDATE tw_Accounts SET Username='%s',Password='%s' WHERE UserID=%d;", P->m_AccData.m_aUsername, P->m_AccData.m_aPassword, UserID);
+                    str_format(aBuf, sizeof(aBuf), "UPDATE tw_Accounts SET "
+                                                   "Username='%s',Password='%s',Language='%s',Sword=%d,Axe=%d,Pickaxe=%d "
+                                                   "WHERE UserID=%d;",
+                               P->m_AccData.m_aUsername, P->m_AccData.m_aPassword, P->GetLanguage(), P->m_Holding[ITYPE_SWORD], P->m_Holding[ITYPE_AXE], P->m_Holding[ITYPE_PICKAXE], UserID);
                     DB()->Execute(aBuf);
                 }
                 break;

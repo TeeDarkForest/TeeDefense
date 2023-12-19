@@ -417,6 +417,7 @@ int CGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 		pKiller->m_Score++;
 		DoZombMessage(m_ZombLeft--);
 		GameServer()->TW()->Account()->SaveAccountData(pKiller->GetCID(), CGameContext::TABLE_ITEM);
+		GameServer()->ClearVotes(pKiller->GetCID());
 	}
 	if (pKiller && pKiller == pVictim->GetPlayer())
 		return 0; // suicide

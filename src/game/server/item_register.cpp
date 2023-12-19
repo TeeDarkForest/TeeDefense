@@ -14,13 +14,13 @@ void CGameContext::InitItems()
     int Resource[NUM_ITEM];
     ResetResource(Resource);
     // Dont move this item!!!
-    CreateItem("checkpoint", // Name
+    CreateItem("HAND", // Name
                0,            // ID
-               ITYPE_SWORD,  // ItemType
-               2,            // Damage
-               LEVEL_LOG,    // Level
+               ITYPE_MATERIAL,  // ItemType
+               0,            // Damage
+               0,    // Level
                -1,           // TurretType
-               90,           // Proba
+               100,           // Proba
                -1,           // Speed
                Resource);
     // Register Items.

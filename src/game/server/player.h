@@ -21,7 +21,7 @@ public:
 
 	void TryRespawn();
 	void Respawn();
-	void SetTeam(int Team, bool DoChatMsg=true);
+	void SetTeam(int Team, bool DoChatMsg = true);
 	int GetTeam();
 	int GetCID() const { return m_ClientID; };
 
@@ -30,7 +30,7 @@ public:
 	void Snap(int SnappingClient);
 
 	void FakeSnap(int SnappingClient);
-	
+
 	void OnDirectInput(CNetObj_PlayerInput *NewInput);
 	void OnPredictedInput(CNetObj_PlayerInput *NewInput);
 	void OnDisconnect(const char *pReason);
@@ -38,8 +38,8 @@ public:
 	void KillCharacter(int Weapon = WEAPON_GAME);
 	CCharacter *GetCharacter();
 
-	const char* GetLanguage();
-	void SetLanguage(const char* pLanguage);
+	const char *GetLanguage();
+	void SetLanguage(const char *pLanguage);
 
 	//---------------------------------------------------------
 	// this is used for snapping so we know how we can clip the view for the player
@@ -104,32 +104,31 @@ public:
 
 	int m_Authed;
 
-	//Zomb2
-	int m_SubZomb[3];//all Types, 3 times ( 0, 1, 2)
+	// Zomb2
+	int m_SubZomb[3]; // all Types, 3 times ( 0, 1, 2)
 	int m_Zomb;
 	///////////////////////////////
-	//1 = Zaby
-	//2 = Zoomer
-	//3 = Zooker
-	//4 = Zamer
-	//5 = Zunner
-	//6 = Zaster
-	//7 = Zotter
-	//8 = Zenade
-	//9 = Flombie
-	//10 = Zinja
-	//11 = Zele
-	//12 = Zinvis
-	//13 = Zeater
-	//14 = Qian
-	//15 = Humbie
+	// 1 = Zaby
+	// 2 = Zoomer
+	// 3 = Zooker
+	// 4 = Zamer
+	// 5 = Zunner
+	// 6 = Zaster
+	// 7 = Zotter
+	// 8 = Zenade
+	// 9 = Flombie
+	// 10 = Zinja
+	// 11 = Zele
+	// 12 = Zinvis
+	// 13 = Zeater
 	////////////////////////////////
 
-	//Zomb2
+	// Zomb2
 	void DeleteCharacter();
-	int GetZomb() { 
-		if(m_Zomb)
-			return m_Zomb; 
+	int GetZomb()
+	{
+		if (m_Zomb)
+			return m_Zomb;
 		return 0;
 	};
 	bool GetZomb(int Zomb);
@@ -154,30 +153,37 @@ public:
 	int m_SnappingNum;
 
 private:
-	void HandleTuningParams(); //This function will send the new parameters if needed
+	void HandleTuningParams(); // This function will send the new parameters if needed
 
 public:
-	CTuningParams* GetNextTuningParams() { return &m_NextTuningParams; };
+	CTuningParams *GetNextTuningParams() { return &m_NextTuningParams; };
 	CTuningParams m_PrevTuningParams;
 	CTuningParams m_NextTuningParams;
 
-// 
+	//
 public:
 	struct // knapsack
 	{
-		int m_Resource[NUM_RESOURCE];
-		int m_Sword;
-		int m_Pickaxe;
-		int m_Axe;
 		// Developers (Special things. XD)
 		int m_Shengyan; // This is special, he is SLUG lmao! hahahahahahah xaxaxaxaxaxaxaxaxa
 		int m_Ninecloud;
 		int m_EDreemurr;
 		int m_XyCloud;
-		int m_HGDio; // This is special one too, he is OOOOOOOOOOOOOOOO.
+		int m_HGDio;   // This is special one too, he is OOOOOOOOOOOOOOOO.
 		int m_Jiuyuan; // half developer (?)
-		int m_FFS; // it me, FlowerFell-Sans. lmao(why my name is soo long...)
+		int m_FFS;	   // it me, FlowerFell-Sans. lmao(why my name is soo long...)
 	} m_Knapsack;
+
+	int m_Holding[NUM_ITYPE];
+
+	struct
+	{
+		int m_UserID;
+		char m_aUsername[64];
+		char m_aPassword[64];
+	} m_AccData;
+
+	int m_Items[NUM_ITEM];
 
 	// Mine
 	int m_MiningType;
@@ -190,14 +196,6 @@ public:
 
 	// Account
 	bool LoggedIn;
-	struct
-	{
-		int m_UserID;
-		char m_Username[20];
-		char m_Password[20];
-
-		
-	} m_AccData;
 
 	void ResetKnapsack();
 	void Logout();

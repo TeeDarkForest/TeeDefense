@@ -102,12 +102,11 @@ MACRO_CONFIG_INT(B2TeeLaser, b2_tee_laser, 0, 0, 1, CFGFLAG_SERVER, "draws your 
 
 // OnTime
 /* SQL */
-MACRO_CONFIG_STR(SvSqlUser, sv_sql_user, 256, "nameless", CFGFLAG_SERVER, "SQL User")
-MACRO_CONFIG_STR(SvSqlPw, sv_sql_pw, 256, "tee", CFGFLAG_SERVER, "SQL Password")
-MACRO_CONFIG_STR(SvSqlIp, sv_sql_ip, 256, "127.0.0.1", CFGFLAG_SERVER, "SQL Database IP")
-MACRO_CONFIG_INT(SvSqlPort, sv_sql_port, 0, 65535, 3306, CFGFLAG_SERVER, "SQL Database port")
-MACRO_CONFIG_STR(SvSqlDatabase, sv_sql_database, 256, "goaway", CFGFLAG_SERVER, "SQL Database name")
-MACRO_CONFIG_STR(SvSqlPrefix, sv_sql_prefix, 16, "tw", CFGFLAG_SERVER, "SQL Database table prefix")
+MACRO_CONFIG_STR(SvMySqlHostname, sv_sql_hostname, 32, "localhost", CFGFLAG_SERVER, "MySQL Host")
+MACRO_CONFIG_STR(SvMySqlDatabase, sv_sql_database, 32, "database", CFGFLAG_SERVER, "MySQL Database")
+MACRO_CONFIG_STR(SvMySqlUsername, sv_sql_username, 32, "nameless", CFGFLAG_SERVER, "MySQL Login")
+MACRO_CONFIG_STR(SvMySqlPassword, sv_sql_password, 32, "", CFGFLAG_SERVER, "MySQL Password")
+MACRO_CONFIG_INT(SvMySqlPort, sv_sql_port, 3306, 0, 65000, CFGFLAG_SERVER, "MySQL Port")
 
 // debug
 #ifdef CONF_DEBUG // this one can crash the server if not used correctly

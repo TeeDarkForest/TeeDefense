@@ -7,28 +7,6 @@
 #include <game/server/player.h>
 const int PhysSize = 14;
 
-enum
-{
-    CK_WOOD,
-    CK_COAL,
-    CK_COPPER,
-    CK_IRON,
-    CK_GOLD,
-    CK_DIAMONAD,
-	CK_ENEGRY,
-
-	CK_Abyss_LEnegry,
-	CK_Abyss_Agar,
-	CK_Abyss_ScrapMetal,
-	CK_Abyss_ScrapMetal_S,
-	CK_Abyss_NuclearWaste_S,
-	CK_Abyss_Remnant,
-	CK_Abyss_ConstantFragment,
-	CK_Abyss_DeathAgglomerate,
-	CK_Abyss_DeepPrism,
-	CK_Abyss_PlatinumWildColor,
-};
-
 class CKs : public CEntity
 {
 public:
@@ -39,15 +17,12 @@ public:
 	virtual void TickPaused();
 	virtual void Snap(int SnappingClient);
 	virtual void Picking(int Time, CPlayer *Player);
-	
+
 	void HandleLockPlayer();
 	int m_Health;
 	int m_LockPlayer;
 
 	int GetMaxHealth(int Type);
-	int GetResourceID(int Type);
-	const char* GetNameByType(int Type);
-	const char* GetRealNameByType(int Type);
 
 private:
 	int m_CKID;

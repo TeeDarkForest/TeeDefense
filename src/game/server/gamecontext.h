@@ -23,8 +23,8 @@
 #include <vector>
 #include "item.h"
 
-#include "entities/giga-Qian.h"
-#include "OnTime/sql.h"
+#include "GameCore/TWorldController.h"
+#include "GameCore/Database/DB.h"
 
 #ifdef _MSC_VER
 typedef __int32 int32_t;
@@ -108,14 +108,13 @@ class CGameContext : public IGameServer
 {
 	IServer *m_pServer;
 	class IConsole *m_pConsole;
+	class TWorldController *m_pTWorldController;
 	CLayers m_Layers;
 	CCollision m_Collision;
 	CNetObjHandler m_NetObjHandler;
 	CTuningParams m_Tuning;
 
-	/* SQL */
-	CSQL *m_Sql;
-	CAccountData *m_AccountData;
+	CDB *m_pDB;
 
 	static void ConsoleOutputCallback_Chat(const char *pLine, void *pUser);
 
@@ -154,7 +153,12 @@ class CGameContext : public IGameServer
 	static void ConLogin(IConsole::IResult *pResult, void *pUserData);
 	static void ConCheckEvent(IConsole::IResult *pResult, void *pUserData);
 
-	#ifdef CONF_BOX2D
+	// Vote Command
+	static void ConMake(IConsole::IResult *pResult, void *pUserData);
+	static void ConUse(IConsole::IResult *pResult, void *pUserData);
+	static void ConSync(IConsole::IResult *pResult, void *pUserData);
+
+#ifdef CONF_BOX2D
 	static void ConB2CreateBox(IConsole::IResult *pResult, void *pUserData);
 	static void ConB2CreateTest(IConsole::IResult *pResult, void *pUserData);
 	static void ConB2CreateTestSpider(IConsole::IResult *pResult, void *pUserData);
@@ -207,8 +211,8 @@ public:
 	virtual class CLayers *Layers() { return &m_Layers; }
 
 	/* SQL */
-	CSQL *Sql() const { return m_Sql; };
-	CAccountData *AccountData() {return m_AccountData; };
+	CDB *DB() { return m_pDB; }
+	TWorldController *TW() const { return m_pTWorldController; };
 	void LogoutAccount(int ClientID);
 	
 	CGameContext();
@@ -333,22 +337,17 @@ public:
 	void OnZombie(int ClientID, int Zomb);
 	void OnZombieKill(int ClientID);
 
-	void UnsealQianFromAbyss(int ClientID);
-	bool Qian;
-
 	// Tee Defense
 	bool m_NeedResetTower;
 	bool GetPaused();
 	int m_TowerHealth;
 
-	int m_ItemID;
 	void InitItems();
 	void InitCrafts();
 	void CreateItem(const char* pItemName, int ID, int Type, int Damage, int Level, int TurretType, int Proba, 
-		        int Speed, int Log, int Coal, int Copper, int Iron, int Gold, int Diamond, int Enegry, int ZombieHeart = 0);
+		        int Speed, int NeedItems[NUM_ITEM], int Life = -1);
 	void CreateCraft(const char* pName, int ID, int Type, int Level, int Proba, int *NeedResource, int Speed = -1);
 
-	const char *GetItemSQLNameByID(int Type);
 	const char *GetItemNameByID(int Type);
 
 	void InitVotes(int ClientID);
@@ -358,22 +357,23 @@ public:
 	{
 		const char* m_Name;
     	int m_Type;
-    	int m_NeedResource[NUM_RESOURCE];
-    	int m_Proba;
+		int m_NeedResource[NUM_ITEM];
+		int m_Proba;
     	int m_Level;
     	int m_Damage;
     	int m_Speed;
     	int m_ID;
     	int m_TurretType;
+		int m_Life;
 	};
-	
+
 	int GetItemId(const char* pItemName);
 
 	int GetSpeed(int Level, int Type);
 
     int GetDmg(int Level);
 
-	void MakeItem(const char* pItemName, int ClientID);
+	void MakeItem(int ItemID, int ClientID);
 
     bool CheckItemName(const char* pItemName);
 
@@ -383,17 +383,24 @@ public:
 
     void SendMakeItemFailedChat(int To, int* Resource);
 		
-	std::vector<CItem> m_vItem;
+	CItem m_Items[NUM_ITEM];
 
 	int m_EventTimer;
 	int m_EventType;
 	int m_EventDuration;
 
-	bool QianIsAlive();
-	bool IsAbyss();
-	void GoToAbyss(CQian *Victim);
-
 	void OnUpdatePlayerServerInfo(char *aBuf, int BufSize, int ID) override;
+
+public:
+	CPlayer *GetPlayer(int ClientID, bool CheckAuthed = false, bool CheckCharacter = false);
+	enum
+	{
+		TABLE_ACCOUNT = 0,
+		TABLE_ITEM,
+	};
+
+	void PutTurret(int Type, int Owner, int Life, int Radius);
+	void AddVote_Make(int ClientID, int Type);
 };
 
 inline Mask128 CmaskAll() { return Mask128(); }

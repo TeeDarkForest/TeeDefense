@@ -645,11 +645,13 @@ set_glob(GAME_SERVER GLOB_RECURSE src/game/server
   entities/turret.h
   entities/growingexplosion.cpp
   entities/growingexplosion.h
-  entities/giga-Qian.cpp
-  entities/giga-Qian.h
-
-  OnTime/sql.cpp
-  OnTime/sql.h
+  GameCore/Account/account.cpp
+  GameCore/Account/account.h
+  GameCore/Database/DB.cpp
+  GameCore/Database/DB.h
+  GameCore/TWorldComponent.h
+  GameCore/TWorldController.cpp
+  GameCore/TWorldController.h
   entity.cpp
   entity.h
   eventhandler.cpp
@@ -662,6 +664,7 @@ set_glob(GAME_SERVER GLOB_RECURSE src/game/server
   gameworld.h
   player.cpp
   player.h
+  item_register.cpp
   item.h
   mask128.h
 )

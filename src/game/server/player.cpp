@@ -3,7 +3,6 @@
 #include <new>
 #include <engine/shared/config.h>
 #include "player.h"
-#include "entities/giga-Qian.h"
 
 MACRO_ALLOC_POOL_ID_IMPL(CPlayer, MAX_CLIENTS)
 
@@ -28,22 +27,21 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team, int Zomb)
 	m_PrevTuningParams = *pGameServer->Tuning();
 	m_NextTuningParams = m_PrevTuningParams;
 
-	int* idMap = Server()->GetIdMap(ClientID);
-	for (int i = 1;i < VANILLA_MAX_CLIENTS;i++)
+	int *idMap = Server()->GetIdMap(ClientID);
+	for (int i = 1; i < VANILLA_MAX_CLIENTS; i++)
 	{
-	    idMap[i] = -1;
+		idMap[i] = -1;
 	}
 	idMap[0] = ClientID;
 
-	m_AccData.m_UserID = 0;
 	LoggedIn = false;
-	if(!Zomb)
+	if (!Zomb)
 		ResetKnapsack();
-	//Zomb2
+	// Zomb2
 	m_Zomb = Zomb;
 	mem_zero(m_SubZomb, sizeof(m_SubZomb));
 
-	#ifdef CONF_BOX2D
+#ifdef CONF_BOX2D
 	b2CircleShape shape;
 	shape.m_radius = 1.6f;
 
@@ -51,7 +49,9 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team, int Zomb)
 	sd.density = 1.0f;
 	sd.shape = &shape;
 	sd.filter.groupIndex = -1;
-	#endif
+#endif
+
+	m_AccData.m_UserID = 0;
 }
 
 CPlayer::~CPlayer()
@@ -62,14 +62,14 @@ CPlayer::~CPlayer()
 
 void CPlayer::HandleTuningParams()
 {
-	if(!(m_PrevTuningParams == m_NextTuningParams))
+	if (!(m_PrevTuningParams == m_NextTuningParams))
 	{
-		if(m_IsReady)
+		if (m_IsReady)
 		{
 			CMsgPacker Msg(NETMSGTYPE_SV_TUNEPARAMS);
 			int *pParams = (int *)&m_NextTuningParams;
-			for(unsigned i = 0; i < sizeof(m_NextTuningParams)/sizeof(int); i++)
-			Msg.AddInt(pParams[i]);
+			for (unsigned i = 0; i < sizeof(m_NextTuningParams) / sizeof(int); i++)
+				Msg.AddInt(pParams[i]);
 			Server()->SendMsg(&Msg, MSGFLAG_VITAL, GetCID());
 		}
 
@@ -82,28 +82,28 @@ void CPlayer::HandleTuningParams()
 void CPlayer::Tick()
 {
 #ifdef CONF_DEBUG
-	if(!g_Config.m_DbgDummies || m_ClientID < MAX_CLIENTS-g_Config.m_DbgDummies)
+	if (!g_Config.m_DbgDummies || m_ClientID < MAX_CLIENTS - g_Config.m_DbgDummies)
 #endif
-	if(!Server()->ClientIngame(m_ClientID))
-		return;
+		if (!Server()->ClientIngame(m_ClientID))
+			return;
 
 	Server()->SetClientScore(m_ClientID, m_Score);
 	Server()->SetClientLanguage(m_ClientID, m_aLanguage);
 
 	// do latency stuff
-	if(!m_Zomb)
+	if (!m_Zomb)
 	{
 		IServer::CClientInfo Info;
-		if(Server()->GetClientInfo(m_ClientID, &Info))
+		if (Server()->GetClientInfo(m_ClientID, &Info))
 		{
 			m_Latency.m_Accum += Info.m_Latency;
 			m_Latency.m_AccumMax = max(m_Latency.m_AccumMax, Info.m_Latency);
 			m_Latency.m_AccumMin = min(m_Latency.m_AccumMin, Info.m_Latency);
 		}
 		// each second
-		if(Server()->Tick()%Server()->TickSpeed() == 0)
+		if (Server()->Tick() % Server()->TickSpeed() == 0)
 		{
-			m_Latency.m_Avg = m_Latency.m_Accum/Server()->TickSpeed();
+			m_Latency.m_Avg = m_Latency.m_Accum / Server()->TickSpeed();
 			m_Latency.m_Max = m_Latency.m_AccumMax;
 			m_Latency.m_Min = m_Latency.m_AccumMin;
 			m_Latency.m_Accum = 0;
@@ -112,17 +112,17 @@ void CPlayer::Tick()
 		}
 	}
 
-	if(!GameServer()->m_World.m_Paused)
+	if (!GameServer()->m_World.m_Paused)
 	{
-		if(!m_pCharacter && m_Team == TEAM_SPECTATORS && m_SpectatorID == SPEC_FREEVIEW)
-			m_ViewPos -= vec2(clamp(m_ViewPos.x-m_LatestActivity.m_TargetX, -500.0f, 500.0f), clamp(m_ViewPos.y-m_LatestActivity.m_TargetY, -400.0f, 400.0f));
+		if (!m_pCharacter && m_Team == TEAM_SPECTATORS && m_SpectatorID == SPEC_FREEVIEW)
+			m_ViewPos -= vec2(clamp(m_ViewPos.x - m_LatestActivity.m_TargetX, -500.0f, 500.0f), clamp(m_ViewPos.y - m_LatestActivity.m_TargetY, -400.0f, 400.0f));
 
-		if(!m_pCharacter && m_DieTick+Server()->TickSpeed()*3 <= Server()->Tick())
+		if (!m_pCharacter && m_DieTick + Server()->TickSpeed() * 3 <= Server()->Tick())
 			m_Spawning = true;
 
-		if(m_pCharacter)
+		if (m_pCharacter)
 		{
-			if(m_pCharacter->IsAlive())
+			if (m_pCharacter->IsAlive())
 			{
 				m_ViewPos = m_pCharacter->m_Pos;
 			}
@@ -132,7 +132,7 @@ void CPlayer::Tick()
 				m_pCharacter = 0;
 			}
 		}
-		else if(m_Spawning && m_RespawnTick <= Server()->Tick())
+		else if (m_Spawning && m_RespawnTick <= Server()->Tick())
 			TryRespawn();
 	}
 	else
@@ -142,13 +142,13 @@ void CPlayer::Tick()
 		++m_ScoreStartTick;
 		++m_LastActionTick;
 		++m_TeamChangeTick;
- 	}
+	}
 
 	/*char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "Log: %d", m_Knapsack.m_Log);
 	GameServer()->SendBroadcast(aBuf, m_ClientID);*/
 
-	if(m_MiningTick > -1)
+	if (m_MiningTick > -1)
 		m_MiningTick--;
 
 	HandleTuningParams();
@@ -157,23 +157,23 @@ void CPlayer::Tick()
 void CPlayer::PostTick()
 {
 	// update latency value
-	if(m_PlayerFlags&PLAYERFLAG_SCOREBOARD)
+	if (m_PlayerFlags & PLAYERFLAG_SCOREBOARD)
 	{
-		for(int i = 0; i < MAX_CLIENTS; ++i)
+		for (int i = 0; i < MAX_CLIENTS; ++i)
 		{
-			if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
+			if (GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
 				m_aActLatency[i] = GameServer()->m_apPlayers[i]->m_Latency.m_Min;
 		}
 	}
 
 	// update view pos for spectators
-	if(m_Team == TEAM_SPECTATORS && m_SpectatorID != SPEC_FREEVIEW && GameServer()->m_apPlayers[m_SpectatorID])
+	if (m_Team == TEAM_SPECTATORS && m_SpectatorID != SPEC_FREEVIEW && GameServer()->m_apPlayers[m_SpectatorID])
 		m_ViewPos = GameServer()->m_apPlayers[m_SpectatorID]->m_ViewPos;
 }
 
 void CPlayer::InfectedToHumbie()
 {
-	if(GetZomb())
+	if (GetZomb())
 		return;
 	m_Zomb = 15; // Humbie..
 }
@@ -182,16 +182,17 @@ void CPlayer::Snap(int SnappingClient)
 {
 
 #ifdef CONF_DEBUG
-	if(!g_Config.m_DbgDummies || m_ClientID < MAX_CLIENTS-g_Config.m_DbgDummies)
+	if (!g_Config.m_DbgDummies || m_ClientID < MAX_CLIENTS - g_Config.m_DbgDummies)
 #endif
-	if(!Server()->ClientIngame(m_ClientID) && !m_Zomb)
-		return;
+		if (!Server()->ClientIngame(m_ClientID) && !m_Zomb)
+			return;
 
 	int id = m_ClientID;
-	if (!Server()->Translate(id, SnappingClient)) return;
+	if (!Server()->Translate(id, SnappingClient))
+		return;
 
 	CNetObj_ClientInfo *pClientInfo = static_cast<CNetObj_ClientInfo *>(Server()->SnapNewItem(NETOBJTYPE_CLIENTINFO, id, sizeof(CNetObj_ClientInfo)));
-	if(!pClientInfo)
+	if (!pClientInfo)
 		return;
 
 	/*if(!GetZomb())
@@ -233,93 +234,78 @@ void CPlayer::Snap(int SnappingClient)
 				dbg_msg("ssss","sawdw");
 		}*/
 
-	if(m_Zomb)
+	if (m_Zomb)
 	{
 		pClientInfo->m_UseCustomColor = 0;
 		StrToInts(&pClientInfo->m_Clan0, 3, "Zombie");
 		pClientInfo->m_Country = 1000;
 		pClientInfo->m_ColorBody = 16776960;
 		pClientInfo->m_ColorFeet = 16776960;
-		m_Team = 1; // Don't snap Zombies at Scorebroad.
-		if(m_Zomb == 1)//Zaby
+		m_Team = 1;		 // Don't snap Zombies at Scorebroad.
+		if (m_Zomb == 1) // Zaby
 		{
 			StrToInts(&pClientInfo->m_Name0, 4, "Zaby");
 			StrToInts(&pClientInfo->m_Skin0, 6, "zaby");
 		}
-		else if(m_Zomb == 2)//Zoomer
+		else if (m_Zomb == 2) // Zoomer
 		{
 			StrToInts(&pClientInfo->m_Name0, 4, "Zoomer");
 			StrToInts(&pClientInfo->m_Skin0, 6, "redstripe");
 		}
-		else if(m_Zomb == 3)//Zooker
+		else if (m_Zomb == 3) // Zooker
 		{
 			StrToInts(&pClientInfo->m_Name0, 4, "Zooker");
 			StrToInts(&pClientInfo->m_Skin0, 6, "bluekitty");
 		}
-		else if(m_Zomb == 4)//Zamer
+		else if (m_Zomb == 4) // Zamer
 		{
 			StrToInts(&pClientInfo->m_Name0, 4, "Zamer");
 			StrToInts(&pClientInfo->m_Skin0, 6, "twinbop");
 		}
-		else if(m_Zomb == 5)//Zunner
+		else if (m_Zomb == 5) // Zunner
 		{
 			StrToInts(&pClientInfo->m_Name0, 4, "Zunner");
 			StrToInts(&pClientInfo->m_Skin0, 6, "cammostripes");
 		}
-		else if(m_Zomb == 6)//Zaster
+		else if (m_Zomb == 6) // Zaster
 		{
 			StrToInts(&pClientInfo->m_Name0, 4, "Zaster");
 			StrToInts(&pClientInfo->m_Skin0, 6, "coala");
 		}
-		else if(m_Zomb == 7)//Zotter
+		else if (m_Zomb == 7) // Zotter
 		{
 			StrToInts(&pClientInfo->m_Name0, 4, "Zotter");
 			StrToInts(&pClientInfo->m_Skin0, 6, "cammo");
 		}
-		else if(m_Zomb == 8)//Zenade
+		else if (m_Zomb == 8) // Zenade
 		{
 			StrToInts(&pClientInfo->m_Name0, 4, "Zenade");
 			StrToInts(&pClientInfo->m_Skin0, 6, "twintri");
 		}
-		else if(m_Zomb == 9)//Fombie
+		else if (m_Zomb == 9) // Fombie
 		{
 			StrToInts(&pClientInfo->m_Name0, 4, "Flombie");
 			StrToInts(&pClientInfo->m_Skin0, 6, "toptri");
 		}
-		else if(m_Zomb == 10)//Zinja
+		else if (m_Zomb == 10) // Zinja
 		{
 			StrToInts(&pClientInfo->m_Name0, 4, "Zinja");
 			StrToInts(&pClientInfo->m_Skin0, 6, "default");
 		}
-		else if(m_Zomb == 11)//Zele
+		else if (m_Zomb == 11) // Zele
 		{
 			StrToInts(&pClientInfo->m_Name0, 4, "Zele");
 			StrToInts(&pClientInfo->m_Skin0, 6, "redbopp");
 		}
-		else if(m_Zomb == 12)//Zinvis
+		else if (m_Zomb == 12) // Zinvis
 		{
 			StrToInts(&pClientInfo->m_Name0, 4, "Zinvis");
 			StrToInts(&pClientInfo->m_Skin0, 6, "zaby");
 		}
-		else if(m_Zomb == 13)//Zeater
+		else if (m_Zomb == 13) // Zeater
 		{
 			StrToInts(&pClientInfo->m_Name0, 4, "Zeater");
 			StrToInts(&pClientInfo->m_Skin0, 6, "warpaint");
-		}
-		else if(m_Zomb == 14)//Zeater
-		{
-			StrToInts(&pClientInfo->m_Name0, 4, "Qian");
-			StrToInts(&pClientInfo->m_Skin0, 6, "blacktee");
-		}
-		else if(m_Zomb == 15)
-		{
-			StrToInts(&pClientInfo->m_Name0, 4, Server()->ClientName(m_ClientID));
-			StrToInts(&pClientInfo->m_Clan0, 3, Server()->ClientClan(m_ClientID));
-			pClientInfo->m_Country = Server()->ClientCountry(m_ClientID);
-			pClientInfo->m_UseCustomColor = m_TeeInfos.m_UseCustomColor;
-			pClientInfo->m_ColorBody = m_TeeInfos.m_ColorBody;
-			pClientInfo->m_ColorFeet = m_TeeInfos.m_ColorFeet;
-			StrToInts(&pClientInfo->m_Skin0, 6, m_TeeInfos.m_SkinName);
 		}
 	}
 	else
@@ -334,10 +320,10 @@ void CPlayer::Snap(int SnappingClient)
 	}
 
 	CNetObj_PlayerInfo *pPlayerInfo = static_cast<CNetObj_PlayerInfo *>(Server()->SnapNewItem(NETOBJTYPE_PLAYERINFO, id, sizeof(CNetObj_PlayerInfo)));
-	if(!pPlayerInfo)
+	if (!pPlayerInfo)
 		return;
 
-	if(m_Zomb)
+	if (m_Zomb)
 		pPlayerInfo->m_Latency = 0;
 	else
 		pPlayerInfo->m_Latency = SnappingClient == -1 ? m_Latency.m_Min : GameServer()->m_apPlayers[SnappingClient]->m_aActLatency[m_ClientID];
@@ -346,13 +332,13 @@ void CPlayer::Snap(int SnappingClient)
 	pPlayerInfo->m_Score = m_Score;
 	pPlayerInfo->m_Team = m_Team;
 
-	if(m_ClientID == SnappingClient)
+	if (m_ClientID == SnappingClient)
 		pPlayerInfo->m_Local = 1;
 
-	if(m_ClientID == SnappingClient && m_Team == TEAM_SPECTATORS)
+	if (m_ClientID == SnappingClient && m_Team == TEAM_SPECTATORS)
 	{
 		CNetObj_SpectatorInfo *pSpectatorInfo = static_cast<CNetObj_SpectatorInfo *>(Server()->SnapNewItem(NETOBJTYPE_SPECTATORINFO, m_ClientID, sizeof(CNetObj_SpectatorInfo)));
-		if(!pSpectatorInfo)
+		if (!pSpectatorInfo)
 			return;
 
 		pSpectatorInfo->m_SpectatorID = m_SpectatorID;
@@ -369,13 +355,13 @@ void CPlayer::FakeSnap(int SnappingClient)
 	int id;
 
 	if (info.m_CustClt)
-		int id = MAX_CHARACTERS-1;
+		int id = MAX_CHARACTERS - 1;
 	else
 		int id = VANILLA_MAX_CLIENTS - 1;
 
 	CNetObj_ClientInfo *pClientInfo = static_cast<CNetObj_ClientInfo *>(Server()->SnapNewItem(NETOBJTYPE_CLIENTINFO, id, sizeof(CNetObj_ClientInfo)));
 
-	if(!pClientInfo)
+	if (!pClientInfo)
 		return;
 
 	StrToInts(&pClientInfo->m_Name0, 4, " ");
@@ -385,15 +371,15 @@ void CPlayer::FakeSnap(int SnappingClient)
 
 void CPlayer::OnDisconnect(const char *pReason)
 {
-	if(LoggedIn)
+	if (LoggedIn)
 	{
 		GameServer()->LogoutAccount(m_ClientID);
 	}
 
-	if(Server()->ClientIngame(m_ClientID) && !m_Zomb)
+	if (Server()->ClientIngame(m_ClientID) && !m_Zomb)
 	{
 		char aBuf[512];
-		if(pReason && *pReason)
+		if (pReason && *pReason)
 		{
 			str_format(aBuf, sizeof(aBuf), "'%s' has left the game (%s)", Server()->ClientName(m_ClientID), pReason);
 			GameServer()->SendChatTarget(-1, _("'{str:PlayerName}' has left the game ({str:Reason})"), "PlayerName", Server()->ClientName(m_ClientID), "Reason", pReason);
@@ -415,41 +401,41 @@ void CPlayer::OnDisconnect(const char *pReason)
 void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput)
 {
 	// skip the input if chat is active
-	if((m_PlayerFlags&PLAYERFLAG_CHATTING) && (NewInput->m_PlayerFlags&PLAYERFLAG_CHATTING))
+	if ((m_PlayerFlags & PLAYERFLAG_CHATTING) && (NewInput->m_PlayerFlags & PLAYERFLAG_CHATTING))
 		return;
 
-	if(m_pCharacter)
+	if (m_pCharacter)
 		m_pCharacter->OnPredictedInput(NewInput);
 }
 
 void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 {
-	if(NewInput->m_PlayerFlags&PLAYERFLAG_CHATTING)
+	if (NewInput->m_PlayerFlags & PLAYERFLAG_CHATTING)
 	{
 		// skip the input if chat is active
-		if(m_PlayerFlags&PLAYERFLAG_CHATTING)
+		if (m_PlayerFlags & PLAYERFLAG_CHATTING)
 			return;
 
 		// reset input
-		if(m_pCharacter)
+		if (m_pCharacter)
 			m_pCharacter->ResetInput();
 
 		m_PlayerFlags = NewInput->m_PlayerFlags;
- 		return;
+		return;
 	}
 
 	m_PlayerFlags = NewInput->m_PlayerFlags;
 
-	if(m_pCharacter)
+	if (m_pCharacter)
 		m_pCharacter->OnDirectInput(NewInput);
 
-	if(!m_pCharacter && m_Team != TEAM_SPECTATORS && (NewInput->m_Fire&1))
+	if (!m_pCharacter && m_Team != TEAM_SPECTATORS && (NewInput->m_Fire & 1))
 		m_Spawning = true;
 
 	// check for activity
-	if(NewInput->m_Direction || m_LatestActivity.m_TargetX != NewInput->m_TargetX ||
+	if (NewInput->m_Direction || m_LatestActivity.m_TargetX != NewInput->m_TargetX ||
 		m_LatestActivity.m_TargetY != NewInput->m_TargetY || NewInput->m_Jump ||
-		NewInput->m_Fire&1 || NewInput->m_Hook)
+		NewInput->m_Fire & 1 || NewInput->m_Hook)
 	{
 		m_LatestActivity.m_TargetX = NewInput->m_TargetX;
 		m_LatestActivity.m_TargetY = NewInput->m_TargetY;
@@ -459,14 +445,14 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 
 CCharacter *CPlayer::GetCharacter()
 {
-	if(m_pCharacter && m_pCharacter->IsAlive())
+	if (m_pCharacter && m_pCharacter->IsAlive())
 		return m_pCharacter;
 	return 0;
 }
 
 void CPlayer::KillCharacter(int Weapon)
 {
-	if(m_pCharacter)
+	if (m_pCharacter)
 	{
 		m_pCharacter->Die(m_ClientID, Weapon);
 		delete m_pCharacter;
@@ -476,7 +462,7 @@ void CPlayer::KillCharacter(int Weapon)
 
 void CPlayer::Respawn()
 {
-	if(m_Team != TEAM_SPECTATORS)
+	if (m_Team != TEAM_SPECTATORS)
 		m_Spawning = true;
 }
 
@@ -489,42 +475,29 @@ void CPlayer::TryRespawn()
 {
 	vec2 SpawnPos;
 
-	if(!GameServer()->m_pController->CanSpawn(m_Team, &SpawnPos, m_Zomb == 14))
+	if (!GameServer()->m_pController->CanSpawn(m_Team, &SpawnPos, m_Zomb == 14))
 		return;
 
 	m_Spawning = false;
-	m_pCharacter = new(m_ClientID) CCharacter(&GameServer()->m_World);
+	m_pCharacter = new (m_ClientID) CCharacter(&GameServer()->m_World);
 	m_pCharacter->Spawn(this, SpawnPos);
-
-	if(m_Zomb == 14)
-	{
-		for(CQian *pChr = (CQian*) GameServer()->m_World.FindFirst(CGameWorld::ENTTYPE_QIAN); pChr; pChr = (CQian *)pChr->TypeNext())
-    	{
-			if(pChr)
-				return;
-		}
-		new CQian(&GameServer()->m_World, 0, m_ClientID, GetCharacter()->m_Pos);
-		GameServer()->SendChatTarget(-1, _("**Qian** is back.. There is no escape..."));
-		for(int i = 0; i<5;i++)
-			GameServer()->SendChatTarget(-1, _("Rule {int:i}: SEAL Qian OR BE KILLED BY Qian!"), "i", &i);
-	}
 
 	GameServer()->CreatePlayerSpawn(SpawnPos);
 }
 
-const char* CPlayer::GetLanguage()
+const char *CPlayer::GetLanguage()
 {
 	return m_aLanguage;
 }
 
-void CPlayer::SetLanguage(const char* pLanguage)
+void CPlayer::SetLanguage(const char *pLanguage)
 {
 	str_copy(m_aLanguage, pLanguage, sizeof(m_aLanguage));
 }
 
 void CPlayer::DeleteCharacter()
 {
-	if(m_pCharacter)
+	if (m_pCharacter)
 	{
 		m_Spawning = false;
 		delete m_pCharacter;
@@ -534,11 +507,11 @@ void CPlayer::DeleteCharacter()
 
 bool CPlayer::GetZomb(int Type)
 {
-	if(m_Zomb == Type)
+	if (m_Zomb == Type)
 		return true;
-	for(int i = 0; i < (int)(sizeof(m_SubZomb)/sizeof(m_SubZomb[0])); i++)
+	for (int i = 0; i < (int)(sizeof(m_SubZomb) / sizeof(m_SubZomb[0])); i++)
 	{
-		if(m_SubZomb[i] == Type)
+		if (m_SubZomb[i] == Type)
 			return true;
 	}
 	return false;
@@ -546,16 +519,16 @@ bool CPlayer::GetZomb(int Type)
 
 void CPlayer::ResetKnapsack()
 {
-	for(int i = 0; i < NUM_RESOURCE; i++)
-		m_Knapsack.m_Resource[i] = 0;
-	m_Knapsack.m_Axe = -1;
-	m_Knapsack.m_Pickaxe = -1;
-	m_Knapsack.m_Sword = -1;
+	for (int i = 0; i < NUM_ITEM; i++)
+		m_Items[i] = 0;
+	m_Holding[ITYPE_AXE] = -1;
+	m_Holding[ITYPE_PICKAXE] = -1;
+	m_Holding[ITYPE_SWORD] = -1;
 }
 
 int CPlayer::GetTeam()
 {
-	if(GetZomb())
+	if (GetZomb())
 		return TEAM_ZOMBIE;
 	else
 		return TEAM_HUMAN;
@@ -563,13 +536,12 @@ int CPlayer::GetTeam()
 
 bool CPlayer::PressTab()
 {
-	if(m_PlayerFlags&PLAYERFLAG_SCOREBOARD)
+	if (m_PlayerFlags & PLAYERFLAG_SCOREBOARD)
 		return true;
 	return false;
 }
 
 void CPlayer::Logout()
 {
-	m_AccData.m_UserID = 0;
 	LoggedIn = false;
 }

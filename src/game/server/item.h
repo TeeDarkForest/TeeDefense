@@ -6,43 +6,50 @@
 
 enum
 {
-    // Level 1
-	RESOURCE_LOG=0,
-	RESOURCE_COAL,
-	RESOURCE_COPPER,
-	RESOURCE_IRON,
-	RESOURCE_GOLD,
-	RESOURCE_DIAMOND,
-	RESOURCE_ENEGRY,
-	RESOURCE_ZOMBIEHEART,
+    ITEM_LOG = 1,
+    ITEM_COAL,
+    ITEM_COPPER,
+    ITEM_IRON,
+    ITEM_GOLDEN,
+    ITEM_DIAMOND,
+    ITEM_ENEGRY,
+    ITEM_ZOMBIEHEART,
 
-    // Level 2 : D e e p   A b y s s
-    Abyss_LEnegry, // Light Enegry
-    Abyss_Agar,
-    Abyss_ScrapMetal,
-    Abyss_ScrapMetal_S,
-    Abyss_NuclearWaste_S,
-    Abyss_Remnant,
-    Abyss_MoonlightIngot,
-    Abyss_Alloy,
-    Abyss_Yuerks,
-    Abyss_StarLightIngot,
-    Abyss_Enegry_CORE,
-    Abyss_NuclearWaste_CORE,
-    Abyss_ConstantFragment,
-    Abyss_ConstantIngot,
-    Abyss_DeathAgglomerate,
-    Abyss_Prism,
-    Abyss_PlatinumWildColor,
-    Abyss_Star,
+    ITEM_SWORD_LOG,
+    ITEM_AXE_LOG,
+    ITEM_PICKAXE_LOG,
 
-    // Level End.
-    NUM_RESOURCE,
+    ITEM_AXE_COPPER,
+    ITEM_PICKAXE_COPPER,
+    ITEM_SWORD_IRON,
+
+    ITEM_AXE_IRON,
+    ITEM_PICKAXE_IRON,
+
+    ITEM_SWORD_GOLDEN,
+    ITEM_AXE_GOLDEN,
+    ITEM_PICKAXE_GOLDEN,
+
+    ITEM_SWORD_DIAMOND,
+    ITEM_AXE_DIAMOND,
+    ITEM_PICKAXE_DIAMOND,
+
+    ITEM_SWORD_ENEGRY,
+    ITEM_PICKAXE_ENEGRY,
+
+    ITEM_GUN_TURRET,
+    ITEM_SHOTGUN_TURRET,
+    ITEM_LASER_TURRET,
+    ITEM_LASER_TURRET_2077,
+    ITEM_FOLLOW_GRENADE_TURRET,
+    ITEM_FGUN_TURRET,
+    ITEM_SHOTGUN_TURRET_2077,
+    NUM_ITEM,
 };
 
 enum
 {
-    LEVEL_LOG=1,
+    LEVEL_LOG = 1,
     LEVEL_COAL,
     LEVEL_COPPER,
     LEVEL_IRON,
@@ -57,10 +64,11 @@ enum
 
 enum
 {
-    ITYPE_PICKAXE=0,
+    ITYPE_PICKAXE = 0,
     ITYPE_AXE,
     ITYPE_SWORD,
     ITYPE_TURRET,
     ITYPE_MATERIAL,
+    NUM_ITYPE,
 };
 #endif

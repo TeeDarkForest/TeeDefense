@@ -165,6 +165,8 @@ void CTurret::Tick()
                 if(m_FireDelay <= 0)
                 {
                     new CLaser(GameWorld(), m_Pos, Direction, GameServer()->Tuning()->m_LaserReach, GetOwner());
+                    new CLaser(GameWorld(), m_Pos, Direction, GameServer()->Tuning()->m_LaserReach, GetOwner());
+                    new CLaser(GameWorld(), m_Pos, Direction, GameServer()->Tuning()->m_LaserReach, GetOwner());
                     m_FireDelay = 10;
                     m_Lifes--;
                 }
@@ -172,7 +174,8 @@ void CTurret::Tick()
             case TURRET_LASER_2077:
                 if(m_FireDelay <= 0)
                 {
-	    			new CLightning(GameWorld(), m_Pos, Direction, 100, 400, GetOwner(), 10);
+                    for (int i = 0; i < 4; i++)
+                        new CLightning(GameWorld(), m_Pos, Direction, 100+i*10, 100*i, GetOwner(), 10);
                     m_FireDelay = 5;
                     m_Lifes--;
                 }

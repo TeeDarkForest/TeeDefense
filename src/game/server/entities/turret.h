@@ -22,6 +22,7 @@ enum
     TURRET_LASER_2077, // Lightning!!
 };
 
+
 class CTurret : public CEntity
 {
 public:

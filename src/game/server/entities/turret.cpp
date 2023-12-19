@@ -175,7 +175,7 @@ void CTurret::Tick()
                 if(m_FireDelay <= 0)
                 {
                     for (int i = 0; i < 4; i++)
-                        new CLightning(GameWorld(), m_Pos, Direction, 100+i*10, 100*i, GetOwner(), 10);
+                        new CLightning(GameWorld(), m_Pos, Direction, 100-i*10, 400, GetOwner(), 10);
                     m_FireDelay = 5;
                     m_Lifes--;
                 }

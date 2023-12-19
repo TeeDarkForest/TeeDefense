@@ -277,7 +277,7 @@ void CGameContext::InitItems()
     ResetResource(Resource);
     Resource[ITEM_LOG] = 4666;
     Resource[ITEM_DIAMOND] = 35;
-    Resource[ITEM_ENEGRY] = 20;
+    Resource[ITEM_ENEGRY] = 10;
     CreateItem("enegry pickaxe",    // Name
                ITEM_PICKAXE_ENEGRY, // ID
                ITYPE_PICKAXE,       // ItemType
@@ -285,12 +285,11 @@ void CGameContext::InitItems()
                LEVEL_ENEGRY,        // Level
                -1,                  // TurretType
                100,                 // Proba
-               10000,               // Speed
+               250000,               // Speed
                Resource);
     ResetResource(Resource);
     Resource[ITEM_LOG] = 50;
     Resource[ITEM_COPPER] = 10;
-    Resource[ITEM_ENEGRY] = 40;
     CreateItem("gun turret",    // Name
                ITEM_GUN_TURRET, // ID
                ITYPE_TURRET,    // ItemType
@@ -303,7 +302,6 @@ void CGameContext::InitItems()
     ResetResource(Resource);
     Resource[ITEM_LOG] = 75;
     Resource[ITEM_COPPER] = 20;
-    Resource[ITEM_ENEGRY] = 40;
     CreateItem("shotgun turret",    // Name
                ITEM_SHOTGUN_TURRET, // ID
                ITYPE_TURRET,        // ItemType
@@ -318,7 +316,7 @@ void CGameContext::InitItems()
     Resource[ITEM_COPPER] = 600;
     Resource[ITEM_GOLDEN] = 40;
     Resource[ITEM_DIAMOND] = 20;
-    Resource[ITEM_ENEGRY] = 40;
+    Resource[ITEM_ENEGRY] = 5;
     CreateItem("laser turret",    // Name
                ITEM_LASER_TURRET, // ID
                ITYPE_TURRET,      // ItemType
@@ -332,7 +330,7 @@ void CGameContext::InitItems()
     Resource[ITEM_LOG] = 20;
     Resource[ITEM_COPPER] = 500;
     Resource[ITEM_DIAMOND] = 500;
-    Resource[ITEM_ENEGRY] = 250;
+    Resource[ITEM_ENEGRY] = 35;
     CreateItem("laser2077 turret",     // Name
                ITEM_LASER_TURRET_2077, // ID
                ITYPE_TURRET,           // ItemType
@@ -347,7 +345,7 @@ void CGameContext::InitItems()
     Resource[ITEM_COAL] = 500;
     Resource[ITEM_GOLDEN] = 250;
     Resource[ITEM_DIAMOND] = 75;
-    Resource[ITEM_ENEGRY] = 55;
+    Resource[ITEM_ENEGRY] = 5;
     CreateItem("follow grenade turret",    // Name
                ITEM_FOLLOW_GRENADE_TURRET, // ID
                ITYPE_TURRET,               // ItemType
@@ -361,7 +359,7 @@ void CGameContext::InitItems()
     Resource[ITEM_LOG] = 700;
     Resource[ITEM_COAL] = 1000;
     Resource[ITEM_COPPER] = 70;
-    Resource[ITEM_ENEGRY] = 35;
+    Resource[ITEM_ENEGRY] = 10;
     CreateItem("freeze gun turret", // Name
                ITEM_FGUN_TURRET,    // ID
                ITYPE_TURRET,        // ItemType

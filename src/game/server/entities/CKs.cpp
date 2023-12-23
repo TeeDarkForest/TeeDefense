@@ -124,7 +124,7 @@ void CKs::Picking(int Time, CPlayer *Player)
 	dynamic_string buffre;
 	Server()->Localization()->Format_L(buffer, Player->GetLanguage(), _("- Picking: {str:item} -\n"), "item", buf.buffer());
 	Server()->Localization()->Format_L(buffre, Player->GetLanguage(), _("{int:Health} left. Keep hit!"), "Health", &m_Health);
-	buffer.append(buffre.buffer());
+	buffer.append(buffre);
 	GameServer()->SendBroadcast(buffer.buffer(), CID);
 	Player->m_MiningTick = 25;
 }

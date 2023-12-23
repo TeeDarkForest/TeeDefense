@@ -2359,7 +2359,7 @@ int CGameContext::GetDmg(int Level)
 
 int CGameContext::GetSpeed(int Level, int Type)
 {
-	if (Level <= 0)
+	if (Level <= 0 || Level >= NUM_ITEM)
 		return 8;
 	for (int i = 0; NUM_ITEM; i++)
 	{

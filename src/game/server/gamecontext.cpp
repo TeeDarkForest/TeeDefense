@@ -2313,8 +2313,7 @@ void CGameContext::ConRegister(IConsole::IResult *pResult, void *pUserData)
 	str_copy(Username, pResult->GetString(0), sizeof(Username));
 	str_copy(Password, pResult->GetString(1), sizeof(Password));
 
-	if(pSelf->TW()->Account()->Register(pResult->GetClientID(), Username, Password))
-		pSelf->TW()->Account()->Login(pResult->GetClientID(), Username, Password);
+	pSelf->TW()->Account()->Register(pResult->GetClientID(), Username, Password);
 }
 
 void CGameContext::ConLogin(IConsole::IResult *pResult, void *pUserData)
@@ -2331,8 +2330,7 @@ void CGameContext::ConLogin(IConsole::IResult *pResult, void *pUserData)
 	str_copy(Username, pResult->GetString(0), sizeof(Username));
 	str_copy(Password, pResult->GetString(1), sizeof(Password));
 
-	if(pSelf->TW()->Account()->Login(pResult->GetClientID(), Username, Password))
-		pSelf->TW()->Account()->SyncAccountData(pResult->GetClientID(), pSelf->GetPlayer(pResult->GetClientID())->m_AccData.m_UserID);
+	pSelf->TW()->Account()->Login(pResult->GetClientID(), Username, Password);
 	pSelf->ClearVotes(pResult->GetClientID());
 }
 

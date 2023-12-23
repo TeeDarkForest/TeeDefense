@@ -16,12 +16,19 @@ public:
     bool Login(int ClientID, const char *Username, const char *Password);
     void SyncAccountData(int ClientID, int Table);
     void SaveAccountData(int ClientID, int Table);
+};
 
-private:
-    CDB *DB() const
-    {
-        return GameServer()->DB();
-    }
+struct FaBao
+{
+    CGameContext *m_pGameServer;
+    int m_ClientID;
+    char m_Username[64];
+    char m_Password[64];
+};
+
+struct SFaBao : FaBao
+{
+    int m_Table;
 };
 
 #endif

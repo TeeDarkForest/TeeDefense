@@ -419,7 +419,7 @@ void CCharacter::FireWeapon()
 			Hits++;
 		}
 
-		if (GetPlayer() && !GetPlayer()->GetZomb() && (GetPlayer()->m_Knapsack.m_FFS || (GetPlayer()->m_Holding[ITYPE_SWORD] >= 0 && GetPlayer()->m_Holding[ITYPE_SWORD] >= LEVEL_DIAMOND)))
+		if (GetPlayer() && !GetPlayer()->GetZomb() || GetPlayer()->m_Knapsack.m_FFS)
 		{
 			for (int i = 0; i < 25; i++)
 			{
@@ -430,7 +430,7 @@ void CCharacter::FireWeapon()
 			}
 		}
 
-		if (GetPlayer() && (!GetPlayer()->GetZomb() && (GetPlayer()->m_Knapsack.m_EDreemurr || (GetPlayer()->m_Holding[ITYPE_SWORD] >= 0 && GetPlayer()->m_Holding[ITYPE_SWORD] == ITEM_SWORD_ENEGRY))))
+		if (GetPlayer() && !GetPlayer()->GetZomb() || GetPlayer()->m_Knapsack.m_EDreemurr)
 		{
 			m_Core.m_Vel += ((normalize(vec2(m_LatestInput.m_TargetX, m_LatestInput.m_TargetY))) * max(0.001f, 64.0f));
 			for (int i = 0; i < 10; i++)

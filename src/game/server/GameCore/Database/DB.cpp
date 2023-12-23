@@ -55,4 +55,5 @@ void CDB::FreeData(sql::ResultSet *Result)
 {
     delete m_Statement;
     delete Result;
+    Disconnect();
 }

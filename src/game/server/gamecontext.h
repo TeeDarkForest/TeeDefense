@@ -396,7 +396,6 @@ public:
 };
 
 inline Mask128 CmaskAll() { return Mask128(); }
-inline Mask128 CmaskNone() { return Mask128(-1); }
 inline Mask128 CmaskOne(int ClientID) { return Mask128(ClientID); }
 inline Mask128 CmaskUnset(Mask128 Mask, int ClientID) { return Mask^CmaskOne(ClientID); }
 inline Mask128 CmaskAllExceptOne(int ClientID) { return CmaskUnset(CmaskAll(), ClientID); }

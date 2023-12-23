@@ -192,6 +192,8 @@ public:
 
 	b2Body *m_Tee;
 #endif
+
+	int m_BotID;
 };
 
 #endif

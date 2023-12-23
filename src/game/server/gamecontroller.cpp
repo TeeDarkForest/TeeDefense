@@ -1080,7 +1080,7 @@ void CGameController::CheckZombie()
 {
 	if (m_Warmup || !m_Wave || EndWave())
 		return;
-	for (int i = 0; i < MAX_CLIENTS; i++) //...
+	for (int i = ZOMBIE_START; i < ZOMBIE_END; i++) //...
 	{
 		if (!GameServer()->m_apPlayers[i]) // Check if the CID is free
 		{

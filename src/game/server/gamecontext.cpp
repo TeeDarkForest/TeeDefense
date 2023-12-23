@@ -320,7 +320,7 @@ void CGameContext::CreateSoundGlobal(int Sound, int Target)
 void CGameContext::SendChatTarget(int To, const char *pText, ...)
 {
 	int Start = (To < 0 ? 0 : To);
-	int End = (To < 0 ? MAX_CLIENTS : To + 1);
+	int End = (To < 0 ? MAX_PLAYERS : To + 1);
 
 	CNetMsg_Sv_Chat Msg;
 	Msg.m_Team = 0;
@@ -2099,7 +2099,7 @@ void CGameContext::OnZombie(int ClientID, int Zomb)
 
 void CGameContext::OnZombieKill(int ClientID)
 {
-	if (m_apPlayers[ClientID] && m_apPlayers[ClientID]->GetCharacter())
+	if (GetPlayer(ClientID, false, true))
 		m_apPlayers[ClientID]->DeleteCharacter();
 	if (m_apPlayers[ClientID])
 		delete m_apPlayers[ClientID];
@@ -2256,7 +2256,6 @@ void CGameContext::SendCantMakeItemChat(int To, int *Resource)
 		{
 			dynamic_string iname;
 			Buffre.clear();
-			p->m_Items[i] -= Resource[i];
 			Server()->Localization()->Format_L(iname, Lang, _(GetItemNameByID(i)));
 			Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} {str:name}, "), "num", &Resource[i], "name", iname.buffer());
 			Buffer.append(Buffre.buffer());
@@ -2330,8 +2329,6 @@ void CGameContext::MakeItem(int ItemID, int ClientID)
 		}
 	}
 
-	TW()->Account()->SyncAccountData(ClientID, TABLE_ITEM);
-
 	if (random_int(0, 100) < MakeItem.m_Proba)
 	{
 		SendMakeItemChat(ClientID, MakeItem);
@@ -2350,6 +2347,8 @@ void CGameContext::MakeItem(int ItemID, int ClientID)
 	}
 
 	TW()->Account()->SaveAccountData(ClientID, TABLE_ITEM);
+	TW()->Account()->SyncAccountData(ClientID, TABLE_ITEM);
+	ClearVotes(ClientID);
 }
 
 int CGameContext::GetDmg(int Level)

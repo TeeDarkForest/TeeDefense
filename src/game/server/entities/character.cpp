@@ -1107,74 +1107,92 @@ void CCharacter::Snap(int SnappingClient)
 	if (NetworkClipped(SnappingClient))
 		return;
 
-	CNetObj_Character *pCharacter = static_cast<CNetObj_Character *>(Server()->SnapNewItem(NETOBJTYPE_CHARACTER, Id, sizeof(CNetObj_Character)));
-	if (!pCharacter)
-		return;
-
-	// write down the m_Core
-	if (!m_ReckoningTick || GameServer()->m_World.m_Paused)
+	if (Id >= VANILLA_MAX_CLIENTS)
 	{
-		// no dead reckoning when paused because the client doesn't know
-		// how far to perform the reckoning
-		pCharacter->m_Tick = 0;
-		m_Core.Write(pCharacter);
+		CNetObj_DDNetLaser *pObj = static_cast<CNetObj_DDNetLaser *>(Server()->SnapNewItem(NETOBJTYPE_DDNETLASER, Id, sizeof(CNetObj_DDNetLaser)));
+		if (pObj)
+		{
+
+			pObj->m_ToX = (int)m_Pos.x;
+			pObj->m_ToY = (int)m_Pos.y;
+			pObj->m_FromX = (int)m_Pos.x;
+			pObj->m_FromY = (int)m_Pos.y - 32;
+			pObj->m_StartTick = Server()->Tick();
+			pObj->m_Owner = Id;
+			pObj->m_Type = rand() % NUM_LASERTYPES;
+		}
 	}
 	else
 	{
-		pCharacter->m_Tick = m_ReckoningTick;
-		m_SendCore.Write(pCharacter);
-	}
+		CNetObj_Character *pCharacter = static_cast<CNetObj_Character *>(Server()->SnapNewItem(NETOBJTYPE_CHARACTER, Id, sizeof(CNetObj_Character)));
+		if (!pCharacter)
+			return;
+
+		// write down the m_Core
+		if (!m_ReckoningTick || GameServer()->m_World.m_Paused)
+		{
+			// no dead reckoning when paused because the client doesn't know
+			// how far to perform the reckoning
+			pCharacter->m_Tick = 0;
+			m_Core.Write(pCharacter);
+		}
+		else
+		{
+			pCharacter->m_Tick = m_ReckoningTick;
+			m_SendCore.Write(pCharacter);
+		}
 
 #ifdef CONF_BOX2D
-	if (g_Config.m_B2TeeLaser)
-	{
-		CNetObj_Laser *pB2Body = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, Id, sizeof(CNetObj_Laser)));
-		pB2Body->m_FromX = pB2Body->m_X = m_b2Body->GetPosition().x * 30.f;
-		pB2Body->m_FromY = pB2Body->m_Y = m_b2Body->GetPosition().y * 30.f;
-		pB2Body->m_StartTick = Server()->Tick();
-	}
+		if (g_Config.m_B2TeeLaser)
+		{
+			CNetObj_Laser *pB2Body = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, Id, sizeof(CNetObj_Laser)));
+			pB2Body->m_FromX = pB2Body->m_X = m_b2Body->GetPosition().x * 30.f;
+			pB2Body->m_FromY = pB2Body->m_Y = m_b2Body->GetPosition().y * 30.f;
+			pB2Body->m_StartTick = Server()->Tick();
+		}
 #endif
 
-	// set emote
-	if (m_EmoteStop < Server()->Tick())
-	{
-		m_EmoteType = EMOTE_NORMAL;
-		m_EmoteStop = -1;
+		// set emote
+		if (m_EmoteStop < Server()->Tick())
+		{
+			m_EmoteType = EMOTE_NORMAL;
+			m_EmoteStop = -1;
+		}
+
+		if (pCharacter->m_HookedPlayer != -1)
+		{
+			if (!Server()->Translate(pCharacter->m_HookedPlayer, SnappingClient))
+				pCharacter->m_HookedPlayer = -1;
+		}
+
+		pCharacter->m_Emote = m_EmoteType;
+
+		pCharacter->m_AmmoCount = 0;
+		pCharacter->m_Health = 0;
+		pCharacter->m_Armor = 0;
+
+		pCharacter->m_Weapon = m_ActiveWeapon;
+		pCharacter->m_AttackTick = m_AttackTick;
+
+		pCharacter->m_Direction = m_Input.m_Direction;
+
+		if (m_pPlayer->GetCID() == SnappingClient || SnappingClient == -1 ||
+			(!g_Config.m_SvStrictSpectateMode && m_pPlayer->GetCID() == GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID))
+		{
+			pCharacter->m_Health = m_Health;
+			pCharacter->m_Armor = m_Armor;
+			if (m_aWeapons[m_ActiveWeapon].m_Ammo > 0)
+				pCharacter->m_AmmoCount = m_aWeapons[m_ActiveWeapon].m_Ammo;
+		}
+
+		if (pCharacter->m_Emote == EMOTE_NORMAL)
+		{
+			if (250 - ((Server()->Tick() - m_LastAction) % (250)) < 5)
+				pCharacter->m_Emote = EMOTE_BLINK;
+		}
+
+		pCharacter->m_PlayerFlags = GetPlayer()->m_PlayerFlags;
 	}
-
-	if (pCharacter->m_HookedPlayer != -1)
-	{
-		if (!Server()->Translate(pCharacter->m_HookedPlayer, SnappingClient))
-			pCharacter->m_HookedPlayer = -1;
-	}
-
-	pCharacter->m_Emote = m_EmoteType;
-
-	pCharacter->m_AmmoCount = 0;
-	pCharacter->m_Health = 0;
-	pCharacter->m_Armor = 0;
-
-	pCharacter->m_Weapon = m_ActiveWeapon;
-	pCharacter->m_AttackTick = m_AttackTick;
-
-	pCharacter->m_Direction = m_Input.m_Direction;
-
-	if (m_pPlayer->GetCID() == SnappingClient || SnappingClient == -1 ||
-		(!g_Config.m_SvStrictSpectateMode && m_pPlayer->GetCID() == GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID))
-	{
-		pCharacter->m_Health = m_Health;
-		pCharacter->m_Armor = m_Armor;
-		if (m_aWeapons[m_ActiveWeapon].m_Ammo > 0)
-			pCharacter->m_AmmoCount = m_aWeapons[m_ActiveWeapon].m_Ammo;
-	}
-
-	if (pCharacter->m_Emote == EMOTE_NORMAL)
-	{
-		if (250 - ((Server()->Tick() - m_LastAction) % (250)) < 5)
-			pCharacter->m_Emote = EMOTE_BLINK;
-	}
-
-	pCharacter->m_PlayerFlags = GetPlayer()->m_PlayerFlags;
 }
 
 vec2 CCharacter::GetGrenadeAngle(vec2 m_StartPos, vec2 m_ToShoot, bool GrenadeBot)

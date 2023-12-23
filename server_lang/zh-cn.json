@@ -519,8 +519,8 @@
             "value": "欢迎模式作者: FlowerFell-Sans | Flower进入游戏!"
         },
         {
-            "key": "",
-            "value": ""
+            "key": "- Picking: {str:item} -\n",
+            "value": "- 采集中 : {str:item} -\n"
         },
         {
             "key": "",

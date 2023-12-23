@@ -112,15 +112,20 @@ void CKs::Picking(int Time, CPlayer *Player)
 {
 	m_Health -= Time;
 	int CID = Player->GetCID();
+	dynamic_string buf;
+	Server()->Localization()->Format_L(buf, Player->GetLanguage(), _(GameServer()->m_Items[m_Type].m_Name));
 	if (m_Health <= 0)
 	{
 		Player->m_Items[m_Type]++;
-		dynamic_string buf;
-		Server()->Localization()->Format_L(buf, Player->GetLanguage(), _(GameServer()->m_Items[m_Type].m_Name));
 		GameServer()->SendChatTarget(CID, _("You picked up a {str:Resource}"), "Resource", buf.buffer());
 		m_Health = GetMaxHealth(m_Type);
 	}
-	GameServer()->SendBroadcast_VL(_("{int:Health} left. Keep hit!"), CID, "Health", &m_Health);
+	dynamic_string buffer;
+	dynamic_string buffre;
+	Server()->Localization()->Format_L(buffer, Player->GetLanguage(), _("- Picking: {str:item} -\n"), "item", buf.buffer());
+	Server()->Localization()->Format_L(buffre, Player->GetLanguage(), _("{int:Health} left. Keep hit!"), "Health", &m_Health);
+	buffer.append(buffre.buffer());
+	GameServer()->SendBroadcast(buffer.buffer(), CID);
 	Player->m_MiningTick = 25;
 }
 

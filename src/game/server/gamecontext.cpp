@@ -2347,7 +2347,6 @@ void CGameContext::MakeItem(int ItemID, int ClientID)
 	}
 
 	TW()->Account()->SaveAccountData(ClientID, TABLE_ITEM);
-	TW()->Account()->SyncAccountData(ClientID, TABLE_ITEM);
 	ClearVotes(ClientID);
 }
 
@@ -2532,8 +2531,6 @@ void CGameContext::ConUse(IConsole::IResult *pResult, void *pUserData)
 	CPlayer *pP = pSelf->GetPlayer(CID);
 	if (!pP)
 		return;
-
-	pSelf->TW()->Account()->SyncAccountData(CID, TABLE_ITEM);
 
 	switch (pSelf->m_Items[ItemID].m_Type)
 	{

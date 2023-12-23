@@ -54,6 +54,10 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team, int Zomb)
 
 	m_AccData.m_UserID = 0;
 	m_InitAcc = false;
+
+	m_Knapsack.m_EDreemurr = 0;
+	m_Knapsack.m_XyCloud = 0;
+	m_Knapsack.m_FFS = 0;
 }
 
 CPlayer::~CPlayer()

@@ -4,6 +4,8 @@
 #include <engine/shared/config.h>
 #include "player.h"
 
+#include "GameCore/Account/account.h"
+
 MACRO_ALLOC_POOL_ID_IMPL(CPlayer, MAX_CLIENTS)
 
 IServer *CPlayer::Server() const { return m_pGameServer->Server(); }
@@ -161,6 +163,7 @@ void CPlayer::Tick()
 	else if (m_InitAcc)
 	{
 		SetTeam(TEAM_HUMAN, false);
+		GameServer()->TW()->Account()->SyncAccountData(m_ClientID, CGameContext::TABLE_ITEM);
 		m_InitAcc = false;
 	}
 }

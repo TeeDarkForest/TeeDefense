@@ -151,7 +151,7 @@ void CGameContext::InitItems()
                LEVEL_COPPER,        // Level
                -1,                  // TurretType
                90,                  // Proba
-               3000,                 // Speed
+               700,                 // Speed
                Resource);
     ResetResource(Resource);
     Resource[ITEM_LOG] = 1900;
@@ -187,7 +187,7 @@ void CGameContext::InitItems()
                LEVEL_IRON,        // Level
                -1,                // TurretType
                90,                // Proba
-               5000,               // Speed
+               1400,               // Speed
                Resource);
     ResetResource(Resource);
     Resource[ITEM_LOG] = 2440;
@@ -223,7 +223,7 @@ void CGameContext::InitItems()
                LEVEL_GOLD,          // Level
                -1,                  // TurretType
                90,                  // Proba
-               7500,                // Speed
+               2000,                // Speed
                Resource);
     ResetResource(Resource);
     Resource[ITEM_LOG] = 4400;
@@ -259,7 +259,7 @@ void CGameContext::InitItems()
                LEVEL_DIAMOND,        // Level
                -1,                   // TurretType
                80,                   // Proba
-               15000,                 // Speed
+               8000,                 // Speed
                Resource);
     ResetResource(Resource);
     Resource[ITEM_LOG] = 5000;

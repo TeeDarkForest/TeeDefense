@@ -1298,7 +1298,7 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 
 	// count the players
 	int PlayerCount = 0, ClientCount = 0;
-	for (int i = 0; i < MAX_CLIENTS; i++)
+	for (int i = 0; i < MAX_PLAYERS; i++)
 	{
 		if (m_aClients[i].m_State != CClient::STATE_EMPTY)
 		{
@@ -1326,7 +1326,7 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 	}
 	else
 	{
-		if (m_NetServer.MaxClients() <= MAX_CLIENTS)
+		if (m_NetServer.MaxClients() <= MAX_PLAYERS)
 		{
 			p.AddString(g_Config.m_SvName, 64);
 		}
@@ -1354,17 +1354,17 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 	int MaxClients = m_NetServer.MaxClients();
 	// How many clients the used serverinfo protocol supports, has to be tracked
 	// separately to make sure we don't subtract the reserved slots from it
-	int MaxClientsProtocol = MAX_CLIENTS;
+	int MaxClientsProtocol = MAX_PLAYERS;
 	if (Type == SERVERINFO_VANILLA || Type == SERVERINFO_INGAME)
 	{
-		if (ClientCount >= MAX_CLIENTS)
+		if (ClientCount >= MAX_PLAYERS)
 		{
 			if (ClientCount < MaxClients)
-				ClientCount = MAX_CLIENTS - 1;
+				ClientCount = MAX_PLAYERS - 1;
 			else
-				ClientCount = MAX_CLIENTS;
+				ClientCount = MAX_PLAYERS;
 		}
-		MaxClientsProtocol = MAX_CLIENTS;
+		MaxClientsProtocol = MAX_PLAYERS;
 		if (PlayerCount > ClientCount)
 			PlayerCount = ClientCount;
 	}

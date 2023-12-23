@@ -2171,7 +2171,7 @@ void CGameContext::ConRegister(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConLogin(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(pSelf->GetPlayer(pResult->GetClientID())->LoggedIn())
+	if (pSelf->GetPlayer(pResult->GetClientID())->LoggedIn())
 	{
 		pSelf->SendChatTarget(pResult->GetClientID(), _("You're already logged in."));
 		return;
@@ -2361,13 +2361,7 @@ int CGameContext::GetSpeed(int Level, int Type)
 {
 	if (Level <= 0 || Level >= NUM_ITEM)
 		return 8;
-	for (int i = 0; NUM_ITEM; i++)
-	{
-		if (m_Items[i].m_Level == Level && m_Items[i].m_Type == Type)
-		{
-			return m_Items[i].m_Speed;
-		}
-	}
+	return m_Items[Level].m_Speed;
 }
 
 bool CGameContext::CheckItemName(const char *pItemName)
@@ -2433,9 +2427,9 @@ void CGameContext::AddVote_VL(int To, const char *aCmd, const char *pText, ...)
 
 void CGameContext::InitVotes(int ClientID)
 {
-	if(!GetPlayer(ClientID)->LoggedIn())
+	if (!GetPlayer(ClientID)->LoggedIn())
 		return;
-	
+
 	char Lang[16];
 	str_copy(Lang, m_apPlayers[ClientID]->GetLanguage(), sizeof(Lang));
 	AddVote_VL(ClientID, "ccv_null", _("Unlock full stuff please join Server official QQ Group"));

@@ -511,6 +511,22 @@
             "value": "账号创建成功."
         },
         {
+            "key": "\n\n\n\n\n\nEnter '/register username password' to register\nEnter '/login username password' to login",
+            "value": "\n\n\n\n\n输入 '/register 用户名 密码'注册账号\n\n输入'/login 用户名 密码'登录账号\n\n登录账号后可进入游戏          "
+        },
+        {
+            "key": "Welcome the auther of this mod: FlowerFell-Sans | Flower entered the game!",
+            "value": "欢迎模式作者: FlowerFell-Sans | Flower进入游戏!"
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
             "key": "",
             "value": ""
         }

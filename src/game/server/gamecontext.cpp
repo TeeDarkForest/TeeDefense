@@ -528,22 +528,6 @@ void CGameContext::SendTuningParams(int ClientID)
 	Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
 }
 
-void CGameContext::SwapTeams()
-{
-	if (!m_pController->IsTeamplay())
-		return;
-
-	SendChatTarget(-1, _("Teams were swapped"));
-
-	for (int i = 0; i < MAX_CLIENTS; ++i)
-	{
-		if (m_apPlayers[i] && m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
-			m_apPlayers[i]->SetTeam(m_apPlayers[i]->GetTeam() ^ 1, false);
-	}
-
-	(void)m_pController->CheckTeamBalance();
-}
-
 void CGameContext::OnTick()
 {
 	// check tuning
@@ -716,8 +700,6 @@ void CGameContext::OnClientEnter(int ClientID)
 
 	m_VoteUpdate = true;
 
-	ClearVotes(ClientID);
-
 	Server()->ExpireServerInfo();
 }
 
@@ -727,7 +709,7 @@ void CGameContext::OnClientConnected(int ClientID)
 	{
 		OnZombieKill(ClientID);
 	}
-	m_apPlayers[ClientID] = new (ClientID) CPlayer(this, ClientID, 0, 0);
+	m_apPlayers[ClientID] = new (ClientID) CPlayer(this, ClientID, TEAM_SPECTATORS, 0);
 	// players[client_id].init(client_id);
 	// players[client_id].client_id = client_id;
 
@@ -1045,48 +1027,10 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		else if (MsgID == NETMSGTYPE_CL_SETTEAM && !m_World.m_Paused)
 		{
 			CNetMsg_Cl_SetTeam *pMsg = (CNetMsg_Cl_SetTeam *)pRawMsg;
-
-			if (pPlayer->GetTeam() == pMsg->m_Team || (g_Config.m_SvSpamprotection && pPlayer->m_LastSetTeam && pPlayer->m_LastSetTeam + Server()->TickSpeed() * 3 > Server()->Tick()))
+			if (pPlayer->GetTeam() == pMsg->m_Team)
 				return;
 
-			if (pMsg->m_Team != TEAM_SPECTATORS && m_LockTeams)
-			{
-				pPlayer->m_LastSetTeam = Server()->Tick();
-				SendBroadcast_VL(_("Teams are locked"), ClientID);
-				return;
-			}
-
-			if (pPlayer->m_TeamChangeTick > Server()->Tick())
-			{
-				pPlayer->m_LastSetTeam = Server()->Tick();
-				int TimeLeft = (pPlayer->m_TeamChangeTick - Server()->Tick()) / Server()->TickSpeed();
-				char aBuf[128];
-				char aTime[128];
-				str_format(aTime, sizeof(aTime), "%02d:%02d", TimeLeft / 60, TimeLeft % 60);
-				str_format(aBuf, sizeof(aBuf), "Time to wait before changing team: %s", aTime);
-				SendBroadcast_VL(_("Time to wait before changing team: {str:Time}"), ClientID, "Time", aTime);
-				return;
-			}
-
-			// Switch team on given client and kill/respawn him
-			if (m_pController->CanJoinTeam(pMsg->m_Team, ClientID))
-			{
-				if (m_pController->CanChangeTeam(pPlayer, pMsg->m_Team))
-				{
-					pPlayer->m_LastSetTeam = Server()->Tick();
-					if (pPlayer->GetTeam() == TEAM_SPECTATORS || pMsg->m_Team == TEAM_SPECTATORS)
-						m_VoteUpdate = true;
-					pPlayer->SetTeam(pMsg->m_Team);
-					(void)m_pController->CheckTeamBalance();
-					pPlayer->m_TeamChangeTick = Server()->Tick();
-				}
-				else
-					SendBroadcast_VL(_("Teams must be balanced, please join other team"), ClientID);
-			}
-			else
-			{
-				SendBroadcast_VL(_("Only {str:ID} active players are allowed"), ClientID, "ID", ClientID);
-			}
+			pPlayer->SetTeam(pMsg->m_Team);
 		}
 		else if (MsgID == NETMSGTYPE_CL_SETSPECTATORMODE && !m_World.m_Paused)
 		{
@@ -1356,99 +1300,6 @@ void CGameContext::ConSay(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	pSelf->SendChat(-1, CGameContext::CHAT_ALL, pResult->GetString(0));
-}
-
-void CGameContext::ConSetTeam(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	int ClientID = clamp(pResult->GetInteger(0), 0, (int)MAX_CLIENTS - 1);
-	int Team = clamp(pResult->GetInteger(1), -1, 1);
-	int Delay = pResult->NumArguments() > 2 ? pResult->GetInteger(2) : 0;
-	if (!pSelf->m_apPlayers[ClientID])
-		return;
-
-	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "moved client %d to team %d", ClientID, Team);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
-
-	pSelf->m_apPlayers[ClientID]->m_TeamChangeTick = pSelf->Server()->Tick() + pSelf->Server()->TickSpeed() * Delay * 60;
-	pSelf->m_apPlayers[ClientID]->SetTeam(Team);
-	(void)pSelf->m_pController->CheckTeamBalance();
-}
-
-void CGameContext::ConSetTeamAll(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	int Team = clamp(pResult->GetInteger(0), -1, 1);
-
-	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "All players were moved to the %s", pSelf->m_pController->GetTeamName(Team));
-	pSelf->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
-
-	for (int i = 0; i < MAX_CLIENTS; ++i)
-		if (pSelf->m_apPlayers[i])
-			pSelf->m_apPlayers[i]->SetTeam(Team, false);
-
-	(void)pSelf->m_pController->CheckTeamBalance();
-}
-
-void CGameContext::ConSwapTeams(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->SwapTeams();
-}
-
-void CGameContext::ConShuffleTeams(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	if (!pSelf->m_pController->IsTeamplay())
-		return;
-
-	int CounterRed = 0;
-	int CounterBlue = 0;
-	int PlayerTeam = 0;
-	for (int i = 0; i < MAX_CLIENTS; ++i)
-		if (pSelf->m_apPlayers[i] && pSelf->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
-			++PlayerTeam;
-	PlayerTeam = (PlayerTeam + 1) / 2;
-
-	pSelf->SendChat(-1, CGameContext::CHAT_ALL, "Teams were shuffled");
-
-	for (int i = 0; i < MAX_CLIENTS; ++i)
-	{
-		if (pSelf->m_apPlayers[i] && pSelf->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
-		{
-			if (CounterRed == PlayerTeam)
-				pSelf->m_apPlayers[i]->SetTeam(TEAM_ZOMBIE, false);
-			else if (CounterBlue == PlayerTeam)
-				pSelf->m_apPlayers[i]->SetTeam(TEAM_HUMAN, false);
-			else
-			{
-				if (rand() % 2)
-				{
-					pSelf->m_apPlayers[i]->SetTeam(TEAM_ZOMBIE, false);
-					++CounterBlue;
-				}
-				else
-				{
-					pSelf->m_apPlayers[i]->SetTeam(TEAM_HUMAN, false);
-					++CounterRed;
-				}
-			}
-		}
-	}
-
-	(void)pSelf->m_pController->CheckTeamBalance();
-}
-
-void CGameContext::ConLockTeams(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->m_LockTeams ^= 1;
-	if (pSelf->m_LockTeams)
-		pSelf->SendChatTarget(-1, _("Teams were locked"));
-	else
-		pSelf->SendChatTarget(-1, _("Teams were unlocked"));
 }
 
 void CGameContext::ConSkipWarmup(IConsole::IResult *pResult, void *pUserData)
@@ -2074,11 +1925,6 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("restart", "?i", CFGFLAG_SERVER | CFGFLAG_STORE, ConRestart, this, "Restart in x seconds (0 = abort)");
 	Console()->Register("broadcast", "r", CFGFLAG_SERVER, ConBroadcast, this, "Broadcast message");
 	Console()->Register("say", "r", CFGFLAG_SERVER, ConSay, this, "Say in chat");
-	Console()->Register("set_team", "ii?i", CFGFLAG_SERVER, ConSetTeam, this, "Set team of player to team");
-	Console()->Register("set_team_all", "i", CFGFLAG_SERVER, ConSetTeamAll, this, "Set team of all players to team");
-	Console()->Register("swap_teams", "", CFGFLAG_SERVER, ConSwapTeams, this, "Swap the current teams");
-	Console()->Register("shuffle_teams", "", CFGFLAG_SERVER, ConShuffleTeams, this, "Shuffle the current teams");
-	Console()->Register("lock_teams", "", CFGFLAG_SERVER, ConLockTeams, this, "Lock/unlock teams");
 
 	Console()->Register("add_vote", "sr", CFGFLAG_SERVER, ConAddVote, this, "Add a voting option");
 	Console()->Register("add_command_vote", "sr", CFGFLAG_SERVER, ConAddCommandVote, this, "Add a voting option");
@@ -2104,13 +1950,13 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("me", "", CFGFLAG_CHAT, ConMe, this, "Show information about the mod");
 	Console()->Register("event", "", CFGFLAG_CHAT, ConCheckEvent, this, "Show information about the mod");
 
-	Console()->Register("register", "?s?s", CFGFLAG_CHAT, ConRegister, this, "Show information about the mod");
-	Console()->Register("login", "?s?s", CFGFLAG_CHAT, ConLogin, this, "Show information about the mod");
-	Console()->Register("logout", "", CFGFLAG_CHAT, ConLogout, this, "Show information about the mod");
+	Console()->Register("register", "?s?s", CFGFLAG_CHAT | CFGFLAG_USER, ConRegister, this, "Show information about the mod");
+	Console()->Register("login", "?s?s", CFGFLAG_CHAT | CFGFLAG_USER, ConLogin, this, "Show information about the mod");
+	Console()->Register("logout", "", CFGFLAG_CHAT | CFGFLAG_USER, ConLogout, this, "Show information about the mod");
 
-	Console()->Register("sync", "", CFGFLAG_VOTE, ConSync, this, "Sync item");
-	Console()->Register("make", "i", CFGFLAG_VOTE, ConMake, this, "Make");
-	Console()->Register("use", "i", CFGFLAG_VOTE, ConUse, this, "Use");
+	Console()->Register("sync", "", CFGFLAG_VOTE | CFGFLAG_USER, ConSync, this, "Sync item");
+	Console()->Register("make", "i", CFGFLAG_VOTE | CFGFLAG_USER, ConMake, this, "Make");
+	Console()->Register("use", "i", CFGFLAG_VOTE | CFGFLAG_USER, ConUse, this, "Use");
 
 	Console()->Chain("sv_motd", ConchainSpecialMotdupdate, this);
 }
@@ -2302,6 +2148,12 @@ void CGameContext::ConRegister(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
+	if (pSelf->GetPlayer(pResult->GetClientID())->LoggedIn())
+	{
+		pSelf->SendChatTarget(pResult->GetClientID(), _("You're already logged in."));
+		return;
+	}
+
 	if (pResult->NumArguments() != 2)
 	{
 		pSelf->SendChatTarget(pResult->GetClientID(), _("Usage: /register <username> <password>"));
@@ -2319,6 +2171,12 @@ void CGameContext::ConRegister(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConLogin(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->GetPlayer(pResult->GetClientID())->LoggedIn())
+	{
+		pSelf->SendChatTarget(pResult->GetClientID(), _("You're already logged in."));
+		return;
+	}
+
 	if (pResult->NumArguments() != 2)
 	{
 		pSelf->SendChatTarget(pResult->GetClientID(), _("usage: /login <username> <password>"));
@@ -2344,7 +2202,7 @@ void CGameContext::LogoutAccount(int ClientID)
 {
 	CPlayer *pP = m_apPlayers[ClientID];
 	CCharacter *pChr = pP->GetCharacter();
-	pP->Logout();
+	pP->m_AccData.m_UserID = 0;
 	SendChatTarget(pP->GetCID(), _("Logout succesful"));
 }
 
@@ -2575,6 +2433,9 @@ void CGameContext::AddVote_VL(int To, const char *aCmd, const char *pText, ...)
 
 void CGameContext::InitVotes(int ClientID)
 {
+	if(!GetPlayer(ClientID)->LoggedIn())
+		return;
+	
 	char Lang[16];
 	str_copy(Lang, m_apPlayers[ClientID]->GetLanguage(), sizeof(Lang));
 	AddVote_VL(ClientID, "ccv_null", _("Unlock full stuff please join Server official QQ Group"));

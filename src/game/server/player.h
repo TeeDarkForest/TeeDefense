@@ -194,11 +194,14 @@ public:
 	// Check
 	bool PressTab();
 
-	// Account
-	bool LoggedIn;
+	bool LoggedIn()
+	{
+		return (m_AccData.m_UserID > 0);
+	}
 
 	void ResetKnapsack();
-	void Logout();
+
+	bool m_InitAcc;
 };
 
 #endif

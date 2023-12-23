@@ -34,7 +34,6 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team, int Zomb)
 	}
 	idMap[0] = ClientID;
 
-	LoggedIn = false;
 	if (!Zomb)
 		ResetKnapsack();
 	// Zomb2
@@ -52,6 +51,7 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team, int Zomb)
 #endif
 
 	m_AccData.m_UserID = 0;
+	m_InitAcc = false;
 }
 
 CPlayer::~CPlayer()
@@ -152,6 +152,17 @@ void CPlayer::Tick()
 		m_MiningTick--;
 
 	HandleTuningParams();
+
+	if(!LoggedIn())
+	{
+		SetTeam(TEAM_SPECTATORS, false);
+		GameServer()->SendBroadcast_VL(_("\n\n\n\n\n\nEnter '/register username password' to register\nEnter '/login username password' to login"), m_ClientID);
+	}
+	else if (m_InitAcc)
+	{
+		SetTeam(TEAM_HUMAN, false);
+		m_InitAcc = false;
+	}
 }
 
 void CPlayer::PostTick()
@@ -371,11 +382,6 @@ void CPlayer::FakeSnap(int SnappingClient)
 
 void CPlayer::OnDisconnect(const char *pReason)
 {
-	if (LoggedIn)
-	{
-		GameServer()->LogoutAccount(m_ClientID);
-	}
-
 	if (Server()->ClientIngame(m_ClientID) && !m_Zomb)
 	{
 		char aBuf[512];
@@ -468,7 +474,36 @@ void CPlayer::Respawn()
 
 void CPlayer::SetTeam(int Team, bool DoChatMsg)
 {
-	return;
+	// clamp the team
+	Team = GameServer()->m_pController->ClampTeam(Team);
+	if (m_Team == Team || (!LoggedIn() && Team != TEAM_SPECTATORS))
+		return;
+
+	if (DoChatMsg)
+		GameServer()->SendChatTarget(-1, _("'{str:PlayerName}' entered and joined the {str:Team}"), "PlayerName", Server()->ClientName(m_ClientID), "Team", GameServer()->m_pController->GetTeamName(Team));
+
+	KillCharacter();
+
+	char aBuf[512];
+	m_Team = Team;
+	m_LastActionTick = Server()->Tick();
+	m_SpectatorID = SPEC_FREEVIEW;
+	// we got to wait 0.5 secs before respawning
+	m_RespawnTick = Server()->Tick() + Server()->TickSpeed() / 2;
+	str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' m_Team=%d", m_ClientID, Server()->ClientName(m_ClientID), m_Team);
+	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
+
+	GameServer()->m_pController->OnPlayerInfoChange(GameServer()->m_apPlayers[m_ClientID]);
+
+	if (Team == TEAM_SPECTATORS)
+	{
+		// update spectator modes
+		for (int i = 0; i < MAX_CLIENTS; ++i)
+		{
+			if (GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->m_SpectatorID == m_ClientID)
+				GameServer()->m_apPlayers[i]->m_SpectatorID = SPEC_FREEVIEW;
+		}
+	}
 }
 
 void CPlayer::TryRespawn()
@@ -531,7 +566,7 @@ int CPlayer::GetTeam()
 	if (GetZomb())
 		return TEAM_ZOMBIE;
 	else
-		return TEAM_HUMAN;
+		return m_Team;
 }
 
 bool CPlayer::PressTab()
@@ -539,9 +574,4 @@ bool CPlayer::PressTab()
 	if (m_PlayerFlags & PLAYERFLAG_SCOREBOARD)
 		return true;
 	return false;
-}
-
-void CPlayer::Logout()
-{
-	LoggedIn = false;
 }

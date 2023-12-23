@@ -24,6 +24,7 @@ enum
 	CFGFLAG_ECON = 32,
 	CFGFLAG_CHAT = 64,
 	CFGFLAG_VOTE = 128,
+	CFGFLAG_USER = 256,
 };
 
 #endif

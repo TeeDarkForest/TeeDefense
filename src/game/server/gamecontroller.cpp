@@ -289,12 +289,6 @@ void CGameController::CycleMap()
 	if (!str_length(g_Config.m_SvMaprotation))
 		return;
 
-	if (m_RoundCount < g_Config.m_SvRoundsPerMap - 1)
-	{
-		if (g_Config.m_SvRoundSwap)
-			GameServer()->SwapTeams();
-		return;
-	}
 
 	// handle maprotation
 	const char *pMapRotation = g_Config.m_SvMaprotation;
@@ -545,26 +539,12 @@ void CGameController::Tick()
 	int Players = 0;
 	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if (GameServer()->m_apPlayers[Players])
-		{
-			if (GameServer()->m_apPlayers[Players]->GetTeam() == TEAM_HUMAN)
-			{
-				Players++;
-			}
-		}
+		if (GameServer()->GetPlayer(i, false, true))
+			Players++;
 	}
 
 	if (Players >= 1 && !GameServer()->m_pController->m_Wave)
-	{
 		StartRound();
-	}
-	else if (!GameServer()->m_pController->m_Wave)
-	{
-		if (Server()->Tick() % Server()->TickSpeed() == 0)
-		{
-			GameServer()->SendBroadcast_VL(_("At least 4 players are required to start the game."), -1);
-		}
-	}
 
 	m_LastActivePlayers = Players;
 

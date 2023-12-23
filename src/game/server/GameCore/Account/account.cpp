@@ -87,6 +87,7 @@ static void login_thread(void *user)
 
                     Data->m_pGameServer->SendChatTarget(ClientID, _("You are now logged in."));
                     Data->m_pGameServer->SendBroadcast_VL(_("Welcome {str:Name}!"), ClientID, "Name", Data->m_pGameServer->Server()->ClientName(ClientID));
+                    P->m_InitAcc = true;
                 }
                 else
                 {

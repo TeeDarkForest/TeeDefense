@@ -4,6 +4,8 @@
 #include <game/server/gamecontext.h>
 #include "CKs.h"
 
+#include <game/server/GameCore/Account/account.h>
+
 CKs::CKs(CGameWorld *pGameWorld, int Type, vec2 Pos, int ID, int SubType)
 	: CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP)
 {
@@ -119,6 +121,7 @@ void CKs::Picking(int Time, CPlayer *Player)
 		Player->m_Items[m_Type]++;
 		GameServer()->SendChatTarget(CID, _("You picked up a {str:Resource}"), "Resource", buf.buffer());
 		m_Health = GetMaxHealth(m_Type);
+		GameServer()->TW()->Account()->SaveAccountData(CID, CGameContext::TABLE_ITEM);
 	}
 	dynamic_string buffer;
 	dynamic_string buffre;

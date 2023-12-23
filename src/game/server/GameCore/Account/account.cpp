@@ -62,6 +62,9 @@ static void login_thread(void *user)
     lock_wait(Data->m_pGameServer->DB()->SQL_Lock);
     int ClientID = Data->m_ClientID;
     CPlayer *P = Data->m_pGameServer->GetPlayer(ClientID);
+    if(!P)
+        return;
+
     char aBuf[512];
     str_format(aBuf, sizeof(aBuf), "SELECT * from tw_Accounts WHERE Username = '%s';", Data->m_Username);
     sql::ResultSet *Result;
@@ -135,6 +138,8 @@ static void sync_accdata_thread(void *user)
     SFaBao *Data = (SFaBao *)user;
     int ClientID = Data->m_ClientID;
     CPlayer *P = Data->m_pGameServer->GetPlayer(ClientID);
+    if (!P)
+        return;
     int UserID = P->m_AccData.m_UserID;
     if (!UserID)
         return;
@@ -175,7 +180,7 @@ static void sync_accdata_thread(void *user)
                         int ItemID = res->getInt("ItemID");
                         int Num = res->getInt("Num");
 
-                        Data->m_pGameServer->GetPlayer(ClientID)->m_Items[ItemID] = Num;
+                        P->m_Items[ItemID] = Num;
                     }
                     Data->m_pGameServer->ClearVotes(ClientID);
                 }
@@ -220,6 +225,8 @@ static void save_accdata_thread(void *user)
     SFaBao *Data = (SFaBao *)user;
     int ClientID = Data->m_ClientID;
     CPlayer *P = Data->m_pGameServer->GetPlayer(ClientID);
+    if (!P)
+        return;
     int UserID = P->m_AccData.m_UserID;
     if (!UserID)
         return;

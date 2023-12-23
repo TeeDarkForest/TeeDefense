@@ -151,7 +151,7 @@ void CGameContext::InitItems()
                LEVEL_COPPER,        // Level
                -1,                  // TurretType
                90,                  // Proba
-               4000,                 // Speed
+               3000,                 // Speed
                Resource);
     ResetResource(Resource);
     Resource[ITEM_LOG] = 1900;

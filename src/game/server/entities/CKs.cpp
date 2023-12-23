@@ -168,19 +168,19 @@ int CKs::GetMaxHealth(int Type)
 		break;
 
 	case ITEM_COPPER:
-		return 1600;
+		return 2000;
 		break;
 
 	case ITEM_IRON:
-		return 4000;
+		return 8000;
 		break;
 
 	case ITEM_GOLDEN:
-		return 6000;
+		return 30000;
 		break;
 
 	case ITEM_DIAMOND:
-		return 60000;
+		return 1200000;
 		break;
 
 	case ITEM_ENEGRY:

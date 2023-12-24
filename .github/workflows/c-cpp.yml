@@ -14,8 +14,10 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Install
-      run: sudo apt install bam git libfreetype6-dev libsdl2-dev libpnglite-dev libwavpack-dev python3 -y
+      run: sudo apt install cmake git libcurl-dev libmysqlcppconn-dev mysql-server mysql-client libicu-dev devlibfreetype6-dev libsdl2-dev libpnglite-dev libwavpack-dev python3 -y
     - name: Build
-      run: bam
+      run: |
+        cmake .
+        make
     - name: Check
-      run: ./teeworlds_srv_d shutdown
+      run: ./OnTime-Server shutdown

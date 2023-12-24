@@ -5,14 +5,14 @@
 #define GAME_VERSION_H
 #ifndef NON_HASED_VERSION
 #include <game/generated/nethash.cpp>
-#define GAME_VERSION "0.6.4"
+#define GAME_VERSION "0.8.1"
 #define GAME_NETVERSION "0.6 626fce9a778df4d4" //the std game version
 static const char GAME_RELEASE_VERSION[8] = "0.6.4";
 
 #define MOD_NAME "TeeDefense"
 #define MOD_VERSION "v0.2.5"
-#define MOD_AUTHORS "FlowerFell-Sans, EDreemurr, xy_cloud"
-#define MOD_CREDITS "FlowerFell-Sans, EDreemurr, xy_cloud"
+#define MOD_AUTHORS "FlowerFell-Sans, xy_cloud"
+#define MOD_CREDITS "FlowerFell-Sans, xy_cloud"
 #define MOD_THANKS "necropotame, GutZuFusss, AssassinTee, StarOnTheSky, Kurosio"
 #define MOD_SOURCES "https://github.com/TeeDarkForest/TeeDefense"
 #endif

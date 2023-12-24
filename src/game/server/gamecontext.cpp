@@ -1958,6 +1958,8 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("make", "i", CFGFLAG_VOTE | CFGFLAG_USER, ConMake, this, "Make");
 	Console()->Register("use", "i", CFGFLAG_VOTE | CFGFLAG_USER, ConUse, this, "Use");
 
+	Console()->Register("status_db", "", CFGFLAG_SERVER, ConStatusDB, this, "Get status of database");
+
 	Console()->Chain("sv_motd", ConchainSpecialMotdupdate, this);
 }
 
@@ -2550,6 +2552,15 @@ void CGameContext::ConUse(IConsole::IResult *pResult, void *pUserData)
 	}
 	pSelf->TW()->Account()->SaveAccountData(CID, TABLE_ITEM, pP->m_AccData);
 	pSelf->ClearVotes(CID);
+}
+
+void CGameContext::ConStatusDB(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	for (int i = 0; i < pSelf->TW()->Account()->m_pPool->m_pFaBao.size(); i++)
+	{
+		dbg_msg("StatusDB", "(%d)Type: %d, ClientID: %d", i, pSelf->TW()->Account()->m_pPool->m_pFaBao[i]->m_Type, pSelf->TW()->Account()->m_pPool->m_pFaBao[i]->m_ClientID);
+	}
 }
 
 void CGameContext::ClearVotes(int ClientID)

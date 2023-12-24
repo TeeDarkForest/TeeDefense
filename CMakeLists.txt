@@ -72,7 +72,6 @@ if(TARGET_OS STREQUAL "windows")
   set(AUTO_DEPENDENCIES_DEFAULT ON)
 endif()
 
-option(GEOLOCATION "Enable geolocation support" ON)
 option(MYSQL "Enable mysql support" ON)
 option(BOX2D "Enable Box2D fun box" ON)
 option(PREFER_BUNDLED_LIBS "Prefer bundled libraries over system libraries" ${AUTO_DEPENDENCIES_DEFAULT})
@@ -261,7 +260,6 @@ find_package(PythonInterp)
 find_package(SDL)
 find_package(Threads)
 find_package(Wavpack)
-find_package(MaxMindDB REQUIRED)
 find_package(OpenSSL)
 find_package(Curl)
 if(MYSQL)
@@ -701,29 +699,6 @@ list(APPEND TARGETS_OWN ${TARGET_SERVER})
 list(APPEND TARGETS_LINK ${TARGET_SERVER})
 
 target_include_directories(${TARGET_SERVER} PRIVATE ${SERVER_INCLUDES_DIRS})
-
-add_library(GeoLite2PP STATIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/geo/GeoLite2PP/GeoLite2PP.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/geo/GeoLite2PP/GeoLite2PP.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/geo/GeoLite2PP/GeoLite2PP_error_category.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/geo/GeoLite2PP/GeoLite2PP_error_category.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/geo/GeoLite2PP/GeoLite2PP_version.hpp
-  )
-  target_include_directories(GeoLite2PP PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/geo
-  )
-  add_library(GeoLite2PP::GeoLite2PP ALIAS GeoLite2PP)
-
-  target_sources(${TARGET_SERVER} PRIVATE
-    "src/geo/geolocation.cpp"
-    "src/geo/geolocation.h"
-  )
-
-  target_compile_definitions(${TARGET_SERVER} PRIVATE CONF_GEOLOCATION)
-  target_link_libraries(${TARGET_SERVER}
-    GeoLite2PP::GeoLite2PP
-    MaxMindDB::MaxMindDB
-  )
 
 if(TARGET_OS AND TARGET_OS STREQUAL "mac")
   set(SERVER_LAUNCHER_SRC src/osxlaunch/server.mm)

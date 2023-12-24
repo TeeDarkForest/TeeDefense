@@ -410,6 +410,7 @@ int CGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 		GameServer()->SendChatTarget(pKiller->GetCID(), _("You picked up Zombie's Heart"));
 		pKiller->m_Score++;
 		DoZombMessage(m_ZombLeft--);
+		GameServer()->TW()->Account()->SaveAccountData(pKiller->GetCID(), CGameContext::TABLE_ITEM, pKiller->m_AccData);
 		GameServer()->ClearVotes(pKiller->GetCID());
 	}
 	if (pKiller && pKiller == pVictim->GetPlayer())

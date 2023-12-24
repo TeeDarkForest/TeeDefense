@@ -121,6 +121,7 @@ void CKs::Picking(int Time, CPlayer *Player)
 		Player->m_Items[m_Type]++;
 		GameServer()->SendChatTarget(CID, _("You picked up a {str:Resource}"), "Resource", buf.buffer());
 		m_Health = GetMaxHealth(m_Type);
+		GameServer()->TW()->Account()->SaveAccountData(CID, CGameContext::TABLE_ITEM, Player->m_AccData);
 		GameServer()->ClearVotes(CID);
 	}
 	dynamic_string buffer;

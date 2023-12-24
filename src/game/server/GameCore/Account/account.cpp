@@ -6,6 +6,7 @@ void CAccount::OnInitWorld()
 
 static void register_thread(void *user)
 {
+    dbg_msg("StartThread", "Start Register Thread");
     FaBao *Data = (FaBao *)user;
     int ClientID = Data->m_ClientID;
     lock_wait(Data->m_pGameServer->DB()->SQL_Lock);
@@ -22,6 +23,7 @@ static void register_thread(void *user)
                 Data->m_pGameServer->SendChatTarget(ClientID, _("This username is already in use."));
                 Data->m_pGameServer->DB()->FreeData(Result);
                 lock_unlock(Data->m_pGameServer->DB()->SQL_Lock);
+                dbg_msg("EndThread", "End Register Thread");
                 return;
             }
             else
@@ -39,6 +41,7 @@ static void register_thread(void *user)
     Data->m_pGameServer->DB()->FreeData(Result);
 
     lock_unlock(Data->m_pGameServer->DB()->SQL_Lock);
+    dbg_msg("EndThread", "End Register Thread");
 }
 
 bool CAccount::Register(int ClientID, const char *Username, const char *Password)
@@ -58,6 +61,7 @@ bool CAccount::Register(int ClientID, const char *Username, const char *Password
 
 static void login_thread(void *user)
 {
+    dbg_msg("StartThread", "Start Login Thread");
     FaBao *Data = (FaBao *)user;
     lock_wait(Data->m_pGameServer->DB()->SQL_Lock);
     int ClientID = Data->m_ClientID;
@@ -97,6 +101,7 @@ static void login_thread(void *user)
                     Data->m_pGameServer->SendChatTarget(ClientID, _("The password you entered is wrong."));
                     Data->m_pGameServer->DB()->FreeData(Result);
                     lock_unlock(Data->m_pGameServer->DB()->SQL_Lock);
+                    dbg_msg("EndThread", "End Login Thread");
                     return;
                 }
             }
@@ -106,6 +111,7 @@ static void login_thread(void *user)
                 Data->m_pGameServer->SendChatTarget(ClientID, _("Please register first. (/register <user> <pass>)"));
                 Data->m_pGameServer->DB()->FreeData(Result);
                 lock_unlock(Data->m_pGameServer->DB()->SQL_Lock);
+                dbg_msg("EndThread", "End Login Thread");
                 return;
             }
         }
@@ -117,6 +123,7 @@ static void login_thread(void *user)
     Data->m_pGameServer->DB()->FreeData(Result);
 
     lock_unlock(Data->m_pGameServer->DB()->SQL_Lock);
+    dbg_msg("EndThread", "End Login Thread");
 }
 bool CAccount::Login(int ClientID, const char *Username, const char *Password)
 {
@@ -135,6 +142,7 @@ bool CAccount::Login(int ClientID, const char *Username, const char *Password)
 
 static void sync_accdata_thread(void *user)
 {
+    dbg_msg("StartThread", "Start Sync Account Data Thread");
     SFaBao *Data = (SFaBao *)user;
     int ClientID = Data->m_ClientID;
     CPlayer *P = Data->m_pGameServer->GetPlayer(ClientID);
@@ -195,6 +203,7 @@ static void sync_accdata_thread(void *user)
                 dbg_msg("SyncAccountData", "Error when saving account data.");
                 Data->m_pGameServer->DB()->FreeData(Result);
                 lock_unlock(Data->m_pGameServer->DB()->SQL_Lock);
+                dbg_msg("EndThread", "End Sync Account Thread");
                 return;
             }
         }
@@ -206,6 +215,7 @@ static void sync_accdata_thread(void *user)
     Data->m_pGameServer->DB()->FreeData(Result);
 
     lock_unlock(Data->m_pGameServer->DB()->SQL_Lock);
+    dbg_msg("EndThread", "End Sync Account Thread");
 }
 
 void CAccount::SyncAccountData(int ClientID, int Table)
@@ -222,6 +232,7 @@ void CAccount::SyncAccountData(int ClientID, int Table)
 
 static void save_accdata_thread(void *user)
 {
+    dbg_msg("StartThread", "Start Save Account Thread");
     SFaBao *Data = (SFaBao *)user;
     int ClientID = Data->m_ClientID;
     CPlayer *P = Data->m_pGameServer->GetPlayer(ClientID);
@@ -284,9 +295,10 @@ static void save_accdata_thread(void *user)
             }
             else
             {
-                dbg_msg("SyncAccountData", "Error when saving account data.");
+                dbg_msg("SaveAccountData", "Error when saving account data.");
                 Data->m_pGameServer->DB()->FreeData(Result);
                 lock_unlock(Data->m_pGameServer->DB()->SQL_Lock);
+                dbg_msg("EndThread", "End Save Account Thread");
                 return;
             }
         }
@@ -298,6 +310,7 @@ static void save_accdata_thread(void *user)
     Data->m_pGameServer->DB()->FreeData(Result);
 
     lock_unlock(Data->m_pGameServer->DB()->SQL_Lock);
+    dbg_msg("EndThread", "End Save Account Thread");
 }
 
 void CAccount::SaveAccountData(int ClientID, int Table)

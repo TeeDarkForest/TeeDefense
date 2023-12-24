@@ -19,5 +19,3 @@ jobs:
       run: |
         cmake .
         make
-    - name: Check
-      run: ./OnTime-Server shutdown

@@ -27,7 +27,7 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 	if (!pHit || !pHit->GetPlayer())
 		return false;
 
-	if (!pOwnerChar || !pOwnerChar->GetPlayer())
+	if (pOwnerChar && !pOwnerChar->GetPlayer())
 		return false;
 
 	if(!pHit->GetPlayer()->GetZomb() && !pOwnerChar->GetPlayer()->GetZomb())

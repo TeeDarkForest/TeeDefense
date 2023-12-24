@@ -1709,6 +1709,7 @@ void CGameContext::ConLanguage(IConsole::IResult *pResult, void *pUserData)
 	{
 		pSelf->SetClientLanguage(ClientID, aFinalLanguageCode);
 		pSelf->SendChatTarget(ClientID, _("Language successfully switched to English"));
+		dbg_msg("GAMESERVER1712", "SAVE ACCOUNT DATA HERE!!!!!!");
 		pSelf->TW()->Account()->SaveAccountData(ClientID, TABLE_ACCOUNT);
 	}
 	else
@@ -2346,6 +2347,7 @@ void CGameContext::MakeItem(int ItemID, int ClientID)
 		return;
 	}
 
+	dbg_msg("GAMESERVER2349", "SAVE ACCOUNT DATA HERE!!!!!!");
 	TW()->Account()->SaveAccountData(ClientID, TABLE_ITEM);
 	ClearVotes(ClientID);
 }
@@ -2548,6 +2550,7 @@ void CGameContext::ConUse(IConsole::IResult *pResult, void *pUserData)
 	default:
 		break;
 	}
+	dbg_msg("GameContext2551", "SAVE ACCOUNT DATA HERE!!!!!!");
 	pSelf->TW()->Account()->SaveAccountData(CID, TABLE_ITEM);
 	pSelf->ClearVotes(CID);
 }

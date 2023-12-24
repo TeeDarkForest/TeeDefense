@@ -176,13 +176,14 @@ public:
 
 	int m_Holding[NUM_ITYPE];
 
-	struct
+	struct SAccData
 	{
 		int m_UserID;
 		char m_aUsername[64];
 		char m_aPassword[64];
-	} m_AccData;
+	};
 
+	SAccData m_AccData;
 	int m_Items[NUM_ITEM];
 
 	// Mine

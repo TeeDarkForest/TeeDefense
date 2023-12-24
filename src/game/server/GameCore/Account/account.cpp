@@ -1,17 +1,23 @@
 #include "account.h"
+#include <thread>
 
-void CAccount::OnInitWorld()
+void CAccount::OnInit()
 {
+    m_pPool = new AccountPool;
+    m_pPool->m_pDB = GameServer()->DB();
+
+    std::thread(&HandleThread, m_pPool).detach();
 }
 
 static void register_thread(void *user)
 {
-    dbg_msg("StartThread", "Start Register Thread");
     FaBao *Data = (FaBao *)user;
     int ClientID = Data->m_ClientID;
+    dbg_msg("test", "reg wait lock");
     lock_wait(Data->m_pGameServer->DB()->SQL_Lock);
+    dbg_msg("test", "reg none lock");
     char aBuf[512];
-    str_format(aBuf, sizeof(aBuf), "SELECT * from tw_Accounts WHERE Username = '%s';", Data->m_Username);
+    str_format(aBuf, sizeof(aBuf), "SELECT * from tw_Accounts WHERE Username = '%s';", Data->m_AccData.m_aUsername);
     sql::ResultSet *Result;
     if (Data->m_pGameServer->DB()->Connect())
     {
@@ -23,12 +29,11 @@ static void register_thread(void *user)
                 Data->m_pGameServer->SendChatTarget(ClientID, _("This username is already in use."));
                 Data->m_pGameServer->DB()->FreeData(Result);
                 lock_unlock(Data->m_pGameServer->DB()->SQL_Lock);
-                dbg_msg("EndThread", "End Register Thread");
                 return;
             }
             else
             {
-                str_format(aBuf, sizeof(aBuf), "INSERT INTO tw_Accounts(Username, Password) VALUES ('%s', '%s');", Data->m_Username, Data->m_Password);
+                str_format(aBuf, sizeof(aBuf), "INSERT INTO tw_Accounts(Username, Password) VALUES ('%s', '%s');", Data->m_AccData.m_aUsername, Data->m_AccData.m_aPassword);
                 Data->m_pGameServer->DB()->Execute(aBuf);
                 Data->m_pGameServer->SendChatTarget(ClientID, _("Account was created successfully."));
             }
@@ -41,7 +46,6 @@ static void register_thread(void *user)
     Data->m_pGameServer->DB()->FreeData(Result);
 
     lock_unlock(Data->m_pGameServer->DB()->SQL_Lock);
-    dbg_msg("EndThread", "End Register Thread");
 }
 
 bool CAccount::Register(int ClientID, const char *Username, const char *Password)
@@ -49,28 +53,24 @@ bool CAccount::Register(int ClientID, const char *Username, const char *Password
     FaBao *data = new FaBao();
     data->m_pGameServer = GameServer();
     data->m_ClientID = ClientID;
-    str_copy(data->m_Username, Username, sizeof data->m_Username);
-    str_copy(data->m_Password, Password, sizeof data->m_Password);
-
-    void *register_account_thread = thread_init(register_thread, data);
-#if defined(CONF_FAMILY_UNIX)
-    pthread_detach((pthread_t)register_account_thread);
-#endif
+    str_copy(data->m_AccData.m_aUsername, Username, sizeof data->m_AccData.m_aUsername);
+    str_copy(data->m_AccData.m_aPassword, Password, sizeof data->m_AccData.m_aPassword);
+    data->m_Type = TYPE::REG;
+    m_pPool->m_pFaBao.add(data);
     return true;
 }
 
 static void login_thread(void *user)
 {
-    dbg_msg("StartThread", "Start Login Thread");
     FaBao *Data = (FaBao *)user;
     lock_wait(Data->m_pGameServer->DB()->SQL_Lock);
     int ClientID = Data->m_ClientID;
     CPlayer *P = Data->m_pGameServer->GetPlayer(ClientID);
-    if(!P)
+    if (!P)
         return;
 
     char aBuf[512];
-    str_format(aBuf, sizeof(aBuf), "SELECT * from tw_Accounts WHERE Username = '%s';", Data->m_Username);
+    str_format(aBuf, sizeof(aBuf), "SELECT * from tw_Accounts WHERE Username = '%s';", Data->m_AccData.m_aUsername);
     sql::ResultSet *Result;
     if (Data->m_pGameServer->DB()->Connect())
     {
@@ -79,7 +79,7 @@ static void login_thread(void *user)
             Result = Data->m_pGameServer->DB()->ExecuteQuery(aBuf);
             if (Result->next())
             {
-                str_format(aBuf, sizeof(aBuf), "SELECT * from tw_Accounts WHERE Username = '%s' AND Password = '%s';", Data->m_Username, Data->m_Password);
+                str_format(aBuf, sizeof(aBuf), "SELECT * from tw_Accounts WHERE Username = '%s' AND Password = '%s';", Data->m_AccData.m_aUsername, Data->m_AccData.m_aPassword);
                 Result = Data->m_pGameServer->DB()->ExecuteQuery(aBuf);
                 if (Result->next())
                 {
@@ -101,7 +101,6 @@ static void login_thread(void *user)
                     Data->m_pGameServer->SendChatTarget(ClientID, _("The password you entered is wrong."));
                     Data->m_pGameServer->DB()->FreeData(Result);
                     lock_unlock(Data->m_pGameServer->DB()->SQL_Lock);
-                    dbg_msg("EndThread", "End Login Thread");
                     return;
                 }
             }
@@ -111,7 +110,6 @@ static void login_thread(void *user)
                 Data->m_pGameServer->SendChatTarget(ClientID, _("Please register first. (/register <user> <pass>)"));
                 Data->m_pGameServer->DB()->FreeData(Result);
                 lock_unlock(Data->m_pGameServer->DB()->SQL_Lock);
-                dbg_msg("EndThread", "End Login Thread");
                 return;
             }
         }
@@ -123,27 +121,22 @@ static void login_thread(void *user)
     Data->m_pGameServer->DB()->FreeData(Result);
 
     lock_unlock(Data->m_pGameServer->DB()->SQL_Lock);
-    dbg_msg("EndThread", "End Login Thread");
 }
 bool CAccount::Login(int ClientID, const char *Username, const char *Password)
 {
     FaBao *data = new FaBao();
     data->m_pGameServer = GameServer();
     data->m_ClientID = ClientID;
-    str_copy(data->m_Username, Username, sizeof data->m_Username);
-    str_copy(data->m_Password, Password, sizeof data->m_Password);
+    str_copy(data->m_AccData.m_aUsername, Username, sizeof data->m_AccData.m_aUsername);
+    str_copy(data->m_AccData.m_aPassword, Password, sizeof data->m_AccData.m_aPassword);
+    data->m_Type = TYPE::LOG;
 
-    void *login_account_thread = thread_init(login_thread, data);
-#if defined(CONF_FAMILY_UNIX)
-    pthread_detach((pthread_t)login_account_thread);
-#endif
-    return true;
+    m_pPool->m_pFaBao.add(data);
 }
 
 static void sync_accdata_thread(void *user)
 {
-    dbg_msg("StartThread", "Start Sync Account Data Thread");
-    SFaBao *Data = (SFaBao *)user;
+    FaBao *Data = (FaBao *)user;
     int ClientID = Data->m_ClientID;
     CPlayer *P = Data->m_pGameServer->GetPlayer(ClientID);
     if (!P)
@@ -203,7 +196,6 @@ static void sync_accdata_thread(void *user)
                 dbg_msg("SyncAccountData", "Error when saving account data.");
                 Data->m_pGameServer->DB()->FreeData(Result);
                 lock_unlock(Data->m_pGameServer->DB()->SQL_Lock);
-                dbg_msg("EndThread", "End Sync Account Thread");
                 return;
             }
         }
@@ -215,30 +207,30 @@ static void sync_accdata_thread(void *user)
     Data->m_pGameServer->DB()->FreeData(Result);
 
     lock_unlock(Data->m_pGameServer->DB()->SQL_Lock);
-    dbg_msg("EndThread", "End Sync Account Thread");
 }
 
-void CAccount::SyncAccountData(int ClientID, int Table)
+void CAccount::SyncAccountData(int ClientID, int Table, CPlayer::SAccData AccData)
 {
-    SFaBao *data = new SFaBao();
+    FaBao *data = new FaBao();
     data->m_pGameServer = GameServer();
     data->m_ClientID = ClientID;
     data->m_Table = Table;
-    void *sync_thread = thread_init(sync_accdata_thread, data);
-#if defined(CONF_FAMILY_UNIX)
-    pthread_detach((pthread_t)sync_thread);
-#endif
+    data->m_AccData = AccData;
+    for (int i = 0; i < NUM_ITYPE; i++)
+        data->m_Holding[i] = GameServer()->GetPlayer(ClientID)->m_Holding[i];
+    for (int i = 0; i < NUM_ITEM; i++)
+        data->m_Items[i] = GameServer()->GetPlayer(ClientID)->m_Items[i];
+    str_copy(data->m_Language, GameServer()->GetPlayer(ClientID)->GetLanguage(), sizeof(data->m_Language));
+    data->m_Type = TYPE::SYNC;
+
+    m_pPool->m_pFaBao.add(data);
 }
 
 static void save_accdata_thread(void *user)
 {
-    dbg_msg("StartThread", "Start Save Account Thread");
-    SFaBao *Data = (SFaBao *)user;
+    FaBao *Data = (FaBao *)user;
     int ClientID = Data->m_ClientID;
-    CPlayer *P = Data->m_pGameServer->GetPlayer(ClientID);
-    if (!P)
-        return;
-    int UserID = P->m_AccData.m_UserID;
+    int UserID = Data->m_AccData.m_UserID;
     if (!UserID)
         return;
 
@@ -260,7 +252,7 @@ static void save_accdata_thread(void *user)
                     str_format(aBuf, sizeof(aBuf), "UPDATE tw_Accounts SET "
                                                    "Username='%s',Password='%s',Language='%s',Sword=%d,Axe=%d,Pickaxe=%d "
                                                    "WHERE UserID=%d;",
-                               P->m_AccData.m_aUsername, P->m_AccData.m_aPassword, P->GetLanguage(), P->m_Holding[ITYPE_SWORD], P->m_Holding[ITYPE_AXE], P->m_Holding[ITYPE_PICKAXE], UserID);
+                               Data->m_AccData.m_aUsername, Data->m_AccData.m_aPassword, Data->m_Language, Data->m_Holding[ITYPE_SWORD], Data->m_Holding[ITYPE_AXE], Data->m_Holding[ITYPE_PICKAXE], UserID);
                     Data->m_pGameServer->DB()->Execute(aBuf);
                 }
                 break;
@@ -274,15 +266,15 @@ static void save_accdata_thread(void *user)
 
                         if (res->next())
                         {
-                            if (P->m_Items[i])
-                                str_format(aBuf, sizeof(aBuf), "UPDATE tw_Items SET Num=%d WHERE UserID=%d AND ItemID=%d;", P->m_Items[i], UserID, i); // if yes, update it.
+                            if (Data->m_Items[i])
+                                str_format(aBuf, sizeof(aBuf), "UPDATE tw_Items SET Num=%d WHERE UserID=%d AND ItemID=%d;", Data->m_Items[i], UserID, i); // if yes, update it.
                             else
                                 str_format(aBuf, sizeof(aBuf), "DELETE FROM tw_Items WHERE UserID=%d AND ItemID=%d;", UserID, i); // So delete it
                             Data->m_pGameServer->DB()->Execute(aBuf);                                                             // Execute
                         }
-                        else if (P->m_Items[i])
+                        else if (Data->m_Items[i])
                         {
-                            str_format(aBuf, sizeof(aBuf), "INSERT INTO tw_Items(UserID, ItemID, Num) VALUES (%d, %d, %d)", UserID, i, P->m_Items[i]); // if not, insert it.
+                            str_format(aBuf, sizeof(aBuf), "INSERT INTO tw_Items(UserID, ItemID, Num) VALUES (%d, %d, %d)", UserID, i, Data->m_Items[i]); // if not, insert it.
                             Data->m_pGameServer->DB()->Execute(aBuf);
                         }
                     }
@@ -298,7 +290,6 @@ static void save_accdata_thread(void *user)
                 dbg_msg("SaveAccountData", "Error when saving account data.");
                 Data->m_pGameServer->DB()->FreeData(Result);
                 lock_unlock(Data->m_pGameServer->DB()->SQL_Lock);
-                dbg_msg("EndThread", "End Save Account Thread");
                 return;
             }
         }
@@ -310,17 +301,54 @@ static void save_accdata_thread(void *user)
     Data->m_pGameServer->DB()->FreeData(Result);
 
     lock_unlock(Data->m_pGameServer->DB()->SQL_Lock);
-    dbg_msg("EndThread", "End Save Account Thread");
 }
 
-void CAccount::SaveAccountData(int ClientID, int Table)
+void CAccount::SaveAccountData(int ClientID, int Table, CPlayer::SAccData AccData)
 {
-    SFaBao *data = new SFaBao();
+    FaBao *data = new FaBao();
     data->m_pGameServer = GameServer();
     data->m_ClientID = ClientID;
     data->m_Table = Table;
-    void *save_thread = thread_init(save_accdata_thread, data);
-#if defined(CONF_FAMILY_UNIX)
-    pthread_detach((pthread_t)save_thread);
-#endif
+    data->m_AccData = AccData;
+    for (int i = 0; i < NUM_ITYPE; i++)
+        data->m_Holding[i] = GameServer()->GetPlayer(ClientID)->m_Holding[i];
+    for (int i = 0; i < NUM_ITEM; i++)
+        data->m_Items[i] = GameServer()->GetPlayer(ClientID)->m_Items[i];
+    str_copy(data->m_Language, GameServer()->GetPlayer(ClientID)->GetLanguage(), sizeof(data->m_Language));
+    data->m_Type = TYPE::SAVE;
+
+    m_pPool->m_pFaBao.add(data);
+}
+
+void CAccount::HandleThread(void *user)
+{
+    AccountPool *pPool = (AccountPool *)user;
+    while (true)
+    {
+        if (!pPool->m_pFaBao.size())
+            continue;
+        switch (pPool->m_pFaBao[0]->m_Type)
+        {
+        case TYPE::REG:
+            register_thread(pPool->m_pFaBao[0]);
+            break;
+
+        case TYPE::LOG:
+            login_thread(pPool->m_pFaBao[0]);
+            break;
+
+        case TYPE::SYNC:
+            sync_accdata_thread(pPool->m_pFaBao[0]);
+            break;
+
+        case TYPE::SAVE:
+            save_accdata_thread(pPool->m_pFaBao[0]);
+            break;
+
+        default:
+            // none
+            break;
+        }
+        pPool->m_pFaBao.remove_index(0);
+    }
 }

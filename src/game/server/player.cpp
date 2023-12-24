@@ -167,7 +167,7 @@ void CPlayer::Tick()
 	else if (m_InitAcc)
 	{
 		SetTeam(TEAM_HUMAN, false);
-		GameServer()->TW()->Account()->SyncAccountData(m_ClientID, CGameContext::TABLE_ITEM);
+		GameServer()->TW()->Account()->SyncAccountData(m_ClientID, CGameContext::TABLE_ITEM, m_AccData);
 		m_InitAcc = false;
 	}
 }

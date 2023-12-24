@@ -1883,7 +1883,7 @@ int CServer::Run()
 			{
 				GameServer()->OnShutdown(true);
 
-				for (int c = 0; c < MAX_CLIENTS; c++)
+				for (int c = 0; c < MAX_PLAYERS; c++)
 				{
 					if (m_aClients[c].m_State <= CClient::STATE_AUTH)
 						continue;
@@ -1911,7 +1911,7 @@ int CServer::Run()
 					// new map loaded
 					GameServer()->OnShutdown(true);
 
-					for (int c = 0; c < MAX_CLIENTS; c++)
+					for (int c = 0; c < MAX_PLAYERS; c++)
 					{
 						if (m_aClients[c].m_State <= CClient::STATE_AUTH)
 							continue;

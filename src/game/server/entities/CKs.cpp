@@ -54,7 +54,6 @@ void CKs::Tick()
 	if (pChr && pChr->IsAlive() && !pChr->GetPlayer()->GetZomb())
 	{
 		// DUDE! Forget the old comment here
-		int RespawnTime = -1;
 		int PickSpeed = 1;
 
 		CPlayer *pP = GameServer()->GetPlayer(pChr->GetCID(), false, true);
@@ -188,7 +187,7 @@ int CKs::GetMaxHealth(int Type)
 		break;
 
 	default:
-		return 99999999999999;
+		return 3000000;
 		break;
 	}
 }

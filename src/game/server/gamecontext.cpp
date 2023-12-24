@@ -407,7 +407,7 @@ void CGameContext::SendBroadcast(const char *pText, int ClientID)
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
 }
 
-void CGameContext::SendBroadcast_VL(const char *pText, int ClientID, ...)
+void CGameContext::SendBroadcast_VL(int ClientID, const char *pText, ...)
 {
 	CNetMsg_Sv_Broadcast Msg;
 	int Start = (ClientID < 0 ? 0 : ClientID);
@@ -1664,7 +1664,6 @@ void CGameContext::ConMe(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConCheckEvent(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pThis = (CGameContext *)pUserData;
-	CPlayer *Player = pThis->m_apPlayers[pResult->GetClientID()];
 	int Timer = pThis->m_EventTimer / pThis->Server()->TickSpeed();
 	int End = pThis->m_EventDuration / pThis->Server()->TickSpeed();
 	if (Timer)
@@ -1676,7 +1675,6 @@ void CGameContext::ConCheckEvent(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConSetEventTimer(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pThis = (CGameContext *)pUserData;
-	CPlayer *Player = pThis->m_apPlayers[pResult->GetClientID()];
 	if (pResult->NumArguments())
 		pThis->m_EventTimer = pResult->GetInteger(0);
 }
@@ -2203,14 +2201,12 @@ void CGameContext::ConLogout(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::LogoutAccount(int ClientID)
 {
 	CPlayer *pP = m_apPlayers[ClientID];
-	CCharacter *pChr = pP->GetCharacter();
 	pP->m_AccData.m_UserID = 0;
 	SendChatTarget(pP->GetCID(), _("Logout succesful"));
 }
 
 void CGameContext::InitCrafts()
 {
-	int Resource[NUM_ITEM];
 }
 
 void CGameContext::CreateItem(const char *pItemName, int ID, int Type, int Damage, int Level, int TurretType, int Proba,

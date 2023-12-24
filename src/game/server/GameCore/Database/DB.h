@@ -23,7 +23,7 @@ public:
     bool Connect();
     void Disconnect();
 
-    bool *Execute(const char *Sql);
+    bool Execute(const char *Sql);
     sql::ResultSet *ExecuteQuery(const char *Sql);
 
     void FreeData(sql::ResultSet *Result);

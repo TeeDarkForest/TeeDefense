@@ -176,6 +176,7 @@ const char *CRegister::ProtocolToScheme(int Protocol)
 	}
 	dbg_assert(false, "invalid protocol");
 	dbg_break();
+	return "For looks good";
 }
 
 const char *CRegister::ProtocolToString(int Protocol)
@@ -187,6 +188,7 @@ const char *CRegister::ProtocolToString(int Protocol)
 	}
 	dbg_assert(false, "invalid protocol");
 	dbg_break();
+	return "For looks good";
 }
 
 bool CRegister::ProtocolFromString(int *pResult, const char *pString)
@@ -216,6 +218,7 @@ const char *CRegister::ProtocolToSystem(int Protocol)
 	}
 	dbg_assert(false, "invalid protocol");
 	dbg_break();
+	return "For looks good";
 }
 
 IPRESOLVE CRegister::ProtocolToIpresolve(int Protocol)
@@ -227,6 +230,7 @@ IPRESOLVE CRegister::ProtocolToIpresolve(int Protocol)
 	}
 	dbg_assert(false, "invalid protocol");
 	dbg_break();
+	return IPRESOLVE::V4; // For looks good
 }
 
 void CRegister::ConchainOnConfigChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)

@@ -71,6 +71,8 @@ static int num_loggers = 0;
 static NETSTATS network_stats = {0};
 static MEMSTATS memory_stats = {0};
 
+static NETSOCKET_INTERNAL invalid_socket = {NETTYPE_INVALID, -1, -1, -1};
+
 void dbg_logger(DBG_LOGGER logger)
 {
 	loggers[num_loggers++] = logger;
@@ -377,16 +379,48 @@ int io_flush(IOHANDLE io)
 	return 0;
 }
 
-void *thread_init(void (*threadfunc)(void *), void *u)
+struct THREAD_RUN
 {
+	void (*threadfunc)(void *);
+	void *u;
+};
+
 #if defined(CONF_FAMILY_UNIX)
-	pthread_t id;
-	pthread_create(&id, NULL, (void *(*)(void*))threadfunc, u);
-	return (void*)id;
+static void *thread_run(void *user)
 #elif defined(CONF_FAMILY_WINDOWS)
-	return CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)threadfunc, u, 0, NULL);
+static unsigned long __stdcall thread_run(void *user)
 #else
-	#error not implemented
+#error not implemented
+#endif
+{
+	struct THREAD_RUN* data = (THREAD_RUN*)user;
+	void (*threadfunc)(void *) = data->threadfunc;
+	void *u = data->u;
+	free(data);
+	threadfunc(u);
+	return 0;
+}
+
+void *thread_init(void (*threadfunc)(void *), void *u, const char *name)
+{
+	struct THREAD_RUN *data = (THREAD_RUN *)malloc(sizeof(*data));
+	data->threadfunc = threadfunc;
+	data->u = u;
+#if defined(CONF_FAMILY_UNIX)
+	{
+		pthread_t id;
+		int result = pthread_create(&id, NULL, thread_run, data);
+		if (result != 0)
+		{
+			dbg_msg("thread", "creating %s thread failed: %d", name, result);
+			return 0;
+		}
+		return (void *)id;
+	}
+#elif defined(CONF_FAMILY_WINDOWS)
+	return CreateThread(NULL, 0, thread_run, data, 0, NULL);
+#else
+#error not implemented
 #endif
 }
 

@@ -370,7 +370,7 @@ void thread_sleep(int milliseconds);
 		user - Pointer to pass to the thread.
 
 */
-void *thread_init(void (*threadfunc)(void *), void *user);
+void *thread_init(void (*threadfunc)(void *), void *user, const char *name);
 
 /*
 	Function: thread_wait
@@ -599,7 +599,6 @@ struct NETSOCKET_INTERNAL
 
 	NETSOCKET_BUFFER buffer;
 };
-static NETSOCKET_INTERNAL invalid_socket = {NETTYPE_INVALID, -1, -1, -1};
 
 typedef struct NETSOCKET_INTERNAL *NETSOCKET;
 

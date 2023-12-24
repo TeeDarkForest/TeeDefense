@@ -981,18 +981,16 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 			int Chunk = Unpacker.GetInt();
 			unsigned int ChunkSize = 1024 - 128;
-			unsigned int Offset = Chunk * ChunkSize;
+			const unsigned int Offset = Chunk * ChunkSize;
 			int Last = 0;
 
 			// drop faulty map data requests
-			if (Chunk < 0 || Offset > (unsigned int)m_CurrentMapSize)
+			if (Chunk < 0 || Offset > m_CurrentMapSize)
 				return;
 
-			if (Offset + ChunkSize >= (unsigned int)m_CurrentMapSize)
+			if ((Offset + ChunkSize) >= m_CurrentMapSize)
 			{
 				ChunkSize = m_CurrentMapSize - Offset;
-				if (ChunkSize < 0)
-					ChunkSize = 0;
 				Last = 1;
 			}
 
@@ -2286,16 +2284,6 @@ int main(int argc, const char **argv) // ignore_convention
 		}
 	}
 #endif
-
-	bool UseDefaultConfig = false;
-	for (int i = 1; i < argc; i++) // ignore_convention
-	{
-		if (str_comp("-d", argv[i]) == 0 || str_comp("--default", argv[i]) == 0) // ignore_convention
-		{
-			UseDefaultConfig = true;
-			break;
-		}
-	}
 
 	if (secure_random_init() != 0)
 	{

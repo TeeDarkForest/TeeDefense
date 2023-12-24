@@ -162,7 +162,7 @@ void CPlayer::Tick()
 	if(!LoggedIn())
 	{
 		SetTeam(TEAM_SPECTATORS, false);
-		GameServer()->SendBroadcast_VL(_("\n\n\n\n\n\nEnter '/register username password' to register\nEnter '/login username password' to login"), m_ClientID);
+		GameServer()->SendBroadcast_VL(m_ClientID, _("\n\n\n\n\n\nEnter '/register username password' to register\nEnter '/login username password' to login"));
 	}
 	else if (m_InitAcc)
 	{
@@ -373,9 +373,9 @@ void CPlayer::FakeSnap(int SnappingClient)
 	int id;
 
 	if (info.m_CustClt)
-		int id = MAX_CHARACTERS - 1;
+		id = MAX_CHARACTERS - 1;
 	else
-		int id = VANILLA_MAX_CLIENTS - 1;
+		id = VANILLA_MAX_CLIENTS - 1;
 
 	CNetObj_ClientInfo *pClientInfo = static_cast<CNetObj_ClientInfo *>(Server()->SnapNewItem(NETOBJTYPE_CLIENTINFO, id, sizeof(CNetObj_ClientInfo)));
 

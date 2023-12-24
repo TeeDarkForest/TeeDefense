@@ -20,7 +20,7 @@ bool CDB::Connect()
         m_Statement = m_Connection->createStatement();
         m_Connection->setSchema(g_Config.m_SvMySqlDatabase);
     }
-    catch (sql::SQLException e)
+    catch (sql::SQLException &e)
     {
         dbg_msg("SQLError", "Error (%d) : %s", e.getErrorCode(), e.what());
         return false;
@@ -41,9 +41,9 @@ void CDB::Disconnect()
     }
 }
 
-bool *CDB::Execute(const char *Sql)
+bool CDB::Execute(const char *Sql)
 {
-    m_Statement->execute(Sql);
+    return m_Statement->execute(Sql);
 }
 
 sql::ResultSet *CDB::ExecuteQuery(const char *Sql)

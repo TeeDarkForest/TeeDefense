@@ -93,7 +93,7 @@ static void login_thread(void *user)
                     P->SetLanguage(Result->getString("Language").c_str());
 
                     Data->m_pGameServer->SendChatTarget(ClientID, _("You are now logged in."));
-                    Data->m_pGameServer->SendBroadcast_VL(_("Welcome {str:Name}!"), ClientID, "Name", Data->m_pGameServer->Server()->ClientName(ClientID));
+                    Data->m_pGameServer->SendBroadcast_VL(ClientID, _("Welcome {str:Name}!"), "Name", Data->m_pGameServer->Server()->ClientName(ClientID));
                     P->m_InitAcc = true;
                 }
                 else
@@ -132,6 +132,7 @@ bool CAccount::Login(int ClientID, const char *Username, const char *Password)
     data->m_Type = TYPE::LOG;
 
     m_pPool->m_pFaBao.add(data);
+    return true;
 }
 
 static void sync_accdata_thread(void *user)
@@ -229,7 +230,6 @@ void CAccount::SyncAccountData(int ClientID, int Table, CPlayer::SAccData AccDat
 static void save_accdata_thread(void *user)
 {
     FaBao *Data = (FaBao *)user;
-    int ClientID = Data->m_ClientID;
     int UserID = Data->m_AccData.m_UserID;
     if (!UserID)
         return;

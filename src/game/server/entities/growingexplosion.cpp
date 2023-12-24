@@ -200,12 +200,6 @@ void CGrowingExplosion::Tick()
 									NumPossibleStartPoint++;
 								}
 								
-								if(NumPossibleStartPoint > 0)
-								{
-									int randNb = random_int(0, NumPossibleStartPoint-1);
-									vec2 StartPoint = PossibleStartPoint[randNb];
-								}
-								
 								if(random_prob(0.1f))
 								{
 									GameServer()->CreateSound(EndPoint, SOUND_RIFLE_BOUNCE);

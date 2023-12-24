@@ -150,7 +150,7 @@ bd.position = b2Vec2(m_Core.m_Pos.x / 30.f, m_Core.m_Pos.y / 30.f);
 bd.type = b2_kinematicBody;
 m_Tee = GameServer()->m_b2world->CreateBody(&bd);
 
-/*b2PolygonShape PolygonShape;
+b2PolygonShape PolygonShape;
 PolygonShape.SetAsBox(28.0f / 2 / SCALE, 28.0f / 2 / SCALE);
 b2FixtureDef FixtureDef1;
 FixtureDef1.density = 1.0f;
@@ -454,12 +454,12 @@ void CCharacter::FireWeapon()
 
 	case WEAPON_GUN:
 	{
-		CProjectile *pProj = new CProjectile(GameWorld(), WEAPON_GUN,
-											 m_pPlayer->GetCID(),
-											 ProjStartPos,
-											 Direction,
-											 (int)(Server()->TickSpeed() * GameServer()->Tuning()->m_GunLifetime),
-											 1, 0, 0, -1, WEAPON_GUN);
+		new CProjectile(GameWorld(), WEAPON_GUN,
+						m_pPlayer->GetCID(),
+						ProjStartPos,
+						Direction,
+						(int)(Server()->TickSpeed() * GameServer()->Tuning()->m_GunLifetime),
+						1, 0, 0, -1, WEAPON_GUN);
 
 		GameServer()->CreateSound(m_Pos, SOUND_GUN_FIRE);
 	}
@@ -476,12 +476,12 @@ void CCharacter::FireWeapon()
 			a += Spreading[i + 2];
 			float v = 1 - (absolute(i) / (float)ShotSpread);
 			float Speed = mix((float)GameServer()->Tuning()->m_ShotgunSpeeddiff, 1.0f, v);
-			CProjectile *pProj = new CProjectile(GameWorld(), WEAPON_SHOTGUN,
-												 m_pPlayer->GetCID(),
-												 ProjStartPos,
-												 vec2(cosf(a), sinf(a)) * Speed,
-												 (int)(Server()->TickSpeed() * GameServer()->Tuning()->m_ShotgunLifetime),
-												 1, 0, 0, -1, WEAPON_SHOTGUN);
+			new CProjectile(GameWorld(), WEAPON_SHOTGUN,
+							m_pPlayer->GetCID(),
+							ProjStartPos,
+							vec2(cosf(a), sinf(a)) * Speed,
+							(int)(Server()->TickSpeed() * GameServer()->Tuning()->m_ShotgunLifetime),
+							1, 0, 0, -1, WEAPON_SHOTGUN);
 		}
 
 		GameServer()->CreateSound(m_Pos, SOUND_SHOTGUN_FIRE);
@@ -490,12 +490,12 @@ void CCharacter::FireWeapon()
 
 	case WEAPON_GRENADE:
 	{
-		CProjectile *pProj = new CProjectile(GameWorld(), WEAPON_GRENADE,
-											 m_pPlayer->GetCID(),
-											 ProjStartPos,
-											 Direction,
-											 (int)(Server()->TickSpeed() * GameServer()->Tuning()->m_GrenadeLifetime),
-											 1, true, 0, SOUND_GRENADE_EXPLODE, WEAPON_GRENADE);
+		new CProjectile(GameWorld(), WEAPON_GRENADE,
+						m_pPlayer->GetCID(),
+						ProjStartPos,
+						Direction,
+						(int)(Server()->TickSpeed() * GameServer()->Tuning()->m_GrenadeLifetime),
+						1, true, 0, SOUND_GRENADE_EXPLODE, WEAPON_GRENADE);
 		// new CTurret(GameWorld(), ProjStartPos, GetCID(), TURRET_FOLLOW_GRENADE);
 
 		GameServer()->CreateSound(m_Pos, SOUND_GRENADE_FIRE);
@@ -662,9 +662,6 @@ void CCharacter::Tick()
 		DoZombieMovement();
 	if (!IsAlive()) // Boomer kills himself
 		return;
-
-	// save jumping state
-	int Jumped = m_Core.m_Jumped;
 
 	m_Core.m_Input = m_Input;
 	m_Core.Tick(true, m_pPlayer->GetNextTuningParams());
@@ -1506,7 +1503,7 @@ void CCharacter::DoZombieAim(vec2 VictimPos, int VicCID, vec2 NearZombPos, int N
 		// Zamer
 		if (m_pPlayer->GetZomb(4))
 		{
-			if (m_LatestPrevInput.m_Fire = 1)
+			if (m_LatestPrevInput.m_Fire == 1)
 				GameServer()->CreateExplosion(m_Pos, GetCID(), WEAPON_HAMMER, false);
 		}
 

@@ -1,3 +1,5 @@
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wvarargs"
 #include "localization.h"
 
 /* BEGIN EDIT *********************************************************/

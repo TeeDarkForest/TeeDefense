@@ -6,8 +6,7 @@
 #include "laser.h"
 #include <game/server/gamecontext.h>
 
-#define NumSide 6
-#define PickupPhysSizeS 14
+static const int s_TurretNumSide = 6;
 
 enum
 {
@@ -41,8 +40,8 @@ private:
     int m_Type;
     int m_Radius;
     int m_Owner;
-    int m_IDs[NumSide];
-    int m_aIDs[NumSide];
+    int m_IDs[s_TurretNumSide];
+    int m_aIDs[s_TurretNumSide];
 
     int m_FireDelay;
     int m_Degres;

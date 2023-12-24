@@ -73,7 +73,7 @@ if(TARGET_OS STREQUAL "windows")
 endif()
 
 option(MYSQL "Enable mysql support" ON)
-option(BOX2D "Enable Box2D fun box" ON)
+option(BOX2D "Enable Box2D fun box" OFF) # default off
 option(PREFER_BUNDLED_LIBS "Prefer bundled libraries over system libraries" ${AUTO_DEPENDENCIES_DEFAULT})
 option(DEV "Don't generate stuff necessary for packaging" OFF)
 
@@ -162,32 +162,6 @@ function(set_glob VAR GLOBBING DIRECTORY) # ...
   foreach(file ${ARGN})
     list(APPEND FILES "${PROJECT_SOURCE_DIR}/${DIRECTORY}/${file}")
   endforeach()
-
-  if(NOT FILES STREQUAL GLOB_RESULT)
-    message(AUTHOR_WARNING "${VAR} does not contain every file from directory ${DIRECTORY}")
-    set(LIST_BUT_NOT_GLOB)
-    if(POLICY CMP0057)
-      cmake_policy(SET CMP0057 NEW)
-      foreach(file ${FILES})
-        if(NOT file IN_LIST GLOB_RESULT)
-          list(APPEND LIST_BUT_NOT_GLOB ${file})
-        endif()
-      endforeach()
-      if(LIST_BUT_NOT_GLOB)
-        message(AUTHOR_WARNING "Entries only present in ${VAR}: ${LIST_BUT_NOT_GLOB}")
-      endif()
-      set(GLOB_BUT_NOT_LIST)
-      foreach(file ${GLOB_RESULT})
-        if(NOT file IN_LIST FILES)
-          list(APPEND GLOB_BUT_NOT_LIST ${file})
-        endif()
-      endforeach()
-      if(GLOB_BUT_NOT_LIST)
-        message(AUTHOR_WARNING "Entries only present in ${DIRECTORY}: ${GLOB_BUT_NOT_LIST}")
-      endif()
-    endif()
-  endif()
-
   set(${VAR} ${FILES} PARENT_SCOPE)
 endfunction()
 
@@ -443,6 +417,14 @@ generate_source("src/game/generated/server_data.h" "server_content_header")
 
 # Sources
 set_glob(BASE GLOB_RECURSE src/base
+  tl/algorithm.h
+  tl/allocator.h
+  tl/array.h
+  tl/base.h
+  tl/range.h
+  tl/sorted_array.h
+  tl/string.h
+  tl/threading.h 
   color.h
   detect.h
   hash_bundled.cpp
@@ -456,14 +438,6 @@ set_glob(BASE GLOB_RECURSE src/base
   math.h
   system.cpp
   system.h
-  tl/algorithm.h
-  tl/allocator.h
-  tl/array.h
-  tl/base.h
-  tl/range.h
-  tl/sorted_array.h
-  tl/string.h
-  tl/threading.h
   vmath.h
 )
 
@@ -547,7 +521,7 @@ set_glob(ENGINE_SHARED GLOB src/engine/shared
   uuid_manager.cpp
   uuid_manager.h
 )
-set(ENGINE_GENERATED_SHARED src/game/generated/protocol.cpp src/game/generated/protocol.h)
+set(ENGINE_GENERATED_SHARED src/game/generated/nethash.cpp src/game/generated/protocol.cpp src/game/generated/protocol.h)
 set_glob(GAME_SHARED GLOB src/game
   collision.cpp
   collision.h

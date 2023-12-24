@@ -4,8 +4,8 @@
 #include <game/server/gamecontext.h>
 #include <game/server/entity.h>
 
-#define NumSide 32
-#define TowerRadius 240
+static const int s_TowerNumSide = 32;
+static const int s_TowerSize = 240;
 class CTowerMain : public CEntity
 {
 public:
@@ -24,7 +24,7 @@ private:
 
     int m_FlagID;
     int m_aIDs[9];
-    int m_alIDs[NumSide];
+    int m_alIDs[s_TowerNumSide];
 };
 
 #endif

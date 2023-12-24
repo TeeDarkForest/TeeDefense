@@ -25,7 +25,7 @@ CTurret::CTurret(CGameWorld *pGameWorld, vec2 Pos, int Owner, int Type, int Radi
 
     m_ID = Server()->SnapNewID();
 
-    m_ProximityRadius = PickupPhysSizeS;
+    m_ProximityRadius = 14;
 
     GameWorld()->InsertEntity(this);
 }
@@ -85,6 +85,7 @@ int CTurret::GetSnapType()
     default:
         break;
     }
+    return TURRET_GUN;
 }
 
 void CTurret::Tick()
@@ -129,7 +130,7 @@ void CTurret::Tick()
         				a += Spreading[i+2];
         				float v = 1-(absolute(i)/(float)ShotSpread);
         				float Speed = mix((float)GameServer()->Tuning()->m_ShotgunSpeeddiff, 1.0f, v);
-        				CProjectile *pProj = new CProjectile(GameWorld(), WEAPON_SHOTGUN,
+        				new CProjectile(GameWorld(), WEAPON_SHOTGUN,
         					GetOwner(),
         					m_Pos,
         					vec2(cosf(a), sinf(a))*Speed,
@@ -228,10 +229,10 @@ void CTurret::Snap(int SnappingClient)
 
     int aIDSize = sizeof(m_aIDs) / sizeof(int);
 
-    float AngleStep = 2.0f * pi / NumSide;
+    float AngleStep = 2.0f * pi / s_TurretNumSide;
 
-    for(int i=0; i<NumSide; i++)
-	{
+    for (int i = 0; i < s_TurretNumSide; i++)
+    {
 	    vec2 PartPosStart = m_Pos + vec2(GetRadius() * cos(AngleStep*i), GetRadius() * sin(AngleStep*i));
 	    vec2 PartPosEnd = m_Pos + vec2(GetRadius() * cos(AngleStep*(i+1)), GetRadius() * sin(AngleStep*(i+1)));
 	    CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_IDs[i], sizeof(CNetObj_Laser)));

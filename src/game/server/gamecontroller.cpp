@@ -1155,10 +1155,9 @@ bool CGameController::EndWave()
 
 void CGameController::DoZombMessage(int Which)
 {
-	char aBuf[64];
 	if (!Which)
 	{
-		GameServer()->SendBroadcast_VL(_("Wave {int:a} started with {int:a1} Zombies!"), -1, "a", &m_Wave, "a1", &m_ZombLeft);
+		GameServer()->SendBroadcast_VL(-1, _("Wave {int:a} started with {int:a1} Zombies!"), "a", &m_Wave, "a1", &m_ZombLeft);
 		return;
 	}
 	Which -= 1;
@@ -1176,8 +1175,6 @@ void CGameController::DoZombMessage(int Which)
 
 void CGameController::DoLifeMessage(int Life)
 {
-	char aBuf[64];
-
 	GameServer()->SendChatTarget(-1, _("The main tower is under attacked!"));
 	if (Life > 1)
 	{

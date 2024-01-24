@@ -92,7 +92,7 @@ void CTurret::Tick()
 {
     for(CCharacter *pChr = (CCharacter*) GameWorld()->FindFirst(CGameWorld::ENTTYPE_CHARACTER); pChr; pChr = (CCharacter *)pChr->TypeNext())
     {
-        if(!pChr->IsAlive() || !pChr->GetPlayer()->GetZomb())
+        if(!pChr->IsAlive() || !pChr->GetPlayer()->IsBot())
             continue;
 
         TargetPos = pChr->m_Pos;

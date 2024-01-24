@@ -26,6 +26,8 @@
 
 #include "GameCore/Account/account.h"
 
+#include "bot.h"
+
 // Test Msg.
 #define D(MSG) (dbg_msg("Test", MSG))
 
@@ -85,6 +87,8 @@ void CGameContext::Construct(int Resetting, bool ChangeMap)
 	m_b2world = new b2World(gravity);
 	m_b2world->QueryAABB(&callback, worldAABB);
 #endif
+
+	m_pBotEngine = new CBotEngine(this);
 }
 
 CGameContext::CGameContext(int Resetting, bool ChangeMap)
@@ -392,7 +396,7 @@ void CGameContext::SendEmoticon(int ClientID, int Emoticon)
 
 void CGameContext::SendWeaponPickup(int ClientID, int Weapon)
 {
-	if (!m_apPlayers[ClientID]->GetZomb()) // Zombies don't pickup weapons
+	if (!m_apPlayers[ClientID]->IsBot()) // Zombies don't pickup weapons
 	{
 		CNetMsg_Sv_WeaponPickup Msg;
 		Msg.m_Weapon = Weapon;
@@ -533,6 +537,15 @@ void CGameContext::OnTick()
 	// check tuning
 	CheckPureTuning();
 
+	// Test basic move for bots
+	for (int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if (!m_apPlayers[i] || !m_apPlayers[i]->m_IsBot)
+			continue;
+		CNetObj_PlayerInput Input = GetPlayer(i)->m_pBot->GetLastInputData();
+		m_apPlayers[i]->OnPredictedInput(&Input);
+	}
+
 	// copy tuning
 	m_World.m_Core.m_Tuning = m_Tuning;
 	m_World.Tick();
@@ -579,7 +592,7 @@ void CGameContext::OnTick()
 				bool aVoteChecked[MAX_CLIENTS] = {0};
 				for (int i = 0; i < MAX_CLIENTS; i++)
 				{
-					if (!m_apPlayers[i] || m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS || aVoteChecked[i]) // don't count in votes by spectators
+					if (!m_apPlayers[i] || m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS || aVoteChecked[i] || m_apPlayers[i]->m_IsBot) // don't count in votes by spectators
 						continue;
 
 					int ActVote = m_apPlayers[i]->m_Vote;
@@ -651,6 +664,15 @@ void CGameContext::OnTick()
 		}
 	}
 #endif
+
+	// Test basic move for bots
+	for (int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if (!m_apPlayers[i] || !m_apPlayers[i]->m_IsBot)
+			continue;
+		CNetObj_PlayerInput Input = m_apPlayers[i]->m_pBot->GetInputData();
+		m_apPlayers[i]->OnPredictedInput(&Input);
+	}
 }
 
 #ifdef CONF_BOX2D
@@ -705,11 +727,14 @@ void CGameContext::OnClientEnter(int ClientID)
 
 void CGameContext::OnClientConnected(int ClientID)
 {
-	if (m_apPlayers[ClientID])
+	// Check if the slot is used by a bot
+	if (m_apPlayers[ClientID] && m_apPlayers[ClientID]->m_IsBot)
 	{
-		OnZombieKill(ClientID);
+		delete m_apPlayers[ClientID];
+		m_apPlayers[ClientID] = 0;
 	}
-	m_apPlayers[ClientID] = new (ClientID) CPlayer(this, ClientID, TEAM_SPECTATORS, 0);
+
+	m_apPlayers[ClientID] = new (ClientID) CPlayer(this, ClientID, TEAM_SPECTATORS);
 	// players[client_id].init(client_id);
 	// players[client_id].client_id = client_id;
 
@@ -730,6 +755,7 @@ void CGameContext::OnClientConnected(int ClientID)
 	SetClientLanguage(ClientID, "zh-cn");
 	SendChatTarget(ClientID, _("Use command '/language en' to change language English"));
 	SendChatTarget(ClientID, _("上面那消息是给外国人看的，咱中国人不用管！awa"));
+
 	// send motd
 	CNetMsg_Sv_Motd Msg;
 	Msg.m_pMessage = g_Config.m_SvMotd;
@@ -1984,6 +2010,8 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	CMapItemLayerTilemap *pTileMap = m_Layers.GameLayer();
 	CTile *pTiles = (CTile *)Kernel()->RequestInterface<IMap>()->GetData(pTileMap->m_Data);
 
+	m_pBotEngine->Init(pTiles, pTileMap->m_Width, pTileMap->m_Height);
+
 	for (int y = 0; y < pTileMap->m_Height; y++)
 	{
 		for (int x = 0; x < pTileMap->m_Width; x++)
@@ -2086,32 +2114,6 @@ const char *CGameContext::NetVersion() { return GAME_NETVERSION; }
 
 IGameServer *CreateGameServer() { return new CGameContext; }
 
-void CGameContext::OnZombie(int ClientID, int Zomb)
-{
-	if (ClientID >= MAX_CLIENTS || m_apPlayers[ClientID])
-		return;
-
-	m_apPlayers[ClientID] = new (ClientID) CPlayer(this, ClientID, 1, Zomb);
-
-	Server()->InitZomb(ClientID);
-	m_apPlayers[ClientID]->TryRespawn();
-}
-
-void CGameContext::OnZombieKill(int ClientID)
-{
-	if (GetPlayer(ClientID, false, true))
-		m_apPlayers[ClientID]->DeleteCharacter();
-	if (m_apPlayers[ClientID])
-		delete m_apPlayers[ClientID];
-	m_apPlayers[ClientID] = 0;
-	// update spectator modes
-	for (int i = 0; i < MAX_CLIENTS; ++i)
-	{
-		if (m_apPlayers[i] && m_apPlayers[i]->m_SpectatorID == ClientID)
-			m_apPlayers[i]->m_SpectatorID = SPEC_FREEVIEW;
-	}
-}
-
 int CGameContext::NumZombiesAlive()
 {
 	int NumZombies;
@@ -2120,7 +2122,7 @@ int CGameContext::NumZombiesAlive()
 		if (m_apPlayers[i])
 			if (m_apPlayers[i]->GetCharacter())
 				if (m_apPlayers[i]->GetCharacter()->IsAlive())
-					if (m_apPlayers[i]->GetZomb())
+					if (m_apPlayers[i]->IsBot())
 						NumZombies++;
 	}
 	return NumZombies;
@@ -2133,7 +2135,7 @@ int CGameContext::NumHumanAlive()
 	{
 		if (m_apPlayers[i])
 			if (m_apPlayers[i]->GetCharacter())
-				if (!m_apPlayers[i]->GetZomb())
+				if (!m_apPlayers[i]->IsBot())
 					NumHuman++;
 	}
 	return NumHuman;
@@ -2631,4 +2633,56 @@ void CGameContext::PutTurret(int Type, int Owner, int Life, int Radius)
 	if (!GetPlayer(Owner, false, true))
 		return;
 	new CTurret(&m_World, GetPlayerChar(Owner)->m_Pos, Owner, Type, Radius, Life);
+}
+
+int CGameContext::NumPlayers(bool CheckCharacter)
+{
+	int num = 0;
+	for (int i = 0; i < MAX_PLAYERS; i++)
+	{
+		if (GetPlayer(i, false, CheckCharacter))
+			num++;
+	}
+	return num;
+}
+
+void CGameContext::DeleteBot(int i)
+{
+	Server()->DelBot(i);
+	if (m_apPlayers[i] && m_apPlayers[i]->m_IsBot)
+	{
+		dbg_msg("context", "Delete bot at slot: %d", i);
+		delete m_apPlayers[i];
+		m_apPlayers[i] = 0;
+	}
+}
+
+bool CGameContext::AddBot(int i, bool UseDropPlayer)
+{
+	const int StartTeam = g_Config.m_SvTournamentMode ? TEAM_SPECTATORS : m_pController->GetAutoTeam(i);
+	if (StartTeam == TEAM_SPECTATORS)
+		return false;
+	if (Server()->NewBot(i) == 1)
+		return false;
+	dbg_msg("context", "Add a bot at slot: %d", i);
+	if (!UseDropPlayer || !m_apPlayers[i])
+		m_apPlayers[i] = new (i) CPlayer(this, i, StartTeam);
+	m_apPlayers[i]->m_IsBot = true;
+	m_apPlayers[i]->m_pBot = new CBot(m_pBotEngine, m_apPlayers[i]);
+	Server()->SetClientClan(i, g_BotClan);
+	return true;
+}
+
+void CGameContext::OnZombieKill(int ClientID)
+{
+	Server()->DelBot(ClientID);
+	if (m_apPlayers[ClientID])
+		delete m_apPlayers[ClientID];
+	m_apPlayers[ClientID] = 0;
+	// update spectator modes
+	for (int i = 0; i < MAX_CLIENTS; ++i)
+	{
+		if (m_apPlayers[i] && m_apPlayers[i]->m_SpectatorID == ClientID)
+			m_apPlayers[i]->m_SpectatorID = SPEC_FREEVIEW;
+	}
 }

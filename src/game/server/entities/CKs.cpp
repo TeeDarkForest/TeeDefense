@@ -51,7 +51,7 @@ void CKs::Tick()
 		m_SpawnTick--;
 	// Check if a player intersected us
 	CCharacter *pChr = GameServer()->m_World.ClosestCharacter(m_Pos, 20.0f, 0);
-	if (pChr && pChr->IsAlive() && !pChr->GetPlayer()->GetZomb())
+	if (pChr && pChr->IsAlive() && !pChr->GetPlayer()->IsBot())
 	{
 		// DUDE! Forget the old comment here
 		int PickSpeed = 1;

@@ -160,6 +160,21 @@ typedef vector2_base<float> vec2;
 typedef vector2_base<bool> bvec2;
 typedef vector2_base<int> ivec2;
 
+template <typename T>
+inline vector2_base<T> closest_point_on_line_s(vector2_base<T> line_point0, vector2_base<T> line_point1, vector2_base<T> target_point)
+{
+	vector2_base<T> c = target_point - line_point0;
+	vector2_base<T> v = (line_point1 - line_point0);
+	v = normalize(v);
+	T d = length(line_point0 - line_point1);
+	T t = dot(v, c) / d;
+	return mix(line_point0, line_point1, clamp(t, (T)0, (T)1));
+	/*
+	if (t < 0) t = 0;
+	if (t > 1.0f) return 1.0f;
+	return t;*/
+}
+
 // ------------------------------------
 template <typename T>
 class vector3_base

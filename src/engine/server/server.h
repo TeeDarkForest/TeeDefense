@@ -139,6 +139,8 @@ public:
 		char m_aLanguage[16];
 		NETADDR m_Addr;
 		bool m_CustClt;
+
+		bool m_IsBot;
 	};
 
 	CClient m_aClients[MAX_CLIENTS];
@@ -210,7 +212,10 @@ public:
 	int SendMsg(CMsgPacker *pMsg, int Flags, int ClientID) override;
 
 	void DoSnapshot();
-	
+
+	int NewBot(int ClientID);
+	int DelBot(int ClientID);
+
 	static int ClientRejoinCallback(int ClientID, void *pUser);
 	static int NewClientCallback(int ClientID, void *pUser, bool Sixup);
 	static int NewClientNoAuthCallback(int ClientID, void *pUser);

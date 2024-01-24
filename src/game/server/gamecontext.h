@@ -37,6 +37,8 @@ typedef unsigned __int64 uint64_t;
 
 #include "mask128.h"
 
+#include "botengine.h"
+
 /*
 	Tick
 		Game Context (CGameContext::Tick)
@@ -68,12 +70,12 @@ class CBox2DTestSpider;
 class BodyRangeRay : public b2RayCastCallback
 {
 public:
-	b2Body* m_body;
+	b2Body *m_body;
 	b2Vec2 m_point;
 	b2Vec2 m_normal;
 	float m_fraction;
 
-	float ReportFixture(b2Fixture* fixture, const b2Vec2& point, const b2Vec2& normal, float fraction)
+	float ReportFixture(b2Fixture *fixture, const b2Vec2 &point, const b2Vec2 &normal, float fraction)
 	{
 		m_body = fixture->GetBody();
 		m_point = point;
@@ -86,12 +88,12 @@ public:
 class BodyCollideQuery : public b2QueryCallback
 {
 public:
-	b2Body* Body;
+	b2Body *Body;
 	b2Vec2 findPos;
 
-	bool ReportFixture(b2Fixture* fixture)
+	bool ReportFixture(b2Fixture *fixture)
 	{
-		b2Shape* shape = fixture->GetShape();
+		b2Shape *shape = fixture->GetShape();
 		bool inside = shape->TestPoint(fixture->GetBody()->GetTransform(), findPos);
 
 		if (inside)
@@ -137,7 +139,7 @@ class CGameContext : public IGameServer
 
 	static void ConLanguage(IConsole::IResult *pResult, void *pUserData);
 	static void ConAbout(IConsole::IResult *pResult, void *pUserData);
-	
+
 	static void ConClassPassword(IConsole::IResult *pResult, void *pUserData);
 	static void ConCraft(IConsole::IResult *pResult, void *pUserData);
 	static void ConHelp(IConsole::IResult *pResult, void *pUserData);
@@ -161,15 +163,16 @@ class CGameContext : public IGameServer
 	static void ConB2CreateCrank(IConsole::IResult *pResult, void *pUserData);
 	static void ConB2CreateGround(IConsole::IResult *pResult, void *pUserData);
 	static void ConB2ClearWorld(IConsole::IResult *pResult, void *pUserData);
-	#endif
+#endif
 
 	CGameContext(int Resetting, bool ChangeMap);
 	void Construct(int Resetting, bool ChangeMap);
 
 	bool m_Resetting;
 
-	//Zomb2
+	// Zomb2
 	int m_MessageReturn;
+
 public:
 	int m_ChatResponseTargetID;
 	int m_ChatPrintCBIndex;
@@ -177,10 +180,10 @@ public:
 #ifdef CONF_BOX2D
 public:
 	b2World *m_b2world;
-	std::vector<CBox2DBox*> m_b2bodies;
-	std::vector<CBox2DTest*> m_b2Test;
-	std::vector<CBox2DTestSpider*> m_b2TestSpider;
-	std::vector<b2Body*> m_b2explosions;
+	std::vector<CBox2DBox *> m_b2bodies;
+	std::vector<CBox2DTest *> m_b2Test;
+	std::vector<CBox2DTestSpider *> m_b2TestSpider;
+	std::vector<b2Body *> m_b2explosions;
 
 	vec2 B2Vec2ToVec2(b2Vec2 b2vec2, float Scale)
 	{
@@ -189,13 +192,13 @@ public:
 
 	void CreateGround(vec2 Pos, int Type = 0);
 	void HandleBox2D();
-	
+
 private:
 	struct Actor
 	{
 		bool m_Dead;
 
-		bool IsDead() {return m_Dead;}
+		bool IsDead() { return m_Dead; }
 	};
 #endif
 
@@ -210,7 +213,7 @@ public:
 	CDB *DB() { return m_pDB; }
 	TWorldController *TW() const { return m_pTWorldController; };
 	void LogoutAccount(int ClientID);
-	
+
 	CGameContext();
 	~CGameContext();
 
@@ -245,7 +248,7 @@ public:
 	int m_VoteEnforce;
 	enum
 	{
-		VOTE_ENFORCE_UNKNOWN=0,
+		VOTE_ENFORCE_UNKNOWN = 0,
 		VOTE_ENFORCE_NO,
 		VOTE_ENFORCE_YES,
 	};
@@ -253,33 +256,35 @@ public:
 	CVoteOptionServer *m_pVoteOptionFirst;
 	CVoteOptionServer *m_pVoteOptionLast;
 
+	class CBotEngine *m_pBotEngine;
+
 	// MMOTee
 	struct CVoteOptions
 	{
-		char m_aDescription[VOTE_DESC_LENGTH] = { 0 };
-		char m_aCommand[VOTE_CMD_LENGTH] = { 0 };
-		void* data = { 0 };
+		char m_aDescription[VOTE_DESC_LENGTH] = {0};
+		char m_aCommand[VOTE_CMD_LENGTH] = {0};
+		void *data = {0};
 	};
 	array<CVoteOptions> m_PlayerVotes[MAX_CLIENTS];
 
 	// helper functions
-	void CreateDamageInd(vec2 Pos, float AngleMod, int Amount, Mask128 Mask=Mask128());
-	void CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, Mask128 Mask=Mask128());
-	void CreateHammerHit(vec2 Pos, Mask128 Mask=Mask128());
-	void CreatePlayerSpawn(vec2 Pos, Mask128 Mask=Mask128());
-	void CreateDeath(vec2 Pos, int Who, Mask128 Mask=Mask128());
-	void CreateSound(vec2 Pos, int Sound, Mask128 Mask=Mask128());
-	void CreateSoundGlobal(int Sound, int Target=-1);
+	void CreateDamageInd(vec2 Pos, float AngleMod, int Amount, Mask128 Mask = Mask128());
+	void CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, Mask128 Mask = Mask128());
+	void CreateHammerHit(vec2 Pos, Mask128 Mask = Mask128());
+	void CreatePlayerSpawn(vec2 Pos, Mask128 Mask = Mask128());
+	void CreateDeath(vec2 Pos, int Who, Mask128 Mask = Mask128());
+	void CreateSound(vec2 Pos, int Sound, Mask128 Mask = Mask128());
+	void CreateSoundGlobal(int Sound, int Target = -1);
 
 	int NumZombiesAlive();
 	int NumHumanAlive();
 
 	enum
 	{
-		CHAT_ALL=-2,
-		CHAT_SPEC=-1,
-		CHAT_RED=0,
-		CHAT_BLUE=1
+		CHAT_ALL = -2,
+		CHAT_SPEC = -1,
+		CHAT_RED = 0,
+		CHAT_BLUE = 1
 	};
 
 	// network
@@ -291,9 +296,8 @@ public:
 	void SendBroadcast_VL(int ClientID, const char *pText, ...);
 	void SetClientLanguage(int ClientID, const char *pLanguage);
 	// MMOTee
-	void AddVote_VL(int To, const char* aCmd, const char* pText, ...);
+	void AddVote_VL(int To, const char *aCmd, const char *pText, ...);
 	void AddVote(const char *Desc, const char *Cmd, int ClientID = -1);
-
 
 	//
 	void CheckPureTuning();
@@ -320,15 +324,11 @@ public:
 	virtual bool IsClientReady(int ClientID);
 	virtual bool IsClientPlayer(int ClientID);
 
-	virtual void OnSetAuthed(int ClientID,int Level);
-	
+	virtual void OnSetAuthed(int ClientID, int Level);
+
 	virtual const char *GameType();
 	virtual const char *Version();
 	virtual const char *NetVersion();
-
-	//Zomb2
-	void OnZombie(int ClientID, int Zomb);
-	void OnZombieKill(int ClientID);
 
 	// Tee Defense
 	bool m_NeedResetTower;
@@ -337,9 +337,9 @@ public:
 
 	void InitItems();
 	void InitCrafts();
-	void CreateItem(const char* pItemName, int ID, int Type, int Damage, int Level, int TurretType, int Proba, 
-		        int Speed, int NeedItems[NUM_ITEM], int Life = -1);
-	void CreateCraft(const char* pName, int ID, int Type, int Level, int Proba, int *NeedResource, int Speed = -1);
+	void CreateItem(const char *pItemName, int ID, int Type, int Damage, int Level, int TurretType, int Proba,
+					int Speed, int NeedItems[NUM_ITEM], int Life = -1);
+	void CreateCraft(const char *pName, int ID, int Type, int Level, int Proba, int *NeedResource, int Speed = -1);
 
 	const char *GetItemNameByID(int Type);
 
@@ -348,34 +348,34 @@ public:
 
 	struct CItem
 	{
-		const char* m_Name;
-    	int m_Type;
+		const char *m_Name;
+		int m_Type;
 		int m_NeedResource[NUM_ITEM];
 		int m_Proba;
-    	int m_Level;
-    	int m_Damage;
-    	int m_Speed;
-    	int m_ID;
-    	int m_TurretType;
+		int m_Level;
+		int m_Damage;
+		int m_Speed;
+		int m_ID;
+		int m_TurretType;
 		int m_Life;
 	};
 
-	int GetItemId(const char* pItemName);
+	int GetItemId(const char *pItemName);
 
 	int GetSpeed(int Level, int Type);
 
-    int GetDmg(int Level);
+	int GetDmg(int Level);
 
 	void MakeItem(int ItemID, int ClientID);
 
-    bool CheckItemName(const char* pItemName);
+	bool CheckItemName(const char *pItemName);
 
-    void SendCantMakeItemChat(int To, int *Resource);
+	void SendCantMakeItemChat(int To, int *Resource);
 
-    void SendMakeItemChat(int To, CItem Item);
+	void SendMakeItemChat(int To, CItem Item);
 
-    void SendMakeItemFailedChat(int To, int* Resource);
-		
+	void SendMakeItemFailedChat(int To, int *Resource);
+
 	CItem m_Items[NUM_ITEM];
 
 	int m_EventTimer;
@@ -394,12 +394,20 @@ public:
 
 	void PutTurret(int Type, int Owner, int Life, int Radius);
 	void AddVote_Make(int ClientID, int Type);
+
+public:
+	int NumPlayers(bool CheckCharacter = false);
+
+	// Bot slots
+	virtual void DeleteBot(int i);
+	bool AddBot(int i, bool UseDropPlayer = false);
+	void OnZombieKill(int ClientID);
 };
 
 inline Mask128 CmaskAll() { return Mask128(); }
 inline Mask128 CmaskOne(int ClientID) { return Mask128(ClientID); }
-inline Mask128 CmaskUnset(Mask128 Mask, int ClientID) { return Mask^CmaskOne(ClientID); }
+inline Mask128 CmaskUnset(Mask128 Mask, int ClientID) { return Mask ^ CmaskOne(ClientID); }
 inline Mask128 CmaskAllExceptOne(int ClientID) { return CmaskUnset(CmaskAll(), ClientID); }
-inline bool CmaskIsSet(Mask128 Mask, int ClientID) { return (Mask&CmaskOne(ClientID)) != 0; }
+inline bool CmaskIsSet(Mask128 Mask, int ClientID) { return (Mask & CmaskOne(ClientID)) != 0; }
 
 #endif

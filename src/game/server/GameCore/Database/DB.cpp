@@ -1,4 +1,4 @@
-/* DB */
+/* Copyright(C) 2022 - 2024 ST-Chara */
 #include <engine/shared/config.h>
 #include <game/server/gamecontext.h>
 #include "DB.h"

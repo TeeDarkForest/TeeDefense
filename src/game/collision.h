@@ -44,6 +44,8 @@ public:
 	// Tee Dark Forest.
 	int GetRealTile(int x, int y)	{return unpow(GetTile(x, y), 2)+1;}
 	int GetRealTile(vec2 Pos)	{return GetRealTile(Pos.x, Pos.y);}
+	
+	int FastIntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision) const;
 };
 
 #endif

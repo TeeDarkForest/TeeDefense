@@ -619,11 +619,21 @@ set_glob(GAME_SERVER GLOB_RECURSE src/game/server
   entities/growingexplosion.h
   GameCore/Account/account.cpp
   GameCore/Account/account.h
+  GameCore/AI/defence.cpp
+  GameCore/AI/defence.h
+  GameCore/AI/genetics.cpp
+  GameCore/AI/genetics.h
+  GameCore/AI/strategy.cpp
+  GameCore/AI/strategy.h
   GameCore/Database/DB.cpp
   GameCore/Database/DB.h
   GameCore/TWorldComponent.h
   GameCore/TWorldController.cpp
   GameCore/TWorldController.h
+  bot.cpp
+  bot.h
+  botengine.cpp
+  botengine.h
   entity.cpp
   entity.h
   eventhandler.cpp

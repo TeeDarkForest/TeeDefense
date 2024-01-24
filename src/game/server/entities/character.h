@@ -117,6 +117,19 @@ public:
 
 	int m_SnappingNum;
 
+	vec2 GetPos() const;
+
+	CCharacterCore GetCore() { return m_Core; }
+	void SetCore(CCharacterCore Core) { m_Core = Core; }
+	class CCharacterCore *Core() { return &m_Core; }
+
+	// Need for bot (for now)
+	bool CanFire() { return m_ReloadTimer <= 0; }
+	int GetHealth() { return m_Health; }
+	int GetArmor() { return m_Armor; }
+	int GetAmmoCount(int Weapon) { return m_aWeapons[clamp(Weapon, 0, NUM_WEAPONS - 1)].m_Ammo; }
+	int GetWeaponAmmo(int Type) { return m_aWeapons[Type].m_Ammo; }
+
 private:
 	// player controlling this character
 	class CPlayer *m_pPlayer;
@@ -157,11 +170,8 @@ private:
 	int m_LastHitBy;
 
 	// Zomb2 (THANKS FOR AssassinTee)
-	void DoZombieMovement();
-	void DoZombieAim(vec2 VictimPos, int VicCID, vec2 NearZombPos, int NearZombCID);
 	void ResetAiming();
 	vec2 GetGrenadeAngle(vec2 m_startPos, vec2 m_ToShoot, bool GrenadeBot);
-	float GetTriggerDistance(int Type);
 
 	struct MoveVars
     {

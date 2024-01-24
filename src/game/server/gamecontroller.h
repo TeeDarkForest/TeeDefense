@@ -37,7 +37,7 @@ protected:
 		{
 			m_Got = false;
 			m_FriendlyTeam = -1;
-			m_Pos = vec2(100,100);
+			m_Pos = vec2(100, 100);
 		}
 
 		vec2 m_Pos;
@@ -54,7 +54,6 @@ protected:
 	void ResetGame();
 
 	char m_aMapWish[128];
-
 
 	int m_RoundStartTick;
 	int m_GameOverTick;
@@ -135,7 +134,6 @@ public:
 	*/
 	virtual int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon);
 
-
 	virtual void OnPlayerInfoChange(class CPlayer *pP);
 
 	//
@@ -153,23 +151,20 @@ public:
 
 	virtual void PostReset();
 
-	//Zomb2
-	int m_Wave;
-	int m_Zombie[13];//not sure about the amount of zombies
+	// Zomb2
+	int m_Zombie[13]; // not sure about the amount of zombies
 	int m_ZombLeft;
 
-	void StartWave(int Wave);
-	void CheckZombie();
+	void StartWave();
 	int RandZomb();
-	bool EndWave();
 	void DoZombMessage(int Which);
 	void DoLifeMessage(int Life);
 	void HandleTop();
 	void SetWaveAlg(int modulus, int wavedrittel);
 	int GetZombieReihenfolge(int wavedrittel);
+	void CheckZomb();
 
 	int m_CKsID;
-	int m_LastActivePlayers;
 };
 
 #endif

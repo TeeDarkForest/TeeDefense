@@ -173,6 +173,9 @@ public:
 	virtual void SetClientLanguage(int ClientID, const char* pLanguage) = 0;
 	virtual int* GetIdMap(int ClientID) = 0;
 	virtual void SetCustClt(int ClientID) = 0;
+
+	virtual int NewBot(int ClientID) = 0;
+	virtual int DelBot(int ClientID) = 0;
 };
 
 class IGameServer : public IInterface
@@ -210,6 +213,9 @@ public:
 	virtual bool GetPaused() = 0;
 
 	virtual void OnUpdatePlayerServerInfo(char *aBuf, int BufSize, int ID) = 0;
+
+	virtual void DeleteBot(int i) = 0;
+
 public:
 	bool m_NeedResetTowers;
 };

@@ -30,7 +30,7 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 	if (pOwnerChar && !pOwnerChar->GetPlayer())
 		return false;
 
-	if(!pHit->GetPlayer()->GetZomb() && !pOwnerChar->GetPlayer()->GetZomb())
+	if(!pHit->GetPlayer()->IsBot() && !pOwnerChar->GetPlayer()->IsBot())
 		return false;
 
 	m_From = From;

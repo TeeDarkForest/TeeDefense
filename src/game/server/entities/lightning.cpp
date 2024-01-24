@@ -33,7 +33,7 @@ bool CLightning::HitCharacter(vec2 From, vec2 To)
 	m_Pos = At;
 	m_Energy = -1;
 
-	if (pHit && pHit->GetPlayer()->GetZomb())
+	if (pHit && pHit->GetPlayer()->IsBot())
 		pHit->TakeDamage(vec2(0.f, 0.f), m_Damage, m_Owner, WEAPON_RIFLE);
 	else
 		return false;

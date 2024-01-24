@@ -42,8 +42,10 @@ CGameController::CGameController(class CGameContext *pGameServer)
 	m_CKsID = 0;
 	// Zomb2
 	//	m_pTop = new CTop(m_pGameServer);
-	m_Wave = 0;
 	mem_zero(m_Zombie, sizeof(m_Zombie));
+
+	m_ZombLeft = 0;
+	StartWave();
 }
 
 CGameController::~CGameController()
@@ -217,7 +219,6 @@ void CGameController::EndRound()
 	GameServer()->m_World.m_Paused = true;
 	m_GameOverTick = Server()->Tick();
 	m_SuddenDeath = 0;
-	m_Wave = 0;
 	ResetGame();
 	GameServer()->m_NeedResetTowers = true;
 	mem_zero(m_Zombie, sizeof(m_Zombie));
@@ -248,24 +249,6 @@ void CGameController::StartRound()
 	m_GameOverTick = -1;
 	m_ForceBalanced = false;
 	Server()->DemoRecorder_HandleAutoStart();
-
-	// Zomb2
-	for (int i = 0; i < MAX_CLIENTS; i++) // bugfix
-	{
-		if (!GameServer()->m_apPlayers[i])
-			continue;
-
-		if (!GameServer()->m_apPlayers[i]->GetZomb())
-			continue;
-
-		GameServer()->OnZombieKill(i);
-	}
-	m_Wave++;
-	StartWave(m_Wave);
-
-	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "start round type='%s' zombie_wave='%d'", m_pGameType, m_Wave);
-	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 }
 
 void CGameController::ChangeMap(const char *pToMap)
@@ -288,7 +271,6 @@ void CGameController::CycleMap()
 	}
 	if (!str_length(g_Config.m_SvMaprotation))
 		return;
-
 
 	// handle maprotation
 	const char *pMapRotation = g_Config.m_SvMaprotation;
@@ -386,28 +368,42 @@ int CGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 	if (!pKiller)
 		return 0;
 
-	if (pVictim->GetPlayer()->GetZomb())
+	if (pVictim->GetPlayer()->IsBot())
 	{
 		int rando = rand() % 100 + 1;
+		int num = 1 + rand() % 4;
 		if (rando <= 50)
 		{
-			pKiller->m_Items[ITEM_LOG]++;
-			GameServer()->SendChatTarget(pKiller->GetCID(), _("You got 1 Log from the Zombie"));
+			pKiller->m_Items[ITEM_LOG] += num;
+			GameServer()->SendChatTarget(pKiller->GetCID(), _("You got {int:num} Log from the Zombie"), "num", &num);
 		}
 		else if (rando >= 51 && rando <= 75)
 		{
-
-			pKiller->m_Items[ITEM_COPPER]++;
-			GameServer()->SendChatTarget(pKiller->GetCID(), _("You got 1 Copper from the Zombie"));
+			pKiller->m_Items[ITEM_COPPER] += num;
+			GameServer()->SendChatTarget(pKiller->GetCID(), _("You got {int:num} Copper from the Zombie"), "num", &num);
 		}
 		else if (rando <= 99)
 		{
-			pKiller->m_Items[ITEM_GOLDEN]++;
-			GameServer()->SendChatTarget(pKiller->GetCID(), _("You picked up a Gold"));
+			pKiller->m_Items[ITEM_GOLDEN] += num;
+			GameServer()->SendChatTarget(pKiller->GetCID(), _("You got {int:num} Gold from the Zombie"), "num", &num);
+		}
+		else
+		{
+			short r = rand() % 3;
+			if (r == 0)
+			{
+				pKiller->m_Items[ITEM_ENEGRY]++;
+				GameServer()->SendChatTarget(pKiller->GetCID(), _("===-=== You got a Enegry from the Zombie ----"));
+			}
+			else if (r == 1)
+			{
+				pKiller->m_Items[ITEM_DIAMOND]++;
+				GameServer()->SendChatTarget(pKiller->GetCID(), _("===-=== You got a Enegry from the Zombie ----"));
+			}
 		}
 
 		pKiller->m_Items[ITEM_ZOMBIEHEART]++;
-		GameServer()->SendChatTarget(pKiller->GetCID(), _("You picked up Zombie's Heart"));
+		GameServer()->SendChatTarget(pKiller->GetCID(), _("You picked up a Zombie's Heart"));
 		pKiller->m_Score++;
 		DoZombMessage(m_ZombLeft--);
 		GameServer()->TW()->Account()->SaveAccountData(pKiller->GetCID(), CGameContext::TABLE_ITEM, pKiller->m_AccData);
@@ -439,31 +435,6 @@ void CGameController::OnCharacterSpawn(class CCharacter *pChr)
 		pChr->IncreaseHealth(100);
 		pChr->GiveWeapon(WEAPON_HAMMER, -1);
 		pChr->GiveWeapon(WEAPON_GUN, 10);
-	}
-	else if (pChr->GetPlayer()->GetZomb(5) || pChr->GetPlayer()->GetZomb(9)) // Zunner, Flombie
-	{
-		pChr->GiveWeapon(WEAPON_GUN, -1);
-		pChr->SetWeapon(WEAPON_GUN);
-	}
-	else if (pChr->GetPlayer()->GetZomb(2)) // Zoomer
-	{
-		pChr->GiveWeapon(WEAPON_RIFLE, -1);
-		pChr->SetWeapon(WEAPON_RIFLE);
-	}
-	else if (pChr->GetPlayer()->GetZomb(7)) // Zotter
-	{
-		pChr->GiveWeapon(WEAPON_SHOTGUN, -1);
-		pChr->SetWeapon(WEAPON_SHOTGUN);
-	}
-	else if (pChr->GetPlayer()->GetZomb(8)) // Zenade
-	{
-		pChr->GiveWeapon(WEAPON_GRENADE, -1);
-		pChr->SetWeapon(WEAPON_GRENADE);
-	}
-	else // Zaby, Zooker, Zamer, Zaster, Zele, Zinja, Zeater (Ninja gets automatically)
-	{
-		pChr->GiveWeapon(WEAPON_HAMMER, -1);
-		pChr->SetWeapon(WEAPON_HAMMER);
 	}
 }
 
@@ -536,25 +507,13 @@ bool CGameController::CanBeMovedOnBalance(int ClientID)
 
 void CGameController::Tick()
 {
-	int Players = 0;
-	for (int i = 0; i < MAX_CLIENTS; i++)
-	{
-		if (GameServer()->GetPlayer(i, false, true))
-			Players++;
-	}
-
-	if (Players >= 1 && !GameServer()->m_pController->m_Wave)
-		StartRound();
-
-	m_LastActivePlayers = Players;
-
 	// do warmup
 	if (!GameServer()->m_World.m_Paused && m_Warmup)
 	{
 		m_Warmup--;
 		if (!m_Warmup)
 		{
-			StartRound();
+			StartWave();
 			GameServer()->m_World.m_Paused = false;
 		}
 	}
@@ -570,16 +529,6 @@ void CGameController::Tick()
 			// Zomb2: Do this ONLY when the Game ended, that must be BEFORE the round restarts
 			m_aTeamscore[TEAM_HUMAN] = 0;
 			m_aTeamscore[TEAM_ZOMBIE] = g_Config.m_SvLives;
-			for (int i = 0; i < MAX_CLIENTS; i++) // bugfix
-			{
-				if (!GameServer()->m_apPlayers[i])
-					continue;
-
-				if (!GameServer()->m_apPlayers[i]->GetZomb())
-					continue;
-
-				GameServer()->OnZombieKill(i);
-			}
 			DoWarmup(g_Config.m_SvWarmup);
 			m_GameOverTick = -1;
 			m_RoundStartTick = Server()->Tick();
@@ -596,10 +545,7 @@ void CGameController::Tick()
 			GameServer()->m_World.m_Paused = false;
 	}
 
-	if (m_GameOverTick == -1)
-	{
-		CheckZombie();
-	}
+	CheckZomb();
 
 	// game is Paused
 	if (GameServer()->m_World.m_Paused)
@@ -672,39 +618,6 @@ void CGameController::Tick()
 					break;
 			}
 #endif
-			if (GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS && !Server()->IsAuthed(i))
-			{
-				if (Server()->Tick() > GameServer()->m_apPlayers[i]->m_LastActionTick + g_Config.m_SvInactiveKickTime * Server()->TickSpeed() * 60 && !GameServer()->m_apPlayers[i]->GetZomb())
-				{
-					switch (g_Config.m_SvInactiveKick)
-					{
-					case 0:
-					{
-						// move player to spectator
-						GameServer()->m_apPlayers[i]->SetTeam(TEAM_SPECTATORS);
-					}
-					break;
-					case 1:
-					{
-						// move player to spectator if the reserved slots aren't filled yet, kick him otherwise
-						int Spectators = 0;
-						for (int j = 0; j < MAX_CLIENTS; ++j)
-							if (GameServer()->m_apPlayers[j] && GameServer()->m_apPlayers[j]->GetTeam() == TEAM_SPECTATORS)
-								++Spectators;
-						if (Spectators >= g_Config.m_SvSpectatorSlots)
-							Server()->Kick(i, "Kicked for inactivity");
-						else
-							GameServer()->m_apPlayers[i]->SetTeam(TEAM_SPECTATORS);
-					}
-					break;
-					case 2:
-					{
-						// kick the player
-						Server()->Kick(i, "Kicked for inactivity");
-					}
-					}
-				}
-			}
 		}
 	}
 
@@ -851,250 +764,23 @@ int CGameController::ClampTeam(int Team)
 	return 0;
 }
 
-void CGameController::StartWave(int Wave)
+void CGameController::StartWave()
 {
-	// Boom, Server down
-	mem_zero(m_Zombie, sizeof(m_Zombie));
-	if (!Wave) // Well, just in case ^^ shouldn't be needed
-		return;
-	// Zaby, Zaby has no alround wave
-	else if (Wave == 1)
-		m_Zombie[0] = 10;
-	else if (Wave == 2)
-		m_Zombie[0] = 40;
-	else
-		SetWaveAlg(Wave % 3, Wave / 3);
-	/*
-	else if(Wave == 4)
-		m_Zombie[2] = 10;
-	else if(Wave == 5)
-		m_Zombie[2] = 20;
-	else if(Wave == 6)
-		m_Zombie[2] = 40;
-	else if(Wave == 7)
+	if (GameServer()->NumPlayers(true))
 	{
-		m_Zombie[2] = 10;
-		m_Zombie[0] = 10;
+		// Zaby, Zaby has no alround wave
+		if (GameServer()->NumPlayers() == 1)
+			m_Zombie[0] += 10;
+		else if (GameServer()->NumPlayers() == 2)
+			m_Zombie[0] += 20;
+		else
+			SetWaveAlg(GameServer()->NumPlayers() % 3, GameServer()->NumPlayers() / 3);
 	}
-
-	//Zammer
-	else if(Wave == 8)
-		m_Zombie[3] = 10;
-	else if(Wave == 9)
-		m_Zombie[3] = 20;
-	else if(Wave == 10)
-		m_Zombie[3] = 40;
-	else if(Wave == 11)
-	{
-		m_Zombie[3] = 10;
-		m_Zombie[2] = 10;
-		m_Zombie[0] = 10;
-	}
-
-	//Zunner
-	else if(Wave == 12)
-		m_Zombie[4] = 10;
-	else if(Wave == 13)
-		m_Zombie[4] = 20;
-	else if(Wave == 14)
-		m_Zombie[4] = 40;
-	else if(Wave == 15)
-	{
-		m_Zombie[4] = 10;
-		m_Zombie[3] = 10;
-		m_Zombie[2] = 10;
-		m_Zombie[0] = 10;
-	}
-
-	//Zotter
-	else if(Wave == 16)
-		m_Zombie[6] = 10;
-	else if(Wave == 17)
-		m_Zombie[6] = 20;
-	else if(Wave == 18)
-		m_Zombie[6] = 40;
-	else if(Wave == 19)
-	{
-		m_Zombie[6] = 10;
-		m_Zombie[4] = 10;
-		m_Zombie[3] = 10;
-		m_Zombie[2] = 10;
-		m_Zombie[0] = 10;
-	}
-
-	//Zaster
-	else if(Wave == 20)
-		m_Zombie[5] = 10;
-	else if(Wave == 21)
-		m_Zombie[5] = 20;
-	else if(Wave == 22)
-		m_Zombie[5] = 40;
-	else if(Wave == 23)
-	{
-		m_Zombie[6] = 10;
-		m_Zombie[5] = 10;
-		m_Zombie[4] = 10;
-		m_Zombie[3] = 10;
-		m_Zombie[2] = 10;
-		m_Zombie[0] = 10;
-	}
-
-	//Zenade
-	else if(Wave == 24)
-		m_Zombie[7] = 10;
-	else if(Wave == 25)
-		m_Zombie[7] = 20;
-	else if(Wave == 26)
-		m_Zombie[7] = 40;
-	else if(Wave == 27)
-	{
-		m_Zombie[7] = 10;
-		m_Zombie[6] = 10;
-		m_Zombie[5] = 10;
-		m_Zombie[4] = 10;
-		m_Zombie[3] = 10;
-		m_Zombie[2] = 10;
-		m_Zombie[0] = 10;
-	}
-
-	//Flombie
-	else if(Wave == 28)
-	{
-		m_Zombie[8] = 10;
-		m_Zombie[0] = 20;
-	}
-		else if(Wave == 29)
-	{
-		m_Zombie[8] = 20;
-		m_Zombie[0] = 30;
-	}
-		else if(Wave == 30)
-	{
-		m_Zombie[8] = 40;
-		m_Zombie[0] = 50;
-	}
-	else if(Wave == 31)
-	{
-		m_Zombie[8] = 10;
-		m_Zombie[7] = 10;
-		m_Zombie[6] = 10;
-		m_Zombie[5] = 10;
-		m_Zombie[4] = 10;
-		m_Zombie[3] = 10;
-		m_Zombie[2] = 10;
-		m_Zombie[0] = 10;
-	}
-
-	//Zinja
-	else if(Wave == 32)
-		m_Zombie[9] = 10;
-	else if(Wave == 33)
-		m_Zombie[9] = 20;
-	else if(Wave == 34)
-		m_Zombie[9] = 40;
-	else if(Wave == 35)
-	{
-		m_Zombie[9] = 10;
-		m_Zombie[8] = 10;
-		m_Zombie[7] = 10;
-		m_Zombie[6] = 10;
-		m_Zombie[5] = 10;
-		m_Zombie[4] = 10;
-		m_Zombie[3] = 10;
-		m_Zombie[2] = 10;
-		m_Zombie[0] = 10;
-	}
-	//Zele
-	else if(Wave == 36)
-		m_Zombie[10] = 10;
-	else if(Wave == 37)
-		m_Zombie[10] = 20;
-	else if(Wave == 38)
-		m_Zombie[10] = 40;
-	else if(Wave == 39)
-	{
-		m_Zombie[10] = 10;
-		m_Zombie[9] = 10;
-		m_Zombie[8] = 10;
-		m_Zombie[7] = 10;
-		m_Zombie[6] = 10;
-		m_Zombie[5] = 10;
-		m_Zombie[4] = 10;
-		m_Zombie[3] = 10;
-		m_Zombie[2] = 10;
-		m_Zombie[0] = 10;
-	}
-	//Zinvis
-	else if(Wave == 40)
-		m_Zombie[11] = 10;
-	else if(Wave == 41)
-		m_Zombie[11] = 20;
-	else if(Wave == 42)
-		m_Zombie[11] = 40;
-	else if(Wave == 43)
-	{
-		m_Zombie[11] = 10;
-		m_Zombie[10] = 10;
-		m_Zombie[9] = 10;
-		m_Zombie[8] = 10;
-		m_Zombie[7] = 10;
-		m_Zombie[6] = 10;
-		m_Zombie[5] = 10;
-		m_Zombie[4] = 10;
-		m_Zombie[3] = 10;
-		m_Zombie[2] = 10;
-		m_Zombie[0] = 10;
-	}
-	//Zoomer
-	else if(Wave == 44)
-		m_Zombie[1] = 10;
-	else if(Wave == 45)
-		m_Zombie[1] = 20;
-	else if(Wave == 46)
-		m_Zombie[1] = 40;
-	else if(Wave == 47)
-	{
-		m_Zombie[1] = 10;
-		m_Zombie[11] = 10;
-		m_Zombie[10] = 10;
-		m_Zombie[9] = 10;
-		m_Zombie[8] = 10;
-		m_Zombie[7] = 10;
-		m_Zombie[6] = 10;
-		m_Zombie[5] = 10;
-		m_Zombie[4] = 10;
-		m_Zombie[3] = 10;
-		m_Zombie[2] = 10;
-		m_Zombie[0] = 10;
-	}*/
-
-	// Message Shit
-	m_ZombLeft = 0;
 	for (int i = 0; i < (int)(sizeof(m_Zombie) / sizeof(m_Zombie[0])); i++)
 		m_ZombLeft += m_Zombie[i];
 
 	DoZombMessage(0);
-}
-
-void CGameController::CheckZombie()
-{
-	if (m_Warmup || !m_Wave || EndWave())
-		return;
-	for (int i = ZOMBIE_START; i < ZOMBIE_END; i++) //...
-	{
-		if (!GameServer()->m_apPlayers[i]) // Check if the CID is free
-		{
-			int Random = RandZomb();
-			if (Random == -1)
-				break;
-
-			if (GameServer()->NumZombiesAlive() > 32)
-				break;
-
-			GameServer()->OnZombie(i, Random + 1); // Create a Zombie Finally
-			m_Zombie[Random]--;
-		}
-	}
+	DoWarmup(m_ZombLeft + GameServer()->NumPlayers() * 2 + 10);
 }
 
 int CGameController::RandZomb()
@@ -1112,64 +798,8 @@ int CGameController::RandZomb()
 	return Rand;
 }
 
-bool CGameController::EndWave()
-{
-	int PlayerCount = 0;
-	for (int k = 0; k < 4; k++)
-	{
-		if (GameServer()->m_apPlayers[k]) // Make sure a player is there
-		{
-			PlayerCount++;
-			break;
-		}
-	}
-	if (!PlayerCount) // No Players - reset round
-	{
-		for (int i = 0; i < MAX_CLIENTS; i++) // bugfix
-		{
-			if (!GameServer()->m_apPlayers[i])
-				continue;
-
-			if (!GameServer()->m_apPlayers[i]->GetZomb())
-				continue;
-
-			GameServer()->OnZombieKill(i);
-		}
-		// HandleTop();
-		m_Wave = 0;
-		return true;
-	}
-	for (int j = 0; j < (int)(sizeof(m_Zombie) / sizeof(m_Zombie[0])); j++)
-	{
-		if (m_Zombie[j])
-			return false;
-	}
-	for (int i = 0; i < MAX_CLIENTS; i++)
-	{
-		if (GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetZomb() && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
-			return false;
-	}
-	DoWarmup(g_Config.m_SvZombWarmup + 5 * m_Wave);
-	return true;
-}
-
 void CGameController::DoZombMessage(int Which)
 {
-	if (!Which)
-	{
-		GameServer()->SendBroadcast_VL(-1, _("Wave {int:a} started with {int:a1} Zombies!"), "a", &m_Wave, "a1", &m_ZombLeft);
-		return;
-	}
-	Which -= 1;
-	if (Which > 1 && (Which <= 5 || !(Which % 10)))
-	{
-		GameServer()->SendChatTarget(-1, _("Wave {int:a}: {int:a1} zombies are left"), "a", &m_Wave, "a1", &Which);
-	}
-	else if (Which == 1)
-	{
-		GameServer()->SendChatTarget(-1, "Wave {int:i}: 1 zombie is left", "i", &m_Wave);
-	}
-
 	g_Config.m_SvScorelimit = m_ZombLeft;
 }
 
@@ -1258,27 +888,15 @@ void CGameController::HandleTop()
 
 void CGameController::SetWaveAlg(int modulus, int wavedrittel)
 {
-	if (wavedrittel > 11) // endless Waves, but exponentiell Zombie code
+	if (GameServer()->NumPlayers() > 16) // endless Waves, but exponentiell Zombie code
 	{
 		for (int i = 0; i < (int)(sizeof(m_Zombie) / sizeof(m_Zombie[0])); i++)
-			m_Zombie[i] = m_Wave - 35; // 3 mal wavedrittel + modulus 2
+			m_Zombie[i] += GameServer()->NumPlayers(); // 3 mal wavedrittel + modulus 2
 		return;
 	}
-
-	if (!modulus) // 10ner Wave
+	else
 	{
-		m_Zombie[GetZombieReihenfolge(wavedrittel)] = 10;
-	}
-	else if (modulus == 1) // 40er wave
-	{
-		m_Zombie[GetZombieReihenfolge(wavedrittel)] = 40;
-	}
-	else if (modulus == 2)
-	{
-		for (int i = 0; i <= wavedrittel; i++)
-		{
-			m_Zombie[GetZombieReihenfolge(i)] = 10;
-		}
+		m_Zombie[0] += 10 + GameServer()->NumPlayers();
 	}
 }
 
@@ -1311,4 +929,26 @@ int CGameController::GetZombieReihenfolge(int wavedrittel) // Was hei�t Riehen
 		return 1;
 	else // shouldnt be needed
 		return 0;
+}
+
+void CGameController::CheckZomb()
+{
+	if (m_ZombLeft)
+	{
+		for (int j = 0; j < (int)(sizeof(m_Zombie) / sizeof(m_Zombie[0])); j++)
+		{
+			for (int i = ZOMBIE_START; i < ZOMBIE_END; i++) //...
+			{
+				if (GameServer()->m_apPlayers[i]) // Check if the CID is free
+					continue;
+			
+				if (m_Zombie[j] <= 0)
+					break;
+
+				GameServer()->AddBot(i);
+				m_Zombie[j]--;
+				m_ZombLeft--;
+			}
+		}
+	}
 }

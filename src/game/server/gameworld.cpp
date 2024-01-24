@@ -319,7 +319,7 @@ CCharacter *CGameWorld::ClosestCharacter(vec2 Pos, float Radius, CEntity *pNotTh
 		if(p == pNotThis)
 			continue;
 		
-		if(p->GetPlayer() && p->GetPlayer()->GetZomb() && Zombie)
+		if(p->GetPlayer() && p->GetPlayer()->IsBot() && Zombie)
 			continue;
 
 		float Len = distance(Pos, p->m_Pos);

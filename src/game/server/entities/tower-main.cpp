@@ -56,7 +56,7 @@ void CTowerMain::Tick()
         float Len = distance(pChr->m_Pos, m_Pos);
         if (Len < pChr->m_ProximityRadius + s_TowerSize)
         {
-            if (pChr->GetPlayer()->GetZomb())
+            if (pChr->GetPlayer()->IsBot())
             {
                 TakeDamage(1);
                 if (pChr && pChr->GetPlayer())

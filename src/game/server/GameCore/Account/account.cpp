@@ -1,3 +1,4 @@
+/* Copyright(C) 2022 - 2024 ST-Chara */
 #include "account.h"
 #include <thread>
 

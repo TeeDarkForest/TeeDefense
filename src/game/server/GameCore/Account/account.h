@@ -1,3 +1,4 @@
+/* Copyright(C) 2022 - 2024 ST-Chara */
 #ifndef GAME_SERVER_GAMECORE_ACCOUNT_H
 #define GAME_SERVER_GAMECORE_ACCOUNT_H
 
@@ -8,13 +9,12 @@
 
 #include <base/tl/array.h>
 
-enum TYPE
-{
-    REG = 0,
-    LOG,
-    SYNC,
-    SAVE,
-};
+    enum TYPE {
+        REG = 0,
+        LOG,
+        SYNC,
+        SAVE,
+    };
 
 struct FaBao
 {

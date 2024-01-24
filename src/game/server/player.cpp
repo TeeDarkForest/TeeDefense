@@ -3,6 +3,7 @@
 #include <new>
 #include <engine/shared/config.h>
 #include "player.h"
+#include "bot.h"
 
 #include "GameCore/Account/account.h"
 
@@ -10,7 +11,7 @@ MACRO_ALLOC_POOL_ID_IMPL(CPlayer, MAX_CLIENTS)
 
 IServer *CPlayer::Server() const { return m_pGameServer->Server(); }
 
-CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team, int Zomb)
+CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 {
 	m_pGameServer = pGameServer;
 	m_RespawnTick = Server()->Tick();
@@ -36,11 +37,9 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team, int Zomb)
 	}
 	idMap[0] = ClientID;
 
-	if (!Zomb)
+	if (!IsBot())
 		ResetKnapsack();
-	// Zomb2
-	m_Zomb = Zomb;
-	mem_zero(m_SubZomb, sizeof(m_SubZomb));
+	m_IsBot = false;
 
 #ifdef CONF_BOX2D
 	b2CircleShape shape;
@@ -62,6 +61,8 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team, int Zomb)
 
 CPlayer::~CPlayer()
 {
+	if (m_pBot)
+		delete m_pBot;
 	delete m_pCharacter;
 	m_pCharacter = 0;
 }
@@ -90,14 +91,15 @@ void CPlayer::Tick()
 #ifdef CONF_DEBUG
 	if (!g_Config.m_DbgDummies || m_ClientID < MAX_CLIENTS - g_Config.m_DbgDummies)
 #endif
-		if (!Server()->ClientIngame(m_ClientID))
-			return;
+		if (!m_IsBot)
+			if (!Server()->ClientIngame(m_ClientID))
+				return;
 
 	Server()->SetClientScore(m_ClientID, m_Score);
 	Server()->SetClientLanguage(m_ClientID, m_aLanguage);
 
 	// do latency stuff
-	if (!m_Zomb)
+	if (!IsBot())
 	{
 		IServer::CClientInfo Info;
 		if (Server()->GetClientInfo(m_ClientID, &Info))
@@ -136,6 +138,8 @@ void CPlayer::Tick()
 			{
 				delete m_pCharacter;
 				m_pCharacter = 0;
+				if (IsBot())
+					m_pBot->OnReset();
 			}
 		}
 		else if (m_Spawning && m_RespawnTick <= Server()->Tick())
@@ -159,12 +163,13 @@ void CPlayer::Tick()
 
 	HandleTuningParams();
 
-	if(!LoggedIn())
+	if (!LoggedIn() && !IsBot())
 	{
 		SetTeam(TEAM_SPECTATORS, false);
-		GameServer()->SendBroadcast_VL(m_ClientID, _("\n\n\n\n\n\nEnter '/register username password' to register\nEnter '/login username password' to login"));
+		if (Server()->Tick() % (int)(Server()->TickSpeed() * 3) == 0)
+			GameServer()->SendBroadcast_VL(m_ClientID, _("\n\n\n\n\n\nEnter '/register username password' to register\nEnter '/login username password' to login"));
 	}
-	else if (m_InitAcc)
+	else if (m_InitAcc && !IsBot())
 	{
 		SetTeam(TEAM_HUMAN, false);
 		GameServer()->TW()->Account()->SyncAccountData(m_ClientID, CGameContext::TABLE_ITEM, m_AccData);
@@ -189,20 +194,13 @@ void CPlayer::PostTick()
 		m_ViewPos = GameServer()->m_apPlayers[m_SpectatorID]->m_ViewPos;
 }
 
-void CPlayer::InfectedToHumbie()
-{
-	if (GetZomb())
-		return;
-	m_Zomb = 15; // Humbie..
-}
-
 void CPlayer::Snap(int SnappingClient)
 {
 
 #ifdef CONF_DEBUG
 	if (!g_Config.m_DbgDummies || m_ClientID < MAX_CLIENTS - g_Config.m_DbgDummies)
 #endif
-		if (!Server()->ClientIngame(m_ClientID) && !m_Zomb)
+		if (!Server()->ClientIngame(m_ClientID) && !IsBot())
 			return;
 
 	int id = m_ClientID;
@@ -213,118 +211,15 @@ void CPlayer::Snap(int SnappingClient)
 	if (!pClientInfo)
 		return;
 
-	/*if(!GetZomb())
-		if(SnappingClient <= ZOMBIE_START && SnappingClient != id)
-		{
-			dbg_msg("QQ","WW");
-			int MaxClient = ZOMBIE_START;
-			int MinRange1;
-			int MaxRange1;
-			int MinRange2;
-			int MaxRange2;
-			int RealID = SnappingClient+1;
-			if(RealID+16>=MaxClient)
-			{
-				MinRange1 = RealID-16;
-				MaxRange1 = MaxClient;
-				MinRange2 = 0;
-				MaxRange2 = 0+(16 - (MaxClient-RealID));
-			}
-			else if(RealID-16<0)
-			{
-				MinRange1 = 0;
-				MaxRange1 = RealID+16;
-				MinRange2 = MaxClient-(32-(MinRange1+MinRange2));
-				MaxRange2 = MaxClient;
-			}
-			else
-			{
-				MinRange1 = RealID-16;
-				MaxRange1 = MinRange2 = RealID;
-				MinRange2 = RealID+16;
-			}
-
-			if(!((id > MinRange1 && id < MaxRange1) || (id > MinRange2 && id < MaxRange2)))
-			{
-				return;
-			}
-			else
-				dbg_msg("ssss","sawdw");
-		}*/
-
-	if (m_Zomb)
+	if(IsBot())
 	{
-		pClientInfo->m_UseCustomColor = 0;
+		StrToInts(&pClientInfo->m_Name0, 4, "Zaby");
 		StrToInts(&pClientInfo->m_Clan0, 3, "Zombie");
-		pClientInfo->m_Country = 1000;
-		pClientInfo->m_ColorBody = 16776960;
-		pClientInfo->m_ColorFeet = 16776960;
-		m_Team = 1;		 // Don't snap Zombies at Scorebroad.
-		if (m_Zomb == 1) // Zaby
-		{
-			StrToInts(&pClientInfo->m_Name0, 4, "Zaby");
-			StrToInts(&pClientInfo->m_Skin0, 6, "zaby");
-		}
-		else if (m_Zomb == 2) // Zoomer
-		{
-			StrToInts(&pClientInfo->m_Name0, 4, "Zoomer");
-			StrToInts(&pClientInfo->m_Skin0, 6, "redstripe");
-		}
-		else if (m_Zomb == 3) // Zooker
-		{
-			StrToInts(&pClientInfo->m_Name0, 4, "Zooker");
-			StrToInts(&pClientInfo->m_Skin0, 6, "bluekitty");
-		}
-		else if (m_Zomb == 4) // Zamer
-		{
-			StrToInts(&pClientInfo->m_Name0, 4, "Zamer");
-			StrToInts(&pClientInfo->m_Skin0, 6, "twinbop");
-		}
-		else if (m_Zomb == 5) // Zunner
-		{
-			StrToInts(&pClientInfo->m_Name0, 4, "Zunner");
-			StrToInts(&pClientInfo->m_Skin0, 6, "cammostripes");
-		}
-		else if (m_Zomb == 6) // Zaster
-		{
-			StrToInts(&pClientInfo->m_Name0, 4, "Zaster");
-			StrToInts(&pClientInfo->m_Skin0, 6, "coala");
-		}
-		else if (m_Zomb == 7) // Zotter
-		{
-			StrToInts(&pClientInfo->m_Name0, 4, "Zotter");
-			StrToInts(&pClientInfo->m_Skin0, 6, "cammo");
-		}
-		else if (m_Zomb == 8) // Zenade
-		{
-			StrToInts(&pClientInfo->m_Name0, 4, "Zenade");
-			StrToInts(&pClientInfo->m_Skin0, 6, "twintri");
-		}
-		else if (m_Zomb == 9) // Fombie
-		{
-			StrToInts(&pClientInfo->m_Name0, 4, "Flombie");
-			StrToInts(&pClientInfo->m_Skin0, 6, "toptri");
-		}
-		else if (m_Zomb == 10) // Zinja
-		{
-			StrToInts(&pClientInfo->m_Name0, 4, "Zinja");
-			StrToInts(&pClientInfo->m_Skin0, 6, "default");
-		}
-		else if (m_Zomb == 11) // Zele
-		{
-			StrToInts(&pClientInfo->m_Name0, 4, "Zele");
-			StrToInts(&pClientInfo->m_Skin0, 6, "redbopp");
-		}
-		else if (m_Zomb == 12) // Zinvis
-		{
-			StrToInts(&pClientInfo->m_Name0, 4, "Zinvis");
-			StrToInts(&pClientInfo->m_Skin0, 6, "zaby");
-		}
-		else if (m_Zomb == 13) // Zeater
-		{
-			StrToInts(&pClientInfo->m_Name0, 4, "Zeater");
-			StrToInts(&pClientInfo->m_Skin0, 6, "warpaint");
-		}
+		pClientInfo->m_Country = 0;
+		pClientInfo->m_UseCustomColor = 1;
+		pClientInfo->m_ColorBody = 255;
+		pClientInfo->m_ColorFeet = 255;
+		StrToInts(&pClientInfo->m_Skin0, 6, "nanas");
 	}
 	else
 	{
@@ -341,8 +236,8 @@ void CPlayer::Snap(int SnappingClient)
 	if (!pPlayerInfo)
 		return;
 
-	if (m_Zomb)
-		pPlayerInfo->m_Latency = 0;
+	if (IsBot())
+		pPlayerInfo->m_Latency = rand()%52;
 	else
 		pPlayerInfo->m_Latency = SnappingClient == -1 ? m_Latency.m_Min : GameServer()->m_apPlayers[SnappingClient]->m_aActLatency[m_ClientID];
 	pPlayerInfo->m_Local = 0;
@@ -389,7 +284,7 @@ void CPlayer::FakeSnap(int SnappingClient)
 
 void CPlayer::OnDisconnect(const char *pReason)
 {
-	if (Server()->ClientIngame(m_ClientID) && !m_Zomb)
+	if (Server()->ClientIngame(m_ClientID) && !IsBot())
 	{
 		char aBuf[512];
 		if (pReason && *pReason)
@@ -517,7 +412,7 @@ void CPlayer::TryRespawn()
 {
 	vec2 SpawnPos;
 
-	if (!GameServer()->m_pController->CanSpawn(m_Team, &SpawnPos, m_Zomb == 14))
+	if (!GameServer()->m_pController->CanSpawn(m_Team, &SpawnPos))
 		return;
 
 	m_Spawning = false;
@@ -537,28 +432,6 @@ void CPlayer::SetLanguage(const char *pLanguage)
 	str_copy(m_aLanguage, pLanguage, sizeof(m_aLanguage));
 }
 
-void CPlayer::DeleteCharacter()
-{
-	if (m_pCharacter)
-	{
-		m_Spawning = false;
-		delete m_pCharacter;
-		m_pCharacter = 0;
-	}
-}
-
-bool CPlayer::GetZomb(int Type)
-{
-	if (m_Zomb == Type)
-		return true;
-	for (int i = 0; i < (int)(sizeof(m_SubZomb) / sizeof(m_SubZomb[0])); i++)
-	{
-		if (m_SubZomb[i] == Type)
-			return true;
-	}
-	return false;
-}
-
 void CPlayer::ResetKnapsack()
 {
 	for (int i = 0; i < NUM_ITEM; i++)
@@ -570,7 +443,7 @@ void CPlayer::ResetKnapsack()
 
 int CPlayer::GetTeam()
 {
-	if (GetZomb())
+	if (IsBot())
 		return TEAM_ZOMBIE;
 	else
 		return m_Team;

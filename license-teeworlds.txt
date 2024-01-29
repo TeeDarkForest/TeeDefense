@@ -1,4 +1,4 @@
-Copyright (C) 2022 - 2024 ST-Chara
+Copyright (C) 2007-2016 Magnus Auvinen
 
 This software is provided 'as-is', without any express or implied
 warranty.  In no event will the authors be held liable for any damages
@@ -15,10 +15,6 @@ freely, subject to the following restrictions:
 2. Altered source versions must be plainly marked as such, and must not be
   misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
-4. If you use the code in this repo in your own project, please keep your 
-  project open source.
-5. The author and credits of this repo must be clearly indicated.
-6. This repo cannot be used for commercial purposes.
 
 ------------------------------------------------------------------------
 

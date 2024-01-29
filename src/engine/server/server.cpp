@@ -168,7 +168,7 @@ template <class T>
 int CServerBan::BanExt(T *pBanPool, const typename T::CDataType *pData, int Seconds, const char *pReason)
 {
 	// validate address
-	if (Server()->m_RconClientID >= 0 && Server()->m_RconClientID < MAX_CLIENTS &&
+	if (Server()->m_RconClientID >= 0 && Server()->m_RconClientID < MAX_PLAYERS &&
 		Server()->m_aClients[Server()->m_RconClientID].m_State != CServer::CClient::STATE_EMPTY)
 	{
 		if (NetMatch(pData, Server()->m_NetServer.ClientAddr(Server()->m_RconClientID)))
@@ -177,7 +177,7 @@ int CServerBan::BanExt(T *pBanPool, const typename T::CDataType *pData, int Seco
 			return -1;
 		}
 
-		for (int i = 0; i < MAX_CLIENTS; ++i)
+		for (int i = 0; i < MAX_PLAYERS; ++i)
 		{
 			if (i == Server()->m_RconClientID || Server()->m_aClients[i].m_State == CServer::CClient::STATE_EMPTY)
 				continue;
@@ -325,7 +325,7 @@ int CServer::TrySetClientName(int ClientID, const char *pName)
 	pName = aTrimmedName;
 
 	// make sure that two clients doesn't have the same name
-	for (int i = 0; i < MAX_CLIENTS; i++)
+	for (int i = 0; i < MAX_PLAYERS; i++)
 		if (i != ClientID && m_aClients[i].m_State >= CClient::STATE_READY)
 		{
 			if (str_comp(pName, m_aClients[i].m_aName) == 0)
@@ -339,7 +339,7 @@ int CServer::TrySetClientName(int ClientID, const char *pName)
 
 void CServer::SetClientName(int ClientID, const char *pName)
 {
-	if (ClientID < 0 || ClientID >= MAX_CLIENTS || m_aClients[ClientID].m_State < CClient::STATE_READY)
+	if (ClientID < 0 || ClientID >= MAX_PLAYERS || m_aClients[ClientID].m_State < CClient::STATE_READY)
 		return;
 
 	if (!pName)
@@ -569,6 +569,9 @@ static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Sixup
 
 int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientID)
 {
+	if (ClientID > MAX_PLAYERS)
+		return 0;
+
 	CNetChunk Packet;
 	mem_zero(&Packet, sizeof(CNetChunk));
 	if (Flags & MSGFLAG_VITAL)
@@ -646,7 +649,7 @@ void CServer::DoSnapshot()
 	}
 
 	// create snapshots for all clients
-	for (int i = 0; i < MAX_CLIENTS; i++)
+	for (int i = 0; i < MAX_PLAYERS; i++)
 	{
 		// client must be ingame to recive snapshots
 		if (m_aClients[i].m_State != CClient::STATE_INGAME)

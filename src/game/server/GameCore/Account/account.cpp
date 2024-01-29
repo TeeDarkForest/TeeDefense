@@ -351,5 +351,6 @@ void CAccount::HandleThread(void *user)
             break;
         }
         pPool->m_pFaBao.remove_index(0);
+        thread_sleep(50);
     }
 }

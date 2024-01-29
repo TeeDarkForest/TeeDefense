@@ -21,7 +21,7 @@
 #include "gameworld.h"
 #include "player.h"
 #include <vector>
-#include "item.h"
+#include "teedefense/Item/item.h"
 
 #include "GameCore/TWorldController.h"
 #include "GameCore/Database/DB.h"
@@ -38,6 +38,8 @@ typedef unsigned __int64 uint64_t;
 #include "mask128.h"
 
 #include "botengine.h"
+
+#include <engine/storage.h>
 
 /*
 	Tick
@@ -109,6 +111,7 @@ public:
 class CGameContext : public IGameServer
 {
 	IServer *m_pServer;
+	IStorage *m_pStorage;
 	class IConsole *m_pConsole;
 	class TWorldController *m_pTWorldController;
 	CLayers m_Layers;
@@ -204,6 +207,7 @@ private:
 
 public:
 	IServer *Server() const { return m_pServer; }
+	IStorage *Storage() const { return m_pStorage; }
 	class IConsole *Console() { return m_pConsole; }
 	CCollision *Collision() { return &m_Collision; }
 	CTuningParams *Tuning() { return &m_Tuning; }
@@ -335,12 +339,10 @@ public:
 	bool GetPaused();
 	int m_TowerHealth;
 
-	void InitItems();
 	void InitCrafts();
 	void CreateItem(const char *pItemName, int ID, int Type, int Damage, int Level, int TurretType, int Proba,
 					int Speed, int NeedItems[NUM_ITEM], int Life = -1);
-	void CreateCraft(const char *pName, int ID, int Type, int Level, int Proba, int *NeedResource, int Speed = -1);
-
+	
 	const char *GetItemNameByID(int Type);
 
 	void InitVotes(int ClientID);
@@ -399,9 +401,16 @@ public:
 	int NumPlayers(bool CheckCharacter = false);
 
 	// Bot slots
-	virtual void DeleteBot(int i);
-	bool AddBot(int i, bool UseDropPlayer = false);
+	bool AddBot(int i);
 	void OnZombieKill(int ClientID);
+
+	void MakeBotSleep(int i); // Bot-only
+	void WakeBotUp(int i); // Bot-only
+
+	void InitBots();
+
+	CItem_F *m_pItemF;
+	CItem_F *ItemF() { return m_pItemF; }
 };
 
 inline Mask128 CmaskAll() { return Mask128(); }

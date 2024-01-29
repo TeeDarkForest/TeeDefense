@@ -12,7 +12,7 @@
 #include <game/gamecore.h>
 #include "entities/turret.h"
 
-#include "item.h"
+#include "teedefense/Item/item.h"
 #ifdef CONF_BOX2D
 #include "entities/box2d_box.h"
 #include "entities/box2d_test.h"
@@ -73,7 +73,6 @@ void CGameContext::Construct(int Resetting, bool ChangeMap)
 
 	m_pDB = new CDB();
 
-	InitItems();
 	InitCrafts();
 
 #ifdef CONF_BOX2D
@@ -89,6 +88,7 @@ void CGameContext::Construct(int Resetting, bool ChangeMap)
 #endif
 
 	m_pBotEngine = new CBotEngine(this);
+	m_pItemF = new CItem_F(this);
 }
 
 CGameContext::CGameContext(int Resetting, bool ChangeMap)
@@ -107,6 +107,7 @@ CGameContext::~CGameContext()
 		delete pPlayer;
 	if (!m_Resetting)
 		delete m_pVoteOptionHeap;
+	delete m_pBotEngine;
 }
 
 void CGameContext::OnSetAuthed(int ClientID, int Level)
@@ -727,13 +728,6 @@ void CGameContext::OnClientEnter(int ClientID)
 
 void CGameContext::OnClientConnected(int ClientID)
 {
-	// Check if the slot is used by a bot
-	if (m_apPlayers[ClientID] && m_apPlayers[ClientID]->m_IsBot)
-	{
-		delete m_apPlayers[ClientID];
-		m_apPlayers[ClientID] = 0;
-	}
-
 	m_apPlayers[ClientID] = new (ClientID) CPlayer(this, ClientID, TEAM_SPECTATORS);
 	// players[client_id].init(client_id);
 	// players[client_id].client_id = client_id;
@@ -1937,6 +1931,7 @@ void CGameContext::OnConsoleInit()
 {
 	m_pServer = Kernel()->RequestInterface<IServer>();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
+	m_pStorage = Kernel()->RequestInterface<IStorage>();
 
 	m_ChatPrintCBIndex = Console()->RegisterPrintCallback(IConsole::OUTPUT_LEVEL_CHAT, ConsoleOutputCallback_Chat, this);
 
@@ -1991,6 +1986,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 {
 	m_pServer = Kernel()->RequestInterface<IServer>();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
+	m_pStorage = Kernel()->RequestInterface<IStorage>();
 	m_World.SetGameServer(this);
 	m_Events.SetGameServer(this);
 
@@ -2002,6 +1998,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 
 	m_Layers.Init(Kernel());
 	m_Collision.Init(&m_Layers);
+
 	m_pTWorldController = new TWorldController(this);
 
 	m_pController = new CGameController(this);
@@ -2009,8 +2006,6 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	// create all entities from the game layer
 	CMapItemLayerTilemap *pTileMap = m_Layers.GameLayer();
 	CTile *pTiles = (CTile *)Kernel()->RequestInterface<IMap>()->GetData(pTileMap->m_Data);
-
-	m_pBotEngine->Init(pTiles, pTileMap->m_Width, pTileMap->m_Height);
 
 	for (int y = 0; y < pTileMap->m_Height; y++)
 	{
@@ -2038,6 +2033,8 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		}
 	}
 
+	m_pBotEngine->Init(pTiles, pTileMap->m_Width, pTileMap->m_Height);
+
 	// game.world.insert_entity(game.Controller);
 
 #ifdef CONF_DEBUG
@@ -2049,6 +2046,9 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		}
 	}
 #endif
+
+	InitBots();
+	ItemF()->LoadIndex();
 }
 
 void CGameContext::OnShutdown(bool ChangeMap)
@@ -2555,10 +2555,10 @@ void CGameContext::ConUse(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConStatusDB(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
+	dbg_msg("StatusDB", "$======= Status Database =======$");
 	for (int i = 0; i < pSelf->TW()->Account()->m_pPool->m_pFaBao.size(); i++)
-	{
 		dbg_msg("StatusDB", "(%d)Type: %d, ClientID: %d", i, pSelf->TW()->Account()->m_pPool->m_pFaBao[i]->m_Type, pSelf->TW()->Account()->m_pPool->m_pFaBao[i]->m_ClientID);
-	}
+	dbg_msg("StatusDB", "#======= Status Database =======#");
 }
 
 void CGameContext::ClearVotes(int ClientID)
@@ -2646,43 +2646,52 @@ int CGameContext::NumPlayers(bool CheckCharacter)
 	return num;
 }
 
-void CGameContext::DeleteBot(int i)
+void CGameContext::InitBots()
 {
-	Server()->DelBot(i);
-	if (m_apPlayers[i] && m_apPlayers[i]->m_IsBot)
+	for (int i = ZOMBIE_START; i < ZOMBIE_END; i++)
 	{
-		dbg_msg("context", "Delete bot at slot: %d", i);
-		delete m_apPlayers[i];
-		m_apPlayers[i] = 0;
+		if (m_apPlayers[i]) // Careful is good;
+			continue;
+
+		AddBot(i);
 	}
+	dbg_msg("Bot", "Bots created successfully!");
 }
 
-bool CGameContext::AddBot(int i, bool UseDropPlayer)
+bool CGameContext::AddBot(int i)
 {
-	const int StartTeam = g_Config.m_SvTournamentMode ? TEAM_SPECTATORS : m_pController->GetAutoTeam(i);
-	if (StartTeam == TEAM_SPECTATORS)
-		return false;
 	if (Server()->NewBot(i) == 1)
 		return false;
-	dbg_msg("context", "Add a bot at slot: %d", i);
-	if (!UseDropPlayer || !m_apPlayers[i])
-		m_apPlayers[i] = new (i) CPlayer(this, i, StartTeam);
+
+	if (!m_apPlayers[i])
+		m_apPlayers[i] = new (i) CPlayer(this, i, TEAM_ZOMBIE);
+
 	m_apPlayers[i]->m_IsBot = true;
 	m_apPlayers[i]->m_pBot = new CBot(m_pBotEngine, m_apPlayers[i]);
-	Server()->SetClientClan(i, g_BotClan);
+	MakeBotSleep(i);
 	return true;
 }
 
 void CGameContext::OnZombieKill(int ClientID)
 {
-	Server()->DelBot(ClientID);
-	if (m_apPlayers[ClientID])
-		delete m_apPlayers[ClientID];
-	m_apPlayers[ClientID] = 0;
+	MakeBotSleep(ClientID);
+	m_pController->CheckZomb();
 	// update spectator modes
 	for (int i = 0; i < MAX_CLIENTS; ++i)
 	{
 		if (m_apPlayers[i] && m_apPlayers[i]->m_SpectatorID == ClientID)
 			m_apPlayers[i]->m_SpectatorID = SPEC_FREEVIEW;
 	}
+}
+
+void CGameContext::MakeBotSleep(int i)
+{
+	if (GetPlayer(i) && GetPlayer(i)->IsBot())
+		GetPlayer(i)->m_BotSleep = true;
+}
+
+void CGameContext::WakeBotUp(int i)
+{
+	if (GetPlayer(i) && GetPlayer(i)->IsBot())
+		GetPlayer(i)->m_BotSleep = false;
 }

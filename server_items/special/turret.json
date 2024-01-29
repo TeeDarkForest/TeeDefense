@@ -1,0 +1,36 @@
+{
+    "item": {
+        "type": 3,
+        "multiple": [
+            {
+                "id": 25,
+                "name": "Beginner Turret",
+                "capacity": 20,
+                "unplaceable": [],
+                "formula": {
+                    "Log": 70
+                }
+            },
+            {
+                "id": 26,
+                "name": "Intermediate Turret",
+                "capacity": 40,
+                "formula": {
+                    "Beginner Turret": 1,
+                    "Log": 40,
+                    "Copper": 200
+                }
+            },
+            {
+                "id": 27,
+                "name": "Advanced Turret",
+                "capacity": 70,
+                "formula": {
+                    "Intermediate Turret": 1,
+                    "Log": 40,
+                    "Copper": 200
+                }
+            }
+        ]
+    }
+}

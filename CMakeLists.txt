@@ -584,6 +584,11 @@ set(SERVER_INCLUDES_DIRS
   ${MYSQL_INCLUDE_DIRS}
 )
 
+set_glob(TEEDEFENSE GLOB_RECURSE src/teedefense
+  Item/item.cpp
+  Item/item.h
+)
+
 set_glob(GAME_SERVER GLOB_RECURSE src/game/server
   entities/box2d_box.cpp
   entities/box2d_box.h
@@ -646,15 +651,13 @@ set_glob(GAME_SERVER GLOB_RECURSE src/game/server
   gameworld.h
   player.cpp
   player.h
-  item_register.cpp
-  item.h
   mask128.h
 )
 set(GAME_GENERATED_SERVER
   "src/game/generated/server_data.cpp"
   "src/game/generated/server_data.h"
 )
-set(SERVER_SRC ${ENGINE_SERVER} ${GAME_SERVER} ${GAME_GENERATED_SERVER})
+set(SERVER_SRC ${ENGINE_SERVER} ${GAME_SERVER} ${TEEDEFENSE} ${GAME_GENERATED_SERVER})
 if(TARGET_OS STREQUAL "windows")
   set(SERVER_ICON "other/icons/${SERVER_EXECUTABLE}.rc")
 else()

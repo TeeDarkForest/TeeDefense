@@ -40,6 +40,7 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 	if (!IsBot())
 		ResetKnapsack();
 	m_IsBot = false;
+	m_BotSleep = false;
 
 #ifdef CONF_BOX2D
 	b2CircleShape shape;
@@ -211,7 +212,7 @@ void CPlayer::Snap(int SnappingClient)
 	if (!pClientInfo)
 		return;
 
-	if(IsBot())
+	if (IsBot())
 	{
 		StrToInts(&pClientInfo->m_Name0, 4, "Zaby");
 		StrToInts(&pClientInfo->m_Clan0, 3, "Zombie");
@@ -237,7 +238,7 @@ void CPlayer::Snap(int SnappingClient)
 		return;
 
 	if (IsBot())
-		pPlayerInfo->m_Latency = rand()%52;
+		pPlayerInfo->m_Latency = rand() % 52;
 	else
 		pPlayerInfo->m_Latency = SnappingClient == -1 ? m_Latency.m_Min : GameServer()->m_apPlayers[SnappingClient]->m_aActLatency[m_ClientID];
 	pPlayerInfo->m_Local = 0;
@@ -365,6 +366,8 @@ void CPlayer::KillCharacter(int Weapon)
 		m_pCharacter->Die(m_ClientID, Weapon);
 		delete m_pCharacter;
 		m_pCharacter = 0;
+		if (IsBot())
+			m_pBot->OnReset();
 	}
 }
 
@@ -390,8 +393,7 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 	m_Team = Team;
 	m_LastActionTick = Server()->Tick();
 	m_SpectatorID = SPEC_FREEVIEW;
-	// we got to wait 0.5 secs before respawning
-	m_RespawnTick = Server()->Tick() + Server()->TickSpeed() / 2;
+	m_RespawnTick = 5;
 	str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' m_Team=%d", m_ClientID, Server()->ClientName(m_ClientID), m_Team);
 	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 
@@ -412,7 +414,7 @@ void CPlayer::TryRespawn()
 {
 	vec2 SpawnPos;
 
-	if (!GameServer()->m_pController->CanSpawn(m_Team, &SpawnPos))
+	if (!GameServer()->m_pController->CanSpawn(m_Team, &SpawnPos) || m_BotSleep)
 		return;
 
 	m_Spawning = false;

@@ -421,7 +421,7 @@ int CGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 		else
 			pKiller->m_Score++; // normal kill
 	}
-	pVictim->GetPlayer()->m_RespawnTick = max(pVictim->GetPlayer()->m_RespawnTick, Server()->Tick() + Server()->TickSpeed() * g_Config.m_SvRespawnDelayTDM);
+	pVictim->GetPlayer()->m_RespawnTick = 5;
 
 	Server()->ExpireServerInfo();
 	return 0;
@@ -430,9 +430,10 @@ int CGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 void CGameController::OnCharacterSpawn(class CCharacter *pChr)
 {
 	pChr->IncreaseHealth(10);
+	pChr->GiveWeapon(WEAPON_HAMMER, -1);
 	if (pChr->GetPlayer()->GetTeam() == TEAM_HUMAN)
 	{
-		pChr->IncreaseHealth(100);
+		pChr->IncreaseHealth(90);
 		pChr->GiveWeapon(WEAPON_HAMMER, -1);
 		pChr->GiveWeapon(WEAPON_GUN, 10);
 	}
@@ -545,7 +546,6 @@ void CGameController::Tick()
 			GameServer()->m_World.m_Paused = false;
 	}
 
-	CheckZomb();
 
 	// game is Paused
 	if (GameServer()->m_World.m_Paused)
@@ -776,11 +776,14 @@ void CGameController::StartWave()
 		else
 			SetWaveAlg(GameServer()->NumPlayers() % 3, GameServer()->NumPlayers() / 3);
 	}
+	int BeforeZombLeft = m_ZombLeft;
 	for (int i = 0; i < (int)(sizeof(m_Zombie) / sizeof(m_Zombie[0])); i++)
 		m_ZombLeft += m_Zombie[i];
 
 	DoZombMessage(0);
-	DoWarmup(m_ZombLeft + GameServer()->NumPlayers() * 2 + 10);
+	// DoWarmup(BeforeZombLeft + GameServer()->NumPlayers() * 2 + 10);
+	DoWarmup(4);
+	CheckZomb();
 }
 
 int CGameController::RandZomb()
@@ -933,22 +936,25 @@ int CGameController::GetZombieReihenfolge(int wavedrittel) // Was hei�t Riehen
 
 void CGameController::CheckZomb()
 {
-	if (m_ZombLeft)
+	for (int j = 0; j < (int)(sizeof(m_Zombie) / sizeof(m_Zombie[0])); j++)
 	{
-		for (int j = 0; j < (int)(sizeof(m_Zombie) / sizeof(m_Zombie[0])); j++)
-		{
-			for (int i = ZOMBIE_START; i < ZOMBIE_END; i++) //...
-			{
-				if (GameServer()->m_apPlayers[i]) // Check if the CID is free
-					continue;
-			
-				if (m_Zombie[j] <= 0)
-					break;
+		if (!m_Zombie[j])
+			continue;
 
-				GameServer()->AddBot(i);
-				m_Zombie[j]--;
-				m_ZombLeft--;
-			}
+		for (int i = ZOMBIE_START; i < 64; i++) //...
+		{
+			if (m_Zombie[j] <= 0)
+				break;
+
+			CPlayer *pP = GameServer()->m_apPlayers[i];
+			if (!pP)
+				continue;
+
+			if (!pP->m_BotSleep)
+				continue;
+
+			GameServer()->WakeBotUp(i);
+			m_Zombie[j]--;
 		}
 	}
 }

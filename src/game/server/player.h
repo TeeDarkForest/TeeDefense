@@ -6,7 +6,7 @@
 // this include should perhaps be removed
 #include "entities/character.h"
 #include "gamecontext.h"
-#include "item.h"
+#include "teedefense/Item/item.h"
 
 // player object
 class CPlayer
@@ -109,6 +109,8 @@ public:
 	class CBot *m_pBot;
 
 	bool IsBot() { return m_IsBot; }
+
+	bool m_BotSleep;
 
 private:
 	CCharacter *m_pCharacter;

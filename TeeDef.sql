@@ -18,7 +18,8 @@ CREATE TABLE `tw_Items`
 (
   `UserID` int NOT NULL,
   `ItemID` int NOT NULL,
-  `Num` int NOT NULL
+  `Num` int NOT NULL,
+  `Cards` TEXT NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 ALTER TABLE `tw_Accounts` ADD PRIMARY KEY(`UserID`);

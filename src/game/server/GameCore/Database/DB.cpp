@@ -32,8 +32,8 @@ void CDB::Disconnect()
 {
     try
     {
+        // Delete Connection
         delete m_Connection;
-        dbg_msg("SQL", "SQL connection disconnected");
     }
     catch (sql::SQLException &e)
     {

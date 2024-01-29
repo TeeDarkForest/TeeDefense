@@ -1,0 +1,11 @@
+{
+    "item": {
+        "type": 4,
+        "id": 6,
+        "name": "Diamond"
+    },
+    "ck": {
+        "name": "Diamond",
+        "health": 1200000
+    }
+}

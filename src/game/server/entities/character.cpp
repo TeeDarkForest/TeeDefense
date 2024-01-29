@@ -12,7 +12,7 @@
 #include "lightning.h"
 #include "turret.h"
 
-#include "../item.h"
+#include "teedefense/Item/item.h"
 
 #define RAD 0.017453292519943295769236907684886f
 #define SCALE 30
@@ -65,7 +65,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 {
     m_EmoteStop = -1;
     m_LastAction = -1;
-    m_ActiveWeapon = WEAPON_GUN;
+    m_ActiveWeapon = WEAPON_HAMMER;
     m_LastWeapon = WEAPON_HAMMER;
     m_QueuedWeapon = -1;
 
@@ -372,7 +372,7 @@ void CCharacter::FireWeapon()
 
         CCharacter *apEnts[MAX_CLIENTS];
         int Hits = 0;
-        int Num = GameServer()->m_World.FindEntities(ProjStartPos, m_ProximityRadius * 0.5f, (CEntity **)apEnts,
+        int Num = GameServer()->m_World.FindEntities(ProjStartPos, m_ProximityRadius * 0.5f + 96.f, (CEntity **)apEnts,
                                                      MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 
         for (int i = 0; i < Num; ++i)
@@ -929,14 +929,6 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 
     m_Core.m_Vel += Force;
 
-    if (GetPlayer() && GameServer()->m_apPlayers[From])
-        if (!GetPlayer()->IsBot() && !GameServer()->m_apPlayers[From]->IsBot())
-            return false;
-
-    if (GetPlayer() && GameServer()->m_apPlayers[From])
-        if (GetPlayer()->IsBot() && GameServer()->m_apPlayers[From]->IsBot())
-            return false;
-
     // m_pPlayer only inflicts half damage on self
     if (From == m_pPlayer->GetCID())
         Dmg = max(1, Dmg / 2);
@@ -1087,14 +1079,13 @@ void CCharacter::Snap(int SnappingClient)
         CNetObj_DDNetLaser *pObj = static_cast<CNetObj_DDNetLaser *>(Server()->SnapNewItem(NETOBJTYPE_DDNETLASER, Id, sizeof(CNetObj_DDNetLaser)));
         if (pObj)
         {
-
             pObj->m_ToX = (int)m_Pos.x;
             pObj->m_ToY = (int)m_Pos.y;
             pObj->m_FromX = (int)m_Pos.x;
             pObj->m_FromY = (int)m_Pos.y - 32;
             pObj->m_StartTick = Server()->Tick();
             pObj->m_Owner = Id;
-            pObj->m_Type = rand() % NUM_LASERTYPES;
+            pObj->m_Type = GetPlayer()->IsBot() ? LASERTYPE_SHOTGUN : LASERTYPE_DOOR;
         }
     }
     else

@@ -214,8 +214,6 @@ public:
 
 	virtual void OnUpdatePlayerServerInfo(char *aBuf, int BufSize, int ID) = 0;
 
-	virtual void DeleteBot(int i) = 0;
-
 public:
 	bool m_NeedResetTowers;
 };

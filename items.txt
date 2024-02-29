@@ -1,0 +1,139 @@
+Generated
+ID: 1, Type: 4, Damage: 0, Proba: 0, Capacity: 0, ItemName: Log
+ID: 2, Type: 4, Damage: 0, Proba: 0, Capacity: 0, ItemName: Coal
+ID: 3, Type: 4, Damage: 0, Proba: 0, Capacity: 0, ItemName: Copper
+ID: 4, Type: 4, Damage: 0, Proba: 0, Capacity: 0, ItemName: Iron
+ID: 5, Type: 4, Damage: 0, Proba: 0, Capacity: 0, ItemName: Golden
+ID: 6, Type: 4, Damage: 0, Proba: 0, Capacity: 0, ItemName: Diamond
+ID: 7, Type: 4, Damage: 0, Proba: 0, Capacity: 0, ItemName: Enegry
+ID: 9, Type: 0, Damage: 2, Proba: 90, Capacity: 0, ItemName: Wooden Sword
+ID: 12, Type: 0, Damage: 7, Proba: 90, Capacity: 0, ItemName: Iron Sword
+ID: 17, Type: 0, Damage: 10, Proba: 90, Capacity: 0, ItemName: Golden Sword
+ID: 20, Type: 0, Damage: 20, Proba: 80, Capacity: 0, ItemName: Diamond Sword
+ID: 23, Type: 0, Damage: 40, Proba: 100, Capacity: 0, ItemName: Enegry Sword
+ID: 10, Type: 0, Damage: 200, Proba: 90, Capacity: 0, ItemName: Wooden Axe
+ID: 12, Type: 0, Damage: 700, Proba: 90, Capacity: 0, ItemName: Copper Axe
+ID: 15, Type: 0, Damage: 1400, Proba: 90, Capacity: 0, ItemName: Iron Axe
+ID: 18, Type: 0, Damage: 2000, Proba: 90, Capacity: 0, ItemName: Golden Axe
+ID: 21, Type: 0, Damage: 8000, Proba: 100, Capacity: 0, ItemName: Diamond Axe
+ID: 11, Type: 0, Damage: 150, Proba: 90, Capacity: 0, ItemName: Wooden Pickaxe
+ID: 13, Type: 0, Damage: 700, Proba: 90, Capacity: 0, ItemName: Copper Pickaxe
+ID: 16, Type: 0, Damage: 1400, Proba: 90, Capacity: 0, ItemName: Iron Pickaxe
+ID: 19, Type: 0, Damage: 2000, Proba: 90, Capacity: 0, ItemName: Golden Pickaxe
+ID: 22, Type: 0, Damage: 8000, Proba: 80, Capacity: 0, ItemName: Diamond Pickaxe
+ID: 24, Type: 0, Damage: 25000, Proba: 100, Capacity: 0, ItemName: Enegry Pickaxe
+ID: 28, Type: 0, Damage: 0, Proba: 0, Capacity: 10, ItemName: Card: Quickly-Fire
+ID: 29, Type: 0, Damage: 0, Proba: 0, Capacity: 10, ItemName: Card: Quickly-Loading
+ID: 30, Type: 0, Damage: 0, Proba: 0, Capacity: 10, ItemName: Card: Damage
+ID: 31, Type: 0, Damage: 0, Proba: 0, Capacity: 15, ItemName: Card: Explosion
+ID: 32, Type: 0, Damage: 0, Proba: 0, Capacity: 30, ItemName: Card: Electron
+ID: 33, Type: 0, Damage: 0, Proba: 0, Capacity: 55, ItemName: Card: Fusion
+ID: 34, Type: 0, Damage: 0, Proba: 0, Capacity: 10, ItemName: Card: Force
+ID: 35, Type: 0, Damage: 0, Proba: 0, Capacity: 0, ItemName: Card: Manual Control
+ID: 25, Type: 0, Damage: 0, Proba: 0, Capacity: 25, ItemName: Beginner Turret
+ID: 26, Type: 0, Damage: 0, Proba: 0, Capacity: 50, ItemName: Intermediate Turret
+ID: 27, Type: 0, Damage: 0, Proba: 0, Capacity: 100, ItemName: Advanced Turret
+ID: 8, Type: 4, Damage: 0, Proba: 0, Capacity: 0, ItemName: Zombie's Heart
+ID: 9, Name: Wooden Sword
+- Log: 25
+ID: 12, Name: Copper Axe
+- Log: 1900
+- Iron: 25
+ID: 17, Name: Golden Sword
+- Log: 2400
+- Golden: 25
+ID: 20, Name: Diamond Sword
+- Log: 4400
+- Diamond: 25
+ID: 23, Name: Enegry Sword
+- Log: 5000
+- Diamond: 50
+- Enegry: 100
+ID: 10, Name: Wooden Axe
+- Log: 10
+ID: 12, Name: Copper Axe
+- Log: 60
+- Copper: 25
+ID: 15, Name: Iron Axe
+- Log: 1780
+- Iron: 25
+ID: 18, Name: Golden Axe
+- Log: 2300
+- Golden: 10
+ID: 21, Name: Diamond Axe
+- Log: 4000
+- Diamond: 25
+ID: 11, Name: Wooden Pickaxe
+- Log: 20
+ID: 13, Name: Copper Pickaxe
+- Log: 70
+- Copper: 25
+ID: 16, Name: Iron Pickaxe
+- Log: 1800
+- Iron: 25
+ID: 19, Name: Golden Pickaxe
+- Log: 2300
+- Golden: 25
+ID: 22, Name: Diamond Pickaxe
+- Log: 4200
+- Diamond: 25
+ID: 24, Name: Enegry Pickaxe
+- Log: 4666
+- Diamond: 35
+- Enegry: 10
+ID: 28, Name: Card: Quickly-Fire
+- Log: 70
+- Golden: 40
+- ZombieHeart: 50
+ID: 29, Name: Card: Quickly-Loading
+- Log: 70
+- Golden: 40
+- ZombieHeart: 50
+ID: 30, Name: Card: Damage
+- Log: 70
+- Iron: 40
+- ZombieHeart: 100
+ID: 31, Name: Card: Explosion
+- Log: 70
+- Iron: 30
+- Coal: 100
+- ZombieHeart: 50
+ID: 32, Name: Card: Electron
+- Log: 70
+- Copper: 200
+- Iron: 30
+- Coal: 100
+- ZombieHeart: 50
+ID: 33, Name: Card: Fusion
+- Log: 70
+- Copper: 200
+- Iron: 200
+- Coal: 400
+- Enegry: 400
+- ZombieHeart: 50
+ID: 34, Name: Card: Force
+- Log: 70
+- ZombieHeart: 50
+ID: 35, Name: Card: Manual Control
+- Log: 100
+- Coal: 100
+- Copper: 100
+- Iron: 100
+- Golden: 100
+- Diamond: 10
+- Enegry: 5
+- ZombieHeart: 1000
+ID: 25, Name: Beginner Turret
+- Log: 70
+ID: 26, Name: Intermediate Turret
+- Beginner Turret: 1
+- Log: 70
+- Copper: 200
+- Iron: 50
+ID: 27, Name: Advanced Turret
+- Intermediate Turret: 1
+- Log: 70
+- Copper: 40
+- Golden: 200
+- Diamond: 50
+- Enegry: 5

@@ -12,31 +12,40 @@ enum
     ITEM_ENEGRY,
     ITEM_ZOMBIEHEART,
 
-    ITEM_SWORD_LOG,
+    ITEM_SWORD_LOG = 9,
     ITEM_AXE_LOG,
     ITEM_PICKAXE_LOG,
 
-    ITEM_SWORD_IRON,
+    ITEM_SWORD_IRON = 12,
     ITEM_AXE_COPPER,
     ITEM_PICKAXE_COPPER,
 
-    ITEM_AXE_IRON,
+    ITEM_AXE_IRON = 15,
     ITEM_PICKAXE_IRON,
 
-    ITEM_SWORD_GOLDEN,
+    ITEM_SWORD_GOLDEN = 17,
     ITEM_AXE_GOLDEN,
     ITEM_PICKAXE_GOLDEN,
 
-    ITEM_SWORD_DIAMOND,
+    ITEM_SWORD_DIAMOND = 20,
     ITEM_AXE_DIAMOND,
     ITEM_PICKAXE_DIAMOND,
 
-    ITEM_SWORD_ENEGRY,
+    ITEM_SWORD_ENEGRY = 23,
     ITEM_PICKAXE_ENEGRY,
 
-    ITEM_TURRET_BEGINNER,
+    ITEM_TURRET_BEGINNER = 25,
     ITEM_TURRET_INTERMEDIATE,
     ITEM_TURRET_ADVANCED,
+
+    ITEM_CARD_QUICKLY_FIRE = 28,
+    ITEM_CARD_QUICKLY_LOADING,
+    ITEM_CARD_DAMAGE,
+    ITEM_CARD_EXPLOSION,
+    ITEM_CARD_ELECTRON,
+    ITEM_CARD_FUSION,
+    ITEM_CARD_FORCE,
+    ITEM_CARD_MANUAL,
     NUM_ITEM,
 };
 
@@ -62,16 +71,8 @@ enum
     ITYPE_SWORD,
     ITYPE_TURRET,
     ITYPE_MATERIAL,
+    ITYPE_CARD,
     NUM_ITYPE,
-};
-
-enum
-{
-    CARD_LIGHTNING = 1,
-    CARD_FLAME,
-    CARD_SHOOT,
-    CARD_LASER_BEAM,
-    CARD_WATER,
 };
 
 struct CItem
@@ -83,12 +84,19 @@ struct CItem
     int m_Damage;
     int m_Formula[NUM_ITEM];
     int m_Capacity;
-    int m_Unplaceable;
+    int m_Max;
+    int m_Placeable[NUM_ITYPE];
 
     CItem()
     {
         std::memset(this, 0, sizeof(CItem));
     }
+};
+
+struct SPlayerItemData
+{
+    int m_Num;
+    int m_Cards;
 };
 
 class CItem_F
@@ -107,4 +115,20 @@ public:
     CItem m_Items[NUM_ITEM];
 
     int FindItem(const char *ItemName);
+
+    int GetType(int ID);
+    const char *GetItemName(int ID);
+    int GetItemID(const char ItemName[64]);
+    int GetDmg(int ID);
+    int GetProba(int ID);
+    int GetCapacity(int ID);
+    void GetFormula(int ID, int *Formula);
+    int GetMax(int ID);
+
+    bool CheckItemVaild(int ID)
+    {
+        if (ID <= 0 || ID >= NUM_ITEM)
+            return true;
+        return false;
+    }
 };

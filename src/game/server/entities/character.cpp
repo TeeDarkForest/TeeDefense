@@ -952,7 +952,7 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
         {
             CPlayer *Player = GameServer()->m_apPlayers[From];
             if (Player->m_Holding[ITYPE_SWORD] >= 0)
-                Dmg += GameServer()->GetDmg(Player->m_Holding[ITYPE_SWORD]);
+                Dmg += GameServer()->ItemF()->GetDmg(Player->m_Holding[ITYPE_SWORD]);
         }
     }
 

@@ -28,7 +28,7 @@ struct FaBao
     int m_Table;
     char m_Language[64];
     int m_Holding[NUM_ITYPE];
-    int m_Items[NUM_ITEM];
+    SPlayerItemData m_Items[NUM_ITEM];
 };
 
 class CAccount : public TWorldComponent

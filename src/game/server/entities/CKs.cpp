@@ -84,7 +84,7 @@ void CKs::Tick()
 
 				pChr->m_InMining = true;
 				GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP);
-				Picking(GameServer()->GetSpeed(pChr->GetPlayer()->m_Holding[ITYPE_AXE], ITYPE_AXE), pChr->GetPlayer());
+				Picking(GameServer()->ItemF()->GetDmg(pChr->GetPlayer()->m_Holding[ITYPE_AXE]), pChr->GetPlayer());
 				return;
 			}
 			else if (m_Type == ITEM_LOG)
@@ -95,13 +95,13 @@ void CKs::Tick()
 			else if (pChr->GetPlayer()->m_Holding[ITYPE_PICKAXE] >= 0)
 			{
 				if (m_Type == ITEM_ENEGRY)
-					PickSpeed = GameServer()->GetSpeed(pChr->GetPlayer()->m_Holding[ITYPE_PICKAXE], ITYPE_PICKAXE) / 2;
+					PickSpeed = GameServer()->ItemF()->GetDmg(pChr->GetPlayer()->m_Holding[ITYPE_PICKAXE]) / 2;
 				else
-					PickSpeed = GameServer()->GetSpeed(pChr->GetPlayer()->m_Holding[ITYPE_PICKAXE], ITYPE_PICKAXE);
+					PickSpeed = GameServer()->ItemF()->GetDmg(pChr->GetPlayer()->m_Holding[ITYPE_PICKAXE]);
 			}
 
 			pChr->GetPlayer()->m_MiningType = m_Type;
-			
+
 			pChr->m_InMining = true;
 			GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP);
 			Picking(PickSpeed, pChr->GetPlayer());
@@ -114,10 +114,10 @@ void CKs::Picking(int Time, CPlayer *Player)
 	m_Health -= Time;
 	int CID = Player->GetCID();
 	dynamic_string buf;
-	Server()->Localization()->Format_L(buf, Player->GetLanguage(), _(GameServer()->m_Items[m_Type].m_Name));
+	Server()->Localization()->Format_L(buf, Player->GetLanguage(), _(GameServer()->Items(m_Type).m_ItemName));
 	if (m_Health <= 0)
 	{
-		Player->m_Items[m_Type]++;
+		Player->m_Items[m_Type].m_Num++;
 		GameServer()->SendChatTarget(CID, _("You picked up a {str:Resource}"), "Resource", buf.buffer());
 		m_Health = GetMaxHealth(m_Type);
 		GameServer()->TW()->Account()->SaveAccountData(CID, CGameContext::TABLE_ITEM, Player->m_AccData);

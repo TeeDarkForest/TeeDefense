@@ -16,10 +16,10 @@ CREATE TABLE `tw_Accounts`
 
 CREATE TABLE `tw_Items`
 (
-  `UserID` int NOT NULL,
-  `ItemID` int NOT NULL,
-  `Num` int NOT NULL,
-  `Cards` TEXT NOT NULL
+  `UserID` INT NOT NULL,
+  `ItemID` INT NOT NULL,
+  `Num` INT NOT NULL,
+  `Cards` INT NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 ALTER TABLE `tw_Accounts` ADD PRIMARY KEY(`UserID`);

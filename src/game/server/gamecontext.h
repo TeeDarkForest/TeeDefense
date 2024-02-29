@@ -339,46 +339,8 @@ public:
 	bool GetPaused();
 	int m_TowerHealth;
 
-	void InitCrafts();
-	void CreateItem(const char *pItemName, int ID, int Type, int Damage, int Level, int TurretType, int Proba,
-					int Speed, int NeedItems[NUM_ITEM], int Life = -1);
-	
-	const char *GetItemNameByID(int Type);
-
 	void InitVotes(int ClientID);
 	void ClearVotes(int ClientID);
-
-	struct CItem
-	{
-		const char *m_Name;
-		int m_Type;
-		int m_NeedResource[NUM_ITEM];
-		int m_Proba;
-		int m_Level;
-		int m_Damage;
-		int m_Speed;
-		int m_ID;
-		int m_TurretType;
-		int m_Life;
-	};
-
-	int GetItemId(const char *pItemName);
-
-	int GetSpeed(int Level, int Type);
-
-	int GetDmg(int Level);
-
-	void MakeItem(int ItemID, int ClientID);
-
-	bool CheckItemName(const char *pItemName);
-
-	void SendCantMakeItemChat(int To, int *Resource);
-
-	void SendMakeItemChat(int To, CItem Item);
-
-	void SendMakeItemFailedChat(int To, int *Resource);
-
-	CItem m_Items[NUM_ITEM];
 
 	int m_EventTimer;
 	int m_EventType;
@@ -394,7 +356,7 @@ public:
 		TABLE_ITEM,
 	};
 
-	void PutTurret(int Type, int Owner, int Life, int Radius);
+	void PutTurret(int ID, int Owner);
 	void AddVote_Make(int ClientID, int Type);
 
 public:
@@ -411,6 +373,8 @@ public:
 
 	CItem_F *m_pItemF;
 	CItem_F *ItemF() { return m_pItemF; }
+
+	CItem Items(int i) { return ItemF()->m_Items[i]; };
 };
 
 inline Mask128 CmaskAll() { return Mask128(); }

@@ -86,7 +86,6 @@ void CItem_F::LoadItem(const char *FileName)
                 m_Items[ID].m_Proba = rMultiple["proba"].u.integer;
                 m_Items[ID].m_Damage = rMultiple["damage"].u.integer;
                 m_Items[ID].m_Capacity = rMultiple["capacity"].u.integer;
-                m_Items[ID].m_Unplaceable = rMultiple["unplaceable"].u.integer;
 
                 dbg_msg("Test", "ID: %d, Type: %d, Damage: %d, Proba: %d, Capacity: %d, ItemName: %s", ID, m_Items[ID].m_Type,
                         m_Items[ID].m_Damage, m_Items[ID].m_Proba, m_Items[ID].m_Capacity, m_Items[ID].m_ItemName);
@@ -139,18 +138,27 @@ void CItem_F::LoadFormula(const char *FileName)
         {
             for (int i = 0; i < rStart["multiple"].u.object.length; i++)
             {
-                int ID = rStart["multiple"][i]["id"];
+                int ID = rStart["multiple"][i]["id"].u.integer;
                 const json_value &rFormula = rStart["multiple"][i]["formula"];
+                dbg_msg("Test", "ID: %d, Name: %s", ID, m_Items[ID].m_ItemName);
                 for (int j = 0; j < rFormula.u.object.length; j++)
+                {
                     m_Items[ID].m_Formula[FindItem(rFormula.u.object.values[j].name)] = rFormula.u.object.values[j].value->u.integer;
+                    if (rFormula.u.object.values[j].value->u.integer)
+                        dbg_msg("Test", "- %s: %d", rFormula.u.object.values[j].name, rFormula.u.object.values[j].value->u.integer);
+                }
             }
         }
         else if (rStart["formula"])
         {
-            int ID = rStart["id"];
+            int ID = rStart["id"].u.integer;
             const json_value &rFormula = rStart["formula"];
             for (int j = 0; j < rFormula.u.object.length; j++)
+            {
                 m_Items[ID].m_Formula[FindItem(rFormula.u.object.values[j].name)] = rFormula.u.object.values[j].value->u.integer;
+                if (rFormula.u.object.values[j].value->u.integer)
+                    dbg_msg("Test", "- %s: %d", rFormula.u.object.values[j].name, rFormula.u.object.values[j].value->u.integer);
+            }
         }
     }
 }
@@ -163,5 +171,79 @@ int CItem_F::FindItem(const char *ItemName)
         if (str_comp(m_Items[i].m_ItemName, ItemName) == 0)
             return m_Items[i].m_ID;
     }
-    return 0;
+    return ITEM_LOG;
+}
+
+/*
+
+int GetType(int ID);
+const char *GetItemName(int ID);
+int GetItemID(const char ItemName[64]);
+int GetDmg(int ID);
+int GetProba(int ID);
+int GetCapacity(int ID);
+void GetFormula(int ID, int *Formula);
+int GetMax(int ID);
+
+*/
+
+int CItem_F::GetType(int ID)
+{
+    if (!CheckItemVaild(ID))
+        return ITYPE_MATERIAL;
+    return m_Items[ID].m_Type;
+}
+
+const char *CItem_F::GetItemName(int ID)
+{
+    if (!CheckItemVaild(ID))
+        return "Log";
+    return m_Items[ID].m_ItemName;
+}
+
+int CItem_F::GetItemID(const char ItemName[64])
+{
+    short ID = FindItem(ItemName);
+    if(!CheckItemVaild(ID))
+        return ITEM_LOG;
+    return ID;
+}
+
+int CItem_F::GetDmg(int ID)
+{
+    if (!CheckItemVaild(ID))
+        return 0;
+    return m_Items[ID].m_Damage;
+}
+
+int CItem_F::GetProba(int ID)
+{
+    if (!CheckItemVaild(ID))
+        return 0;
+    return m_Items[ID].m_Proba;
+}
+
+int CItem_F::GetCapacity(int ID)
+{
+    if (!CheckItemVaild(ID))
+        return 0;
+    return m_Items[ID].m_Capacity;
+}
+
+void CItem_F::GetFormula(int ID, int *Formula)
+{
+    if (!CheckItemVaild(ID))
+        return;
+    for (int i = 0; i < NUM_ITEM; i++)
+    {
+        if(m_Items[ID].m_Formula[i])
+            Formula[i] = m_Items[ID].m_Formula[i];
+    }
+}
+
+int CItem_F::GetMax(int ID)
+{
+    if (!CheckItemVaild(ID))
+        return 0;
+    return m_Items[ID].m_Max;
 }

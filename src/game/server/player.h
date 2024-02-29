@@ -161,7 +161,7 @@ public:
 	};
 
 	SAccData m_AccData;
-	int m_Items[NUM_ITEM];
+	SPlayerItemData m_Items[NUM_ITEM];
 
 	// Mine
 	int m_MiningType;

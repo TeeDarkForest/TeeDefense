@@ -6,7 +6,7 @@
                 "id": 11,
                 "name": "Wooden Pickaxe",
                 "proba": 90,
-                "damage": 200,
+                "damage": 150,
                 "formula": {
                     "Log": 20
                 }

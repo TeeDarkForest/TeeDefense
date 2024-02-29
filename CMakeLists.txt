@@ -376,29 +376,6 @@ function(generate_source output_file script_parameter)
 endfunction()
 
 file(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/src/game/generated/")
-if(GIT_FOUND)
-  execute_process(COMMAND ${GIT_EXECUTABLE} rev-parse --git-dir
-    ERROR_QUIET
-    OUTPUT_VARIABLE PROJECT_GIT_DIR
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-    RESULT_VARIABLE PROJECT_GIT_DIR_ERROR
-  )
-  if(NOT PROJECT_GIT_DIR_ERROR)
-    set(GIT_REVISION_EXTRA_DEPS
-      ${PROJECT_GIT_DIR}/index
-      ${PROJECT_GIT_DIR}/logs/HEAD
-    )
-  endif()
-endif()
-add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/src/game/generated/git_revision.cpp
-  COMMAND ${PYTHON_EXECUTABLE}
-    scripts/git_revision.py
-    > ${PROJECT_BINARY_DIR}/src/game/generated/git_revision.cpp
-  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-  DEPENDS
-    ${GIT_REVISION_EXTRA_DEPS}
-    scripts/git_revision.py
-)
 chash("src/game/generated/nethash.cpp"
   "src/engine/shared/protocol.h"
   "${PROJECT_BINARY_DIR}/src/game/generated/protocol.h"
@@ -541,7 +518,6 @@ set_glob(GAME_SHARED GLOB src/game
   voting.h
 )
 set(GAME_GENERATED_SHARED
-  src/game/generated/git_revision.cpp
   src/game/generated/nethash.cpp
   src/game/generated/protocol.h
 )

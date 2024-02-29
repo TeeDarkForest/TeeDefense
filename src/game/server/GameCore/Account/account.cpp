@@ -181,9 +181,8 @@ static void sync_accdata_thread(void *user)
                     while (res->next())
                     {
                         int ItemID = res->getInt("ItemID");
-                        int Num = res->getInt("Num");
-
-                        P->m_Items[ItemID] = Num;
+                        P->m_Items[ItemID].m_Num = res->getInt("Num");
+                        P->m_Items[ItemID].m_Cards = res->getInt("Cards");
                     }
                     Data->m_pGameServer->ClearVotes(ClientID);
                 }
@@ -267,15 +266,15 @@ static void save_accdata_thread(void *user)
 
                         if (res->next())
                         {
-                            if (Data->m_Items[i])
+                            if (Data->m_Items[i].m_Num)
                                 str_format(aBuf, sizeof(aBuf), "UPDATE tw_Items SET Num=%d WHERE UserID=%d AND ItemID=%d;", Data->m_Items[i], UserID, i); // if yes, update it.
                             else
                                 str_format(aBuf, sizeof(aBuf), "DELETE FROM tw_Items WHERE UserID=%d AND ItemID=%d;", UserID, i); // So delete it
                             Data->m_pGameServer->DB()->Execute(aBuf);                                                             // Execute
                         }
-                        else if (Data->m_Items[i])
+                        else if (Data->m_Items[i].m_Num)
                         {
-                            str_format(aBuf, sizeof(aBuf), "INSERT INTO tw_Items(UserID, ItemID, Num) VALUES (%d, %d, %d)", UserID, i, Data->m_Items[i]); // if not, insert it.
+                            str_format(aBuf, sizeof(aBuf), "INSERT INTO tw_Items(UserID, ItemID, Num, Cards) VALUES (%d, %d, %d, %d)", UserID, i, Data->m_Items[i].m_Num, Data->m_Items[i].m_Cards); // if not, insert it.
                             Data->m_pGameServer->DB()->Execute(aBuf);
                         }
                     }

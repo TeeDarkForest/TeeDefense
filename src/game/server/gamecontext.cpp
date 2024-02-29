@@ -73,8 +73,6 @@ void CGameContext::Construct(int Resetting, bool ChangeMap)
 
 	m_pDB = new CDB();
 
-	InitCrafts();
-
 #ifdef CONF_BOX2D
 	b2AABB worldAABB;
 	worldAABB.lowerBound.Set(0, 0);
@@ -2207,178 +2205,6 @@ void CGameContext::LogoutAccount(int ClientID)
 	SendChatTarget(pP->GetCID(), _("Logout succesful"));
 }
 
-void CGameContext::InitCrafts()
-{
-}
-
-void CGameContext::CreateItem(const char *pItemName, int ID, int Type, int Damage, int Level, int TurretType, int Proba,
-							  int Speed, int NeedItem[NUM_ITEM], int Life)
-{
-
-	m_Items[ID].m_Damage = Damage;
-	m_Items[ID].m_Level = Level;
-	m_Items[ID].m_Name = pItemName;
-	for (int i = 0; i < NUM_ITEM; i++)
-		m_Items[ID].m_NeedResource[i] = NeedItem[i];
-	m_Items[ID].m_Proba = Proba;
-	m_Items[ID].m_Speed = Speed;
-	m_Items[ID].m_ID = ID;
-	m_Items[ID].m_TurretType = TurretType;
-	m_Items[ID].m_Type = Type;
-	m_Items[ID].m_Life = Life;
-}
-
-int CGameContext::GetItemId(const char *pItemName)
-{
-	for (int i = 0; i < NUM_ITEM; i++)
-	{
-		if (str_comp(m_Items[i].m_Name, pItemName) == 0)
-		{
-			return m_Items[i].m_ID;
-		}
-	}
-	return -1;
-}
-
-void CGameContext::SendCantMakeItemChat(int To, int *Resource)
-{
-	std::string Buffer;
-	dynamic_string Buffre;
-	CPlayer *p = m_apPlayers[To];
-	const char *Lang = p->GetLanguage();
-	Buffre.clear();
-	Server()->Localization()->Format_L(Buffre, Lang, _("You need at least "), NULL);
-
-	Buffer.append(Buffre.buffer());
-	for (int i = 0; i < NUM_ITEM; i++)
-	{
-		if (Resource[i] > 0)
-		{
-			dynamic_string iname;
-			Buffre.clear();
-			Server()->Localization()->Format_L(iname, Lang, _(GetItemNameByID(i)));
-			Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} {str:name}, "), "num", &Resource[i], "name", iname.buffer());
-			Buffer.append(Buffre.buffer());
-		}
-	}
-	Buffre.clear();
-	Server()->Localization()->Format_L(Buffre, Lang, _("But you don't have them."), NULL);
-	Buffer.append(Buffre.buffer());
-	SendChatTarget(To, Buffer.c_str());
-}
-
-void CGameContext::SendMakeItemChat(int To, CItem Item)
-{
-	dynamic_string Buffer;
-	dynamic_string IName;
-	CPlayer *p = m_apPlayers[To];
-	const char *Lang = p->GetLanguage();
-
-	Server()->Localization()->Format_L(IName, Lang, _(Item.m_Name));
-	Server()->Localization()->Format_L(Buffer, Lang, _("You made a {str:ItemName}! Good Job!"), "ItemName", IName.buffer());
-	SendChatTarget(To, Buffer.buffer());
-}
-
-void CGameContext::SendMakeItemFailedChat(int To, int *Resource)
-{
-	SendChatTarget(To, _("Bad luck. The production failed..."));
-	std::string Buffer;
-	dynamic_string Buffre;
-	CPlayer *p = m_apPlayers[To];
-	const char *Lang = p->GetLanguage();
-	Buffre.clear();
-	Server()->Localization()->Format_L(Buffre, Lang, _("You lost "), NULL);
-	Buffer.append(Buffre.buffer());
-	for (int i = 0; i < NUM_ITEM; i++)
-	{
-		if (Resource[i] > 0)
-		{
-			dynamic_string iname;
-			Buffre.clear();
-			p->m_Items[i] -= Resource[i];
-			Server()->Localization()->Format_L(iname, Lang, _(GetItemNameByID(i)));
-			Server()->Localization()->Format_L(Buffre, Lang, _("{int:num} {str:name}, "), "num", &Resource[i], "name", iname.buffer());
-			Buffer.append(Buffre.buffer());
-		}
-	}
-	Buffre.clear();
-	Server()->Localization()->Format_L(Buffre, Lang, _("Bad luck."), NULL);
-	Buffer.append(Buffre.buffer());
-	SendChatTarget(To, Buffer.c_str());
-}
-
-void CGameContext::MakeItem(int ItemID, int ClientID)
-{
-	if (!GetPlayer(ClientID))
-		return;
-
-	if (NUM_ITEM < ItemID || ItemID < 0)
-	{
-		SendChatTarget(ClientID, _("No such item."), NULL);
-		return;
-	}
-
-	CItem MakeItem = m_Items[ItemID];
-
-	for (int i = 0; i < NUM_ITEM; i++)
-	{
-		if (m_apPlayers[ClientID]->m_Items[i] < MakeItem.m_NeedResource[i])
-		{
-			SendCantMakeItemChat(ClientID, MakeItem.m_NeedResource);
-			return;
-		}
-	}
-
-	if (random_int(0, 100) < MakeItem.m_Proba)
-	{
-		SendMakeItemChat(ClientID, MakeItem);
-
-		for (int i = 0; i < NUM_ITEM; i++)
-		{
-			m_apPlayers[ClientID]->m_Items[i] -= MakeItem.m_NeedResource[i];
-		}
-
-		m_apPlayers[ClientID]->m_Items[ItemID] += 1;
-	}
-	else
-	{
-		SendMakeItemFailedChat(ClientID, MakeItem.m_NeedResource);
-		return;
-	}
-
-	TW()->Account()->SaveAccountData(ClientID, TABLE_ITEM, GetPlayer(ClientID)->m_AccData);
-	ClearVotes(ClientID);
-}
-
-int CGameContext::GetDmg(int Level)
-{
-	return m_Items[Level].m_Damage;
-}
-
-int CGameContext::GetSpeed(int Level, int Type)
-{
-	if (Level <= 0 || Level >= NUM_ITEM)
-		return 8;
-	return m_Items[Level].m_Speed;
-}
-
-bool CGameContext::CheckItemName(const char *pItemName)
-{
-	for (int i = 0; i < NUM_ITEM; i++)
-	{
-		if (str_comp(m_Items[i].m_Name, pItemName) == 0)
-		{
-			return true;
-		}
-	}
-	return false;
-}
-
-const char *CGameContext::GetItemNameByID(int Type)
-{
-	return m_Items[Type].m_Name;
-}
-
 // MMOTee
 void CGameContext::AddVote(const char *Desc, const char *Cmd, int ClientID)
 {
@@ -2442,20 +2268,20 @@ void CGameContext::InitVotes(int ClientID)
 	AddVote_VL(ClientID, "ccv_null", _("======= Items ======="));
 	for (int i = 0; i < NUM_ITEM; i++)
 	{
-		int Num = GetPlayer(ClientID)->m_Items[i];
+		int Num = GetPlayer(ClientID)->m_Items[i].m_Num;
 		if (!Num)
 			continue;
 		dynamic_string iname;
 		dynamic_string Buffer;
-		Server()->Localization()->Format_L(iname, Lang, _(GetItemNameByID(i)));
+		Server()->Localization()->Format_L(iname, Lang, _(ItemF()->GetItemName(i)));
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "ccv_use %d", i);
 
-		if (m_Items[i].m_Type == ITYPE_MATERIAL)
+		if (Items(i).m_Type == ITYPE_MATERIAL)
 			Server()->Localization()->Format_L(Buffer, Lang, _("{str:name} x{int:num}"), "name", iname.buffer(), "num", &Num);
-		else if (m_Items[i].m_Type == ITYPE_TURRET)
+		else if (Items(i).m_Type == ITYPE_TURRET)
 			Server()->Localization()->Format_L(Buffer, Lang, _("{str:name} x{int:num}: Place"), "name", iname.buffer(), "num", &Num);
-		else if (GetPlayer(ClientID)->m_Holding[m_Items[i].m_Type] == i)
+		else if (GetPlayer(ClientID)->m_Holding[Items(i).m_Type] == i)
 			Server()->Localization()->Format_L(Buffer, Lang, _("{str:name} x{int:num}: Equipped"), "name", iname.buffer(), "num", &Num);
 		else
 			Server()->Localization()->Format_L(Buffer, Lang, _("{str:name} x{int:num}: Equip"), "name", iname.buffer(), "num", &Num);
@@ -2496,10 +2322,10 @@ void CGameContext::AddVote_Make(int ClientID, int Type)
 {
 	for (int i = 0; i < NUM_ITEM; i++)
 	{
-		if (m_Items[i].m_Type == Type)
+		if (Items(i).m_Type == Type)
 		{
 			dynamic_string iname;
-			Server()->Localization()->Format_L(iname, GetPlayer(ClientID)->GetLanguage(), _(GetItemNameByID(i)));
+			Server()->Localization()->Format_L(iname, GetPlayer(ClientID)->GetLanguage(), _(ItemF()->GetItemName(i)));
 			char Cmd[64];
 			str_format(Cmd, sizeof(Cmd), "ccv_make %d", i);
 			AddVote_VL(ClientID, Cmd, _("Make {str:smth}"), "smth", iname.buffer());
@@ -2519,7 +2345,7 @@ void CGameContext::ConMake(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
-	pSelf->MakeItem(pResult->GetInteger(0), pResult->GetClientID());
+	//pSelf->MakeItem(pResult->GetInteger(0), pResult->GetClientID());
 }
 
 void CGameContext::ConUse(IConsole::IResult *pResult, void *pUserData)
@@ -2532,17 +2358,14 @@ void CGameContext::ConUse(IConsole::IResult *pResult, void *pUserData)
 	if (!pP)
 		return;
 
-	switch (pSelf->m_Items[ItemID].m_Type)
+	switch (pSelf->Items(ItemID).m_Type)
 	{
+	case ITYPE_TURRET:
+		pSelf->PutTurret(pSelf->Items(ItemID).m_ID, CID);
 	case ITYPE_PICKAXE:
 	case ITYPE_AXE:
 	case ITYPE_SWORD:
-		pP->m_Holding[pSelf->m_Items[ItemID].m_Type] = ItemID;
-		break;
-
-	case ITYPE_TURRET:
-		pSelf->PutTurret(pSelf->m_Items[ItemID].m_TurretType, CID, pSelf->m_Items[ItemID].m_Life, 64);
-		pP->m_Items[ItemID]--;
+		pP->m_Holding[pSelf->Items(ItemID).m_Type] = ItemID;
 		break;
 
 	default:
@@ -2628,11 +2451,11 @@ CPlayer *CGameContext::GetPlayer(int ClientID, bool CheckAuthed, bool CheckChara
 	return nullptr;
 }
 
-void CGameContext::PutTurret(int Type, int Owner, int Life, int Radius)
+void CGameContext::PutTurret(int ID, int Owner)
 {
 	if (!GetPlayer(Owner, false, true))
 		return;
-	new CTurret(&m_World, GetPlayerChar(Owner)->m_Pos, Owner, Type, Radius, Life);
+	new CTurret(&m_World, GetPlayerChar(Owner)->m_Pos, ID, Owner);
 }
 
 int CGameContext::NumPlayers(bool CheckCharacter)

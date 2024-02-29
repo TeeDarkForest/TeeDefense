@@ -374,17 +374,17 @@ int CGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 		int num = 1 + rand() % 4;
 		if (rando <= 50)
 		{
-			pKiller->m_Items[ITEM_LOG] += num;
+			pKiller->m_Items[ITEM_LOG].m_Num += num;
 			GameServer()->SendChatTarget(pKiller->GetCID(), _("You got {int:num} Log from the Zombie"), "num", &num);
 		}
 		else if (rando >= 51 && rando <= 75)
 		{
-			pKiller->m_Items[ITEM_COPPER] += num;
+			pKiller->m_Items[ITEM_COPPER].m_Num += num;
 			GameServer()->SendChatTarget(pKiller->GetCID(), _("You got {int:num} Copper from the Zombie"), "num", &num);
 		}
 		else if (rando <= 99)
 		{
-			pKiller->m_Items[ITEM_GOLDEN] += num;
+			pKiller->m_Items[ITEM_GOLDEN].m_Num += num;
 			GameServer()->SendChatTarget(pKiller->GetCID(), _("You got {int:num} Gold from the Zombie"), "num", &num);
 		}
 		else
@@ -392,17 +392,17 @@ int CGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 			short r = rand() % 3;
 			if (r == 0)
 			{
-				pKiller->m_Items[ITEM_ENEGRY]++;
+				pKiller->m_Items[ITEM_ENEGRY].m_Num++;
 				GameServer()->SendChatTarget(pKiller->GetCID(), _("===-=== You got a Enegry from the Zombie ----"));
 			}
 			else if (r == 1)
 			{
-				pKiller->m_Items[ITEM_DIAMOND]++;
+				pKiller->m_Items[ITEM_DIAMOND].m_Num++;
 				GameServer()->SendChatTarget(pKiller->GetCID(), _("===-=== You got a Enegry from the Zombie ----"));
 			}
 		}
 
-		pKiller->m_Items[ITEM_ZOMBIEHEART]++;
+		pKiller->m_Items[ITEM_ZOMBIEHEART].m_Num++;
 		GameServer()->SendChatTarget(pKiller->GetCID(), _("You picked up a Zombie's Heart"));
 		pKiller->m_Score++;
 		DoZombMessage(m_ZombLeft--);

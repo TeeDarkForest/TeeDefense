@@ -2,9 +2,6 @@
     "item": {
         "type": 4,
         "id": 1,
-        "name": "Log"
-    },
-    "ck": {
         "name": "Log",
         "health": 50
     }

@@ -114,7 +114,7 @@ void CKs::Picking(int Time, CPlayer *Player)
 	m_Health -= Time;
 	int CID = Player->GetCID();
 	dynamic_string buf;
-	Server()->Localization()->Format_L(buf, Player->GetLanguage(), _(GameServer()->Items(m_Type).m_ItemName));
+	Server()->Localization()->Format_L(buf, Player->GetLanguage(), _(GameServer()->Items(m_Type)->m_ItemName));
 	if (m_Health <= 0)
 	{
 		Player->m_Items[m_Type].m_Num++;
@@ -156,38 +156,5 @@ void CKs::Snap(int SnappingClient)
 
 int CKs::GetMaxHealth(int Type)
 {
-	switch (Type)
-	{
-	case ITEM_LOG:
-		return 50;
-		break;
-
-	case ITEM_COAL:
-		return 8000;
-		break;
-
-	case ITEM_COPPER:
-		return 2000;
-		break;
-
-	case ITEM_IRON:
-		return 8000;
-		break;
-
-	case ITEM_GOLDEN:
-		return 30000;
-		break;
-
-	case ITEM_DIAMOND:
-		return 1200000;
-		break;
-
-	case ITEM_ENEGRY:
-		return 3000000;
-		break;
-
-	default:
-		return 3000000;
-		break;
-	}
+	return GameServer()->ItemF()->GetMaxHealth(Type);
 }

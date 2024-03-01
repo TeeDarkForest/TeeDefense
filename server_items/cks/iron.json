@@ -2,9 +2,6 @@
     "item": {
         "type": 4,
         "id": 4,
-        "name": "Iron"
-    },
-    "ck": {
         "name": "Iron",
         "health": 8000
     }

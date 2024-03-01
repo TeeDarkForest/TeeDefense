@@ -1,4 +1,8 @@
-// made by fokkonaut
+/*
+Made by Fokkonaut, I haven't asked him if I can use it yet
+BUT, I opened up TeeDefense before deleting this code
+I forgot it noooooo. TuT
+*/
 
 #include <engine/shared/protocol.h>
 

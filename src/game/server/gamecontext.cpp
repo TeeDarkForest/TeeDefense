@@ -54,6 +54,7 @@ public:
 
 void CGameContext::Construct(int Resetting, bool ChangeMap)
 {
+	m_pItemF = new CItem_F(this);
 	m_Resetting = 0;
 	m_pServer = 0;
 
@@ -86,7 +87,6 @@ void CGameContext::Construct(int Resetting, bool ChangeMap)
 #endif
 
 	m_pBotEngine = new CBotEngine(this);
-	m_pItemF = new CItem_F(this);
 }
 
 CGameContext::CGameContext(int Resetting, bool ChangeMap)
@@ -2277,11 +2277,11 @@ void CGameContext::InitVotes(int ClientID)
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "ccv_use %d", i);
 
-		if (Items(i).m_Type == ITYPE_MATERIAL)
+		if (Items(i)->m_Type == ITYPE_MATERIAL)
 			Server()->Localization()->Format_L(Buffer, Lang, _("{str:name} x{int:num}"), "name", iname.buffer(), "num", &Num);
-		else if (Items(i).m_Type == ITYPE_TURRET)
+		else if (Items(i)->m_Type == ITYPE_TURRET)
 			Server()->Localization()->Format_L(Buffer, Lang, _("{str:name} x{int:num}: Place"), "name", iname.buffer(), "num", &Num);
-		else if (GetPlayer(ClientID)->m_Holding[Items(i).m_Type] == i)
+		else if (GetPlayer(ClientID)->m_Holding[Items(i)->m_Type] == i)
 			Server()->Localization()->Format_L(Buffer, Lang, _("{str:name} x{int:num}: Equipped"), "name", iname.buffer(), "num", &Num);
 		else
 			Server()->Localization()->Format_L(Buffer, Lang, _("{str:name} x{int:num}: Equip"), "name", iname.buffer(), "num", &Num);
@@ -2322,7 +2322,7 @@ void CGameContext::AddVote_Make(int ClientID, int Type)
 {
 	for (int i = 0; i < NUM_ITEM; i++)
 	{
-		if (Items(i).m_Type == Type)
+		if (Items(i)->m_Type == Type)
 		{
 			dynamic_string iname;
 			Server()->Localization()->Format_L(iname, GetPlayer(ClientID)->GetLanguage(), _(ItemF()->GetItemName(i)));
@@ -2345,7 +2345,7 @@ void CGameContext::ConMake(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
-	//pSelf->MakeItem(pResult->GetInteger(0), pResult->GetClientID());
+	// pSelf->MakeItem(pResult->GetInteger(0), pResult->GetClientID());
 }
 
 void CGameContext::ConUse(IConsole::IResult *pResult, void *pUserData)
@@ -2358,14 +2358,14 @@ void CGameContext::ConUse(IConsole::IResult *pResult, void *pUserData)
 	if (!pP)
 		return;
 
-	switch (pSelf->Items(ItemID).m_Type)
+	switch (pSelf->Items(ItemID)->m_Type)
 	{
 	case ITYPE_TURRET:
-		pSelf->PutTurret(pSelf->Items(ItemID).m_ID, CID);
+		pSelf->PutTurret(pSelf->Items(ItemID)->m_ID, CID);
 	case ITYPE_PICKAXE:
 	case ITYPE_AXE:
 	case ITYPE_SWORD:
-		pP->m_Holding[pSelf->Items(ItemID).m_Type] = ItemID;
+		pP->m_Holding[pSelf->Items(ItemID)->m_Type] = ItemID;
 		break;
 
 	default:

@@ -81,15 +81,34 @@ struct CItem
     int m_ID;
     char m_ItemName[128];
     int m_Proba;
-    int m_Damage;
     int m_Formula[NUM_ITEM];
-    int m_Capacity;
     int m_Max;
-    int m_Placeable[NUM_ITYPE];
+    int m_MaxHealth;
 
     CItem()
     {
         std::memset(this, 0, sizeof(CItem));
+    }
+};
+
+struct CItem_Tool : public CItem
+{
+    int m_Capacity;
+    int m_Damage;
+
+    CItem_Tool()
+    {
+        std::memset(this, 0, sizeof(CItem_Tool));
+    }
+};
+
+struct CItem_Card : public CItem_Tool
+{
+    bool m_Placeable[NUM_ITYPE];
+
+    CItem_Card()
+    {
+        std::memset(this, 0, sizeof(CItem_Card));
     }
 };
 
@@ -106,13 +125,14 @@ private:
 
     class CGameContext *GameServer() const { return m_pGameServer; }
 
+    CItem *m_Items[NUM_ITEM];
+
 public:
+    CItem *Items(int ID) { return m_Items[ID]; }
     CItem_F(class CGameContext *pGameServer);
     void LoadIndex();
     void LoadItem(const char *FileName);
     void LoadFormula(const char *FileName);
-
-    CItem m_Items[NUM_ITEM];
 
     int FindItem(const char *ItemName);
 
@@ -124,11 +144,12 @@ public:
     int GetCapacity(int ID);
     void GetFormula(int ID, int *Formula);
     int GetMax(int ID);
+    int GetMaxHealth(int ID);
 
-    bool CheckItemVaild(int ID)
+    bool CheckItemVaild(int ID, int Type = -1) // -1 for all
     {
-        if (ID <= 0 || ID >= NUM_ITEM)
-            return true;
-        return false;
+        if (ID <= 0 || ID >= NUM_ITEM || !Items(ID))
+            return false;
+        return true;
     }
 };

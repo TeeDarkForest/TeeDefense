@@ -10,7 +10,7 @@
                 "formula": {
                     "Log": 70,
                     "Golden": 40,
-                    "ZombieHeart": 50
+                    "Zombie's Heart": 50
                 }
             },
             {
@@ -21,7 +21,7 @@
                 "formula": {
                     "Log": 70,
                     "Golden": 40,
-                    "ZombieHeart": 50
+                    "Zombie's Heart": 50
                 }
             },
             {
@@ -32,7 +32,7 @@
                 "formula": {
                     "Log": 70,
                     "Iron": 40,
-                    "ZombieHeart": 100
+                    "Zombie's Heart": 100
                 }
             },
             {
@@ -44,7 +44,7 @@
                     "Log": 70,
                     "Iron": 30,
                     "Coal": 100,
-                    "ZombieHeart": 50
+                    "Zombie's Heart": 50
                 }
             },
             {
@@ -57,7 +57,7 @@
                     "Copper": 200,
                     "Iron": 30,
                     "Coal": 100,
-                    "ZombieHeart": 50
+                    "Zombie's Heart": 50
                 }
             },
             {
@@ -71,7 +71,7 @@
                     "Iron": 200,
                     "Coal": 400,
                     "Enegry": 400,
-                    "ZombieHeart": 50
+                    "Zombie's Heart": 50
                 }
             },
             {
@@ -81,7 +81,7 @@
                 "placeable": [2, 3],
                 "formula": {
                     "Log": 70,
-                    "ZombieHeart": 50
+                    "Zombie's Heart": 50
                 }
             },
             {
@@ -97,7 +97,7 @@
                     "Golden": 100,
                     "Diamond": 10,
                     "Enegry": 5,
-                    "ZombieHeart": 1000
+                    "Zombie's Heart": 1000
                 }
             }
         ]

@@ -367,14 +367,14 @@ public:
 	void OnZombieKill(int ClientID);
 
 	void MakeBotSleep(int i); // Bot-only
-	void WakeBotUp(int i); // Bot-only
+	void WakeBotUp(int i);	  // Bot-only
 
 	void InitBots();
 
 	CItem_F *m_pItemF;
 	CItem_F *ItemF() { return m_pItemF; }
 
-	CItem Items(int i) { return ItemF()->m_Items[i]; };
+	CItem *Items(int i) { return ItemF()->Items(i); };
 };
 
 inline Mask128 CmaskAll() { return Mask128(); }

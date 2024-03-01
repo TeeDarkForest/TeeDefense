@@ -219,7 +219,7 @@ void CAccount::SyncAccountData(int ClientID, int Table, CPlayer::SAccData AccDat
     data->m_AccData = AccData;
     for (int i = 0; i < NUM_ITYPE; i++)
         data->m_Holding[i] = GameServer()->GetPlayer(ClientID)->m_Holding[i];
-    for (int i = 0; i < NUM_ITEM; i++)
+    for (int i = 1; i < NUM_ITEM; i++)
         data->m_Items[i] = GameServer()->GetPlayer(ClientID)->m_Items[i];
     str_copy(data->m_Language, GameServer()->GetPlayer(ClientID)->GetLanguage(), sizeof(data->m_Language));
     data->m_Type = TYPE::SYNC;
@@ -259,7 +259,7 @@ static void save_accdata_thread(void *user)
 
                 case CGameContext::TABLE_ITEM:
                 {
-                    for (int i = 0; i < NUM_ITEM; i++)
+                    for (int i = 1; i < NUM_ITEM; i++)
                     {
                         str_format(aBuf, sizeof(aBuf), "SELECT * FROM tw_Items WHERE UserID=%d AND ItemID=%d;", UserID, i);
                         sql::ResultSet *res = Data->m_pGameServer->DB()->ExecuteQuery(aBuf);
@@ -312,7 +312,7 @@ void CAccount::SaveAccountData(int ClientID, int Table, CPlayer::SAccData AccDat
     data->m_AccData = AccData;
     for (int i = 0; i < NUM_ITYPE; i++)
         data->m_Holding[i] = GameServer()->GetPlayer(ClientID)->m_Holding[i];
-    for (int i = 0; i < NUM_ITEM; i++)
+    for (int i = 1; i < NUM_ITEM; i++)
         data->m_Items[i] = GameServer()->GetPlayer(ClientID)->m_Items[i];
     str_copy(data->m_Language, GameServer()->GetPlayer(ClientID)->GetLanguage(), sizeof(data->m_Language));
     data->m_Type = TYPE::SAVE;

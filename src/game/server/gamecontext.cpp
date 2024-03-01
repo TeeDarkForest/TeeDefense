@@ -2266,7 +2266,7 @@ void CGameContext::InitVotes(int ClientID)
 	AddVote_VL(ClientID, "ccv_null", _("  "));
 
 	AddVote_VL(ClientID, "ccv_null", _("======= Items ======="));
-	for (int i = 0; i < NUM_ITEM; i++)
+	for (int i = 1; i < NUM_ITEM; i++)
 	{
 		int Num = GetPlayer(ClientID)->m_Items[i].m_Num;
 		if (!Num)
@@ -2316,12 +2316,20 @@ void CGameContext::InitVotes(int ClientID)
 
 	AddVote_VL(ClientID, "ccv_null", _("======= Turret ======="));
 	AddVote_Make(ClientID, ITYPE_TURRET);
+
+	AddVote_VL(ClientID, "ccv_null", _("  "));
+
+	AddVote_VL(ClientID, "ccv_null", _("======= Cards ======="));
+	AddVote_Make(ClientID, ITYPE_CARD);
 }
 
 void CGameContext::AddVote_Make(int ClientID, int Type)
 {
-	for (int i = 0; i < NUM_ITEM; i++)
+	for (int i = 1; i < NUM_ITEM; i++)
 	{
+		if (!Items(i))
+			continue;
+
 		if (Items(i)->m_Type == Type)
 		{
 			dynamic_string iname;

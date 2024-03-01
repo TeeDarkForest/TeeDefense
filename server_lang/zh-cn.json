@@ -1,9 +1,9 @@
-{"translation": 
-    [
+{
+    "translation": [
         {
-    		"key": "Language successfully switched to English",
-    		"value": "语言成功切换为中文"
-    	},
+            "key": "Language successfully switched to English",
+            "value": "语言成功切换为中文"
+        },
         {
             "key": "Unknown language or no input language code",
             "value": "未知语言或没有输入语言代码"
@@ -45,8 +45,8 @@
             "value": "投票否决"
         },
         {
-            "key":  "admin forced server option '{str:O}' ({str:R})",
-            "value":  "管理员修改了服务器设置 '{str:O}' ({str:R})"
+            "key": "admin forced server option '{str:O}' ({str:R})",
+            "value": "管理员修改了服务器设置 '{str:O}' ({str:R})"
         },
         {
             "key": "admin moved '{str:N}' to spectator ({str:R})",
@@ -415,29 +415,27 @@
         {
             "key": "gun turret",
             "value": "手枪炮塔"
-        },        
+        },
         {
             "key": "shotgun turret",
             "value": "散弹枪炮塔"
         },
-        
         {
             "key": "follow grenade turret",
             "value": "跟踪榴弹炮塔"
-        },        
+        },
         {
             "key": "laser turret",
             "value": "激光炮塔"
-        },        
+        },
         {
             "key": "shotgun2077 turret",
             "value": "[散弹|2077]炮塔"
         },
-        
         {
             "key": "laser2077 turret",
             "value": "[激光|2077]炮塔"
-        },        
+        },
         {
             "key": "freeze gun turret",
             "value": "冰冻枪炮塔"
@@ -523,8 +521,8 @@
             "value": "- 采集中 : {str:item} -\n"
         },
         {
-            "key": "",
-            "value": ""
+            "key": "======= Cards =======",
+            "value": "======= 符卡 ======="
         },
         {
             "key": "",

@@ -436,7 +436,7 @@ void CPlayer::SetLanguage(const char *pLanguage)
 
 void CPlayer::ResetKnapsack()
 {
-	for (int i = 0; i < NUM_ITEM; i++)
+	for (int i = 1; i < NUM_ITEM; i++)
 		m_Items[i].m_Num = 0;
 	m_Holding[ITYPE_AXE] = -1;
 	m_Holding[ITYPE_PICKAXE] = -1;

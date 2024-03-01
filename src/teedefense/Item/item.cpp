@@ -108,7 +108,7 @@ void CItem_F::LoadItem(const char *FileName)
                     break;
                 }
 
-                m_Items[ID]->m_Type = rMultiple["type"].u.integer;
+                m_Items[ID]->m_Type = Type;
                 m_Items[ID]->m_ID = ID;
                 str_copy(m_Items[ID]->m_ItemName, rMultiple["name"], sizeof(m_Items[ID]->m_ItemName));
                 m_Items[ID]->m_Proba = rMultiple["proba"].u.integer;
@@ -267,7 +267,7 @@ void CItem_F::GetFormula(int ID, int *Formula)
 {
     if (!CheckItemVaild(ID))
         return;
-    for (int i = 0; i < NUM_ITEM; i++)
+    for (int i = 1; i < NUM_ITEM; i++)
     {
         if (m_Items[ID]->m_Formula[i])
             Formula[i] = m_Items[ID]->m_Formula[i];

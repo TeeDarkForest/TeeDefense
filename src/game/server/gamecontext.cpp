@@ -1654,7 +1654,7 @@ void CGameContext::ConHelp(IConsole::IResult *pResult, void *pUserData)
 	pThis->SendChatTarget(CID, _("Defense Zombies, dont let them touch you base."));
 	pThis->SendChatTarget(CID, _("If you team's Tower no health left, you lose."));
 	pThis->SendChatTarget(CID, _("Don't try complete all wave, be cause it's Infinite!."));
-	pThis->SendChatTarget(CID, _("Zombies made by AssassinTee."));
+	pThis->SendChatTarget(CID, _("Zombies AI made by nheir-."));
 	pThis->SendChatTarget(CID, _("-------"));
 	pThis->SendChatTarget(CID, _("In the map have many 'CKs'."));
 	pThis->SendChatTarget(CID, _("The 'heart' is 'CK' log"));

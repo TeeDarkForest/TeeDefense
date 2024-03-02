@@ -508,6 +508,8 @@ bool CGameController::CanBeMovedOnBalance(int ClientID)
 
 void CGameController::Tick()
 {
+	g_Config.m_SvScorelimit = m_ZombLeft;
+
 	// do warmup
 	if (!GameServer()->m_World.m_Paused && m_Warmup)
 	{
@@ -545,7 +547,6 @@ void CGameController::Tick()
 		if (!m_UnpauseTimer)
 			GameServer()->m_World.m_Paused = false;
 	}
-
 
 	// game is Paused
 	if (GameServer()->m_World.m_Paused)
@@ -777,12 +778,14 @@ void CGameController::StartWave()
 			SetWaveAlg(GameServer()->NumPlayers() % 3, GameServer()->NumPlayers() / 3);
 	}
 	int BeforeZombLeft = m_ZombLeft;
+	int a = 0;
 	for (int i = 0; i < (int)(sizeof(m_Zombie) / sizeof(m_Zombie[0])); i++)
-		m_ZombLeft += m_Zombie[i];
+		a += m_Zombie[i];
+	m_ZombLeft = a;
 
 	DoZombMessage(0);
-	// DoWarmup(BeforeZombLeft + GameServer()->NumPlayers() * 2 + 10);
-	DoWarmup(4);
+	DoWarmup(BeforeZombLeft + GameServer()->NumPlayers() * 2 + 10);
+	// DoWarmup(4);
 	CheckZomb();
 }
 
@@ -803,7 +806,7 @@ int CGameController::RandZomb()
 
 void CGameController::DoZombMessage(int Which)
 {
-	g_Config.m_SvScorelimit = m_ZombLeft;
+	// Useless now
 }
 
 void CGameController::DoLifeMessage(int Life)

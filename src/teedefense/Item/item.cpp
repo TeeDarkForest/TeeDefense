@@ -96,10 +96,7 @@ void CItem_F::LoadItem(const char *FileName)
                     m_Items[ID] = new CItem_Card();
                     ((CItem_Card *)m_Items[ID])->m_Capacity = rMultiple["capacity"].u.integer;
                     for (int i = 0; i < rMultiple["placeable"].u.array.length; i++)
-                    {
                         ((CItem_Card *)m_Items[ID])->m_Placeable[rMultiple["placeable"][i].u.integer] = true;
-                        dbg_msg("Card Placeable", "%d %d Yes", ID, rMultiple["placeable"][i].u.integer);
-                    }
 
                     break;
 
@@ -113,6 +110,7 @@ void CItem_F::LoadItem(const char *FileName)
                 str_copy(m_Items[ID]->m_ItemName, rMultiple["name"], sizeof(m_Items[ID]->m_ItemName));
                 m_Items[ID]->m_Proba = rMultiple["proba"].u.integer;
                 m_Items[ID]->m_MaxHealth = rMultiple["health"].u.integer;
+                dbg_msg("test", "%s", m_Items[ID]->m_ItemName);
             }
         }
         else
@@ -133,11 +131,7 @@ void CItem_F::LoadItem(const char *FileName)
                 m_Items[ID] = new CItem_Card();
                 ((CItem_Card *)m_Items[ID])->m_Capacity = rStart["capacity"].u.integer;
                 for (int i = 0; i < rStart["placeable"].u.array.length; i++)
-                {
                     ((CItem_Card *)m_Items[ID])->m_Placeable[rStart["placeable"][i].u.integer] = true;
-                    dbg_msg("Card Placeable", "%d %d Yes", ID, rStart["placeable"][i].u.integer);
-                }
-
                 break;
 
             default:
@@ -149,6 +143,7 @@ void CItem_F::LoadItem(const char *FileName)
             str_copy(m_Items[ID]->m_ItemName, rStart["name"], sizeof(m_Items[ID]->m_ItemName));
             m_Items[ID]->m_Proba = rStart["proba"].u.integer;
             m_Items[ID]->m_MaxHealth = rStart["health"].u.integer;
+            dbg_msg("test", "%s", m_Items[ID]->m_ItemName);
         }
     }
 }
@@ -188,10 +183,7 @@ void CItem_F::LoadFormula(const char *FileName)
                 int ID = rStart["multiple"][i]["id"].u.integer;
                 const json_value &rFormula = rStart["multiple"][i]["formula"];
                 for (int j = 0; j < rFormula.u.object.length; j++)
-                {
                     m_Items[ID]->m_Formula[FindItem(rFormula.u.object.values[j].name)] = rFormula.u.object.values[j].value->u.integer;
-                    dbg_msg("Test", "%s: %s %d", m_Items[ID]->m_ItemName, m_Items[FindItem(rFormula.u.object.values[j].name)]->m_ItemName, rFormula.u.object.values[j].value->u.integer);
-                }
             }
         }
         else if (rStart["formula"])
@@ -199,10 +191,7 @@ void CItem_F::LoadFormula(const char *FileName)
             int ID = rStart["id"].u.integer;
             const json_value &rFormula = rStart["formula"];
             for (int j = 0; j < rFormula.u.object.length; j++)
-            {
                 m_Items[ID]->m_Formula[FindItem(rFormula.u.object.values[j].name)] = rFormula.u.object.values[j].value->u.integer;
-                dbg_msg("Test", "%s: %s %d", m_Items[ID]->m_ItemName, m_Items[rFormula.u.object.values[j].value->u.integer]->m_ItemName, rFormula.u.object.values[j].value->u.integer);
-            }
         }
     }
 }

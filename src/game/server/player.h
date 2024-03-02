@@ -104,13 +104,7 @@ public:
 
 	int m_Authed;
 
-	// Bot flag
-	bool m_IsBot;
-	class CBot *m_pBot;
-
-	bool IsBot() { return m_IsBot; }
-
-	bool m_BotSleep;
+	bool IsBot() { return false; }
 
 private:
 	CCharacter *m_pCharacter;

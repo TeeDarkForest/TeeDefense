@@ -3,7 +3,6 @@
 #include <new>
 #include <engine/shared/config.h>
 #include "player.h"
-#include "bot.h"
 
 #include "GameCore/Account/account.h"
 
@@ -39,9 +38,6 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 
 	if (!IsBot())
 		ResetKnapsack();
-	m_IsBot = false;
-	m_BotSleep = false;
-
 #ifdef CONF_BOX2D
 	b2CircleShape shape;
 	shape.m_radius = 1.6f;
@@ -62,8 +58,6 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 
 CPlayer::~CPlayer()
 {
-	if (m_pBot)
-		delete m_pBot;
 	delete m_pCharacter;
 	m_pCharacter = 0;
 }
@@ -92,7 +86,7 @@ void CPlayer::Tick()
 #ifdef CONF_DEBUG
 	if (!g_Config.m_DbgDummies || m_ClientID < MAX_CLIENTS - g_Config.m_DbgDummies)
 #endif
-		if (!m_IsBot)
+		if (!IsBot())
 			if (!Server()->ClientIngame(m_ClientID))
 				return;
 
@@ -139,8 +133,6 @@ void CPlayer::Tick()
 			{
 				delete m_pCharacter;
 				m_pCharacter = 0;
-				if (IsBot())
-					m_pBot->OnReset();
 			}
 		}
 		else if (m_Spawning && m_RespawnTick <= Server()->Tick())
@@ -366,8 +358,6 @@ void CPlayer::KillCharacter(int Weapon)
 		m_pCharacter->Die(m_ClientID, Weapon);
 		delete m_pCharacter;
 		m_pCharacter = 0;
-		if (IsBot())
-			m_pBot->OnReset();
 	}
 }
 
@@ -414,7 +404,7 @@ void CPlayer::TryRespawn()
 {
 	vec2 SpawnPos;
 
-	if (!GameServer()->m_pController->CanSpawn(m_Team, &SpawnPos) || m_BotSleep)
+	if (!GameServer()->m_pController->CanSpawn(m_Team, &SpawnPos))
 		return;
 
 	m_Spawning = false;

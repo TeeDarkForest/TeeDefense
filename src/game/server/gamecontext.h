@@ -37,8 +37,6 @@ typedef unsigned __int64 uint64_t;
 
 #include "mask128.h"
 
-#include "botengine.h"
-
 #include <engine/storage.h>
 
 /*
@@ -260,8 +258,6 @@ public:
 	CVoteOptionServer *m_pVoteOptionFirst;
 	CVoteOptionServer *m_pVoteOptionLast;
 
-	class CBotEngine *m_pBotEngine;
-
 	// MMOTee
 	struct CVoteOptions
 	{
@@ -361,16 +357,6 @@ public:
 
 public:
 	int NumPlayers(bool CheckCharacter = false);
-
-	// Bot slots
-	bool AddBot(int i);
-	void OnZombieKill(int ClientID);
-
-	void MakeBotSleep(int i); // Bot-only
-	void WakeBotUp(int i);	  // Bot-only
-
-	void InitBots();
-
 	CItem_F *m_pItemF;
 	CItem_F *ItemF() { return m_pItemF; }
 

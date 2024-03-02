@@ -26,8 +26,6 @@
 
 #include "GameCore/Account/account.h"
 
-#include "bot.h"
-
 // Test Msg.
 #define D(MSG) (dbg_msg("Test", MSG))
 
@@ -86,7 +84,6 @@ void CGameContext::Construct(int Resetting, bool ChangeMap)
 	m_b2world->QueryAABB(&callback, worldAABB);
 #endif
 
-	m_pBotEngine = new CBotEngine(this);
 }
 
 CGameContext::CGameContext(int Resetting, bool ChangeMap)
@@ -105,7 +102,6 @@ CGameContext::~CGameContext()
 		delete pPlayer;
 	if (!m_Resetting)
 		delete m_pVoteOptionHeap;
-	delete m_pBotEngine;
 }
 
 void CGameContext::OnSetAuthed(int ClientID, int Level)
@@ -536,15 +532,6 @@ void CGameContext::OnTick()
 	// check tuning
 	CheckPureTuning();
 
-	// Test basic move for bots
-	for (int i = 0; i < MAX_CLIENTS; i++)
-	{
-		if (!m_apPlayers[i] || !m_apPlayers[i]->m_IsBot)
-			continue;
-		CNetObj_PlayerInput Input = GetPlayer(i)->m_pBot->GetLastInputData();
-		m_apPlayers[i]->OnPredictedInput(&Input);
-	}
-
 	// copy tuning
 	m_World.m_Core.m_Tuning = m_Tuning;
 	m_World.Tick();
@@ -591,7 +578,7 @@ void CGameContext::OnTick()
 				bool aVoteChecked[MAX_CLIENTS] = {0};
 				for (int i = 0; i < MAX_CLIENTS; i++)
 				{
-					if (!m_apPlayers[i] || m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS || aVoteChecked[i] || m_apPlayers[i]->m_IsBot) // don't count in votes by spectators
+					if (!m_apPlayers[i] || m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS || aVoteChecked[i] || m_apPlayers[i]->IsBot()) // don't count in votes by spectators
 						continue;
 
 					int ActVote = m_apPlayers[i]->m_Vote;
@@ -663,15 +650,6 @@ void CGameContext::OnTick()
 		}
 	}
 #endif
-
-	// Test basic move for bots
-	for (int i = 0; i < MAX_CLIENTS; i++)
-	{
-		if (!m_apPlayers[i] || !m_apPlayers[i]->m_IsBot)
-			continue;
-		CNetObj_PlayerInput Input = m_apPlayers[i]->m_pBot->GetInputData();
-		m_apPlayers[i]->OnPredictedInput(&Input);
-	}
 }
 
 #ifdef CONF_BOX2D
@@ -2030,9 +2008,6 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 			}
 		}
 	}
-
-	m_pBotEngine->Init(pTiles, pTileMap->m_Width, pTileMap->m_Height);
-
 	// game.world.insert_entity(game.Controller);
 
 #ifdef CONF_DEBUG
@@ -2045,7 +2020,6 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	}
 #endif
 
-	InitBots();
 	ItemF()->LoadIndex();
 }
 
@@ -2120,7 +2094,7 @@ int CGameContext::NumZombiesAlive()
 		if (m_apPlayers[i])
 			if (m_apPlayers[i]->GetCharacter())
 				if (m_apPlayers[i]->GetCharacter()->IsAlive())
-					if (m_apPlayers[i]->IsBot())
+//					if (m_apPlayers[i]->IsBot())
 						NumZombies++;
 	}
 	return NumZombies;
@@ -2475,54 +2449,4 @@ int CGameContext::NumPlayers(bool CheckCharacter)
 			num++;
 	}
 	return num;
-}
-
-void CGameContext::InitBots()
-{
-	for (int i = ZOMBIE_START; i < ZOMBIE_END; i++)
-	{
-		if (m_apPlayers[i]) // Careful is good;
-			continue;
-
-		AddBot(i);
-	}
-	dbg_msg("Bot", "Bots created successfully!");
-}
-
-bool CGameContext::AddBot(int i)
-{
-	if (Server()->NewBot(i) == 1)
-		return false;
-
-	if (!m_apPlayers[i])
-		m_apPlayers[i] = new (i) CPlayer(this, i, TEAM_ZOMBIE);
-
-	m_apPlayers[i]->m_IsBot = true;
-	m_apPlayers[i]->m_pBot = new CBot(m_pBotEngine, m_apPlayers[i]);
-	MakeBotSleep(i);
-	return true;
-}
-
-void CGameContext::OnZombieKill(int ClientID)
-{
-	MakeBotSleep(ClientID);
-	m_pController->CheckZomb();
-	// update spectator modes
-	for (int i = 0; i < MAX_CLIENTS; ++i)
-	{
-		if (m_apPlayers[i] && m_apPlayers[i]->m_SpectatorID == ClientID)
-			m_apPlayers[i]->m_SpectatorID = SPEC_FREEVIEW;
-	}
-}
-
-void CGameContext::MakeBotSleep(int i)
-{
-	if (GetPlayer(i) && GetPlayer(i)->IsBot())
-		GetPlayer(i)->m_BotSleep = true;
-}
-
-void CGameContext::WakeBotUp(int i)
-{
-	if (GetPlayer(i) && GetPlayer(i)->IsBot())
-		GetPlayer(i)->m_BotSleep = false;
 }

@@ -40,12 +40,6 @@ CGameController::CGameController(class CGameContext *pGameServer)
 	m_aNumSpawnPoints[2] = 0;
 
 	m_CKsID = 0;
-	// Zomb2
-	//	m_pTop = new CTop(m_pGameServer);
-	mem_zero(m_Zombie, sizeof(m_Zombie));
-
-	m_ZombLeft = 0;
-	StartWave();
 }
 
 CGameController::~CGameController()
@@ -195,6 +189,7 @@ bool CGameController::OnEntity(int Index, vec2 Pos)
 		break;
 	case ENTITY_MAIN_TOWER:
 		new CTowerMain(&GameServer()->m_World, Pos);
+		m_TowerPos = Pos;
 		break;
 
 	default:
@@ -215,13 +210,11 @@ void CGameController::EndRound()
 	if (m_Warmup) // game can't end when we are running warmup
 		return;
 
-	HandleTop();
 	GameServer()->m_World.m_Paused = true;
 	m_GameOverTick = Server()->Tick();
 	m_SuddenDeath = 0;
 	ResetGame();
 	GameServer()->m_NeedResetTowers = true;
-	mem_zero(m_Zombie, sizeof(m_Zombie));
 }
 
 void CGameController::ResetGame()
@@ -405,7 +398,6 @@ int CGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 		pKiller->m_Items[ITEM_ZOMBIEHEART].m_Num++;
 		GameServer()->SendChatTarget(pKiller->GetCID(), _("You picked up a Zombie's Heart"));
 		pKiller->m_Score++;
-		DoZombMessage(m_ZombLeft--);
 		GameServer()->TW()->Account()->SaveAccountData(pKiller->GetCID(), CGameContext::TABLE_ITEM, pKiller->m_AccData);
 		GameServer()->ClearVotes(pKiller->GetCID());
 	}
@@ -508,17 +500,12 @@ bool CGameController::CanBeMovedOnBalance(int ClientID)
 
 void CGameController::Tick()
 {
-	g_Config.m_SvScorelimit = m_ZombLeft;
-
 	// do warmup
 	if (!GameServer()->m_World.m_Paused && m_Warmup)
 	{
 		m_Warmup--;
 		if (!m_Warmup)
-		{
-			StartWave();
 			GameServer()->m_World.m_Paused = false;
-		}
 	}
 
 	if (m_GameOverTick != -1)
@@ -763,201 +750,4 @@ int CGameController::ClampTeam(int Team)
 	if (IsTeamplay())
 		return Team & 1;
 	return 0;
-}
-
-void CGameController::StartWave()
-{
-	if (GameServer()->NumPlayers(true))
-	{
-		// Zaby, Zaby has no alround wave
-		if (GameServer()->NumPlayers() == 1)
-			m_Zombie[0] += 10;
-		else if (GameServer()->NumPlayers() == 2)
-			m_Zombie[0] += 20;
-		else
-			SetWaveAlg(GameServer()->NumPlayers() % 3, GameServer()->NumPlayers() / 3);
-	}
-	int BeforeZombLeft = m_ZombLeft;
-	int a = 0;
-	for (int i = 0; i < (int)(sizeof(m_Zombie) / sizeof(m_Zombie[0])); i++)
-		a += m_Zombie[i];
-	m_ZombLeft = a;
-
-	DoZombMessage(0);
-	DoWarmup(BeforeZombLeft + GameServer()->NumPlayers() * 2 + 10);
-	// DoWarmup(4);
-	CheckZomb();
-}
-
-int CGameController::RandZomb()
-{
-	int size = (int)(sizeof(m_Zombie) / sizeof(m_Zombie[0]));
-	int Rand = rand() % size;
-	int WTF = g_Config.m_SvMaxZombieSpawn; // dont make it to high, can cause bad cpu
-	while (!m_Zombie[Rand])
-	{
-		Rand = rand() % size;
-		WTF--;
-		if (!WTF) // Anti 100% CPU :D (Very crappy, but it's a fix :P)
-			return -1;
-	}
-	return Rand;
-}
-
-void CGameController::DoZombMessage(int Which)
-{
-	// Useless now
-}
-
-void CGameController::DoLifeMessage(int Life)
-{
-	GameServer()->SendChatTarget(-1, _("The main tower is under attacked!"));
-	if (Life > 1)
-	{
-		if (Life <= 30)
-			GameServer()->SendChatTarget(-1, _("Only {int:Health} lifes left!"), "Health", &Life);
-		else if (Life == 50)
-			GameServer()->SendChatTarget(-1, _("Only HALF health left!!"));
-		else
-			GameServer()->SendChatTarget(-1, _("{int:Health} health left!"), "Health", &Life);
-	}
-	else if (Life == 1)
-		GameServer()->SendChatTarget(-1, _("!!!Only 1 health left!!!"));
-}
-
-void CGameController::HandleTop()
-{
-	/*	//char aBuf[16];
-		if(m_pTop->GetInfo())//File exist
-		{
-			if(m_pTop->m_TopFiveVars.m_aTeams[4].m_TeamScore < m_aTeamscore[TEAM_HUMAN])
-			{
-				m_pTop->m_TopFiveVars.m_aTeams[4].m_NumPlayers = 0;
-				for(int i = 0; i < 16; i++)
-				{
-					if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
-					{
-						//str_format(aBuf, sizeof(aBuf), "%s", Server()->ClientName(i));
-						m_pTop->m_TopFiveVars.m_aTeams[4].m_NumPlayers++;
-						str_format(m_pTop->m_TopFiveVars.m_aTeams[4].m_aaName[i], sizeof(m_pTop->m_TopFiveVars.m_aTeams[4].m_aaName[i]), "%s", Server()->ClientName(i));
-						GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "DEBUGGING", m_pTop->m_TopFiveVars.m_aTeams[4].m_aaName[i]);
-						m_pTop->m_TopFiveVars.m_aTeams[4].m_aKills[i] = GameServer()->m_apPlayers[i]->m_Score;
-					}
-					else
-					{
-						str_format(m_pTop->m_TopFiveVars.m_aTeams[4].m_aaName[i], sizeof(m_pTop->m_TopFiveVars.m_aTeams[4].m_aaName[i]), "null");
-						m_pTop->m_TopFiveVars.m_aTeams[4].m_aKills[i] = 0;
-					}
-				}
-				m_pTop->m_TopFiveVars.m_aTeams[4].m_TeamScore = m_aTeamscore[TEAM_HUMAN];
-				m_pTop->m_TopFiveVars.m_aTeams[4].m_Waves = m_Wave;
-				m_pTop->SortArray(4);
-			}
-			else
-				return;//File esistiert und Spieler schlechter als 5. platz -> bb
-		}
-		else//File doesn't exist-> Platz 1
-		{
-			m_pTop->m_TopFiveVars.m_aTeams[0].m_NumPlayers = 0;//iniatialisiere!!
-			for(int i = 0; i < 16; i++)
-			{
-				if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
-				{
-					m_pTop->m_TopFiveVars.m_aTeams[0].m_NumPlayers++;
-					str_format(m_pTop->m_TopFiveVars.m_aTeams[0].m_aaName[i], sizeof(m_pTop->m_TopFiveVars.m_aTeams[0].m_aaName[i]), "%s", Server()->ClientName(i));
-					m_pTop->m_TopFiveVars.m_aTeams[0].m_aKills[i] = GameServer()->m_apPlayers[i]->m_Score;
-				}
-				else
-				{
-					str_format(m_pTop->m_TopFiveVars.m_aTeams[0].m_aaName[i], sizeof(m_pTop->m_TopFiveVars.m_aTeams[0].m_aaName[i]), "null");
-					m_pTop->m_TopFiveVars.m_aTeams[0].m_aKills[i] = 0;
-				}
-			}
-			m_pTop->m_TopFiveVars.m_aTeams[0].m_TeamScore = m_aTeamscore[TEAM_HUMAN];
-			m_pTop->m_TopFiveVars.m_aTeams[0].m_Waves = m_Wave;
-
-			for(int k = 1; k < 16; k++)//Speicher den rest als Null
-			{
-				for(int i = 0; i < 16; i++)
-				{
-					str_format(m_pTop->m_TopFiveVars.m_aTeams[k].m_aaName[i], sizeof(m_pTop->m_TopFiveVars.m_aTeams[k].m_aaName[i]), "null");
-					m_pTop->m_TopFiveVars.m_aTeams[k].m_aKills[i] = 0;
-				}
-				m_pTop->m_TopFiveVars.m_aTeams[k].m_NumPlayers = 0;
-				m_pTop->m_TopFiveVars.m_aTeams[k].m_TeamScore = 0;
-				m_pTop->m_TopFiveVars.m_aTeams[k].m_Waves = 0;
-			}
-			m_pTop->SortArray(0);
-		}
-		m_pTop->Write(m_pTop->m_TopFiveVars);*/
-}
-
-void CGameController::SetWaveAlg(int modulus, int wavedrittel)
-{
-	if (GameServer()->NumPlayers() > 16) // endless Waves, but exponentiell Zombie code
-	{
-		for (int i = 0; i < (int)(sizeof(m_Zombie) / sizeof(m_Zombie[0])); i++)
-			m_Zombie[i] += GameServer()->NumPlayers(); // 3 mal wavedrittel + modulus 2
-		return;
-	}
-	else
-	{
-		m_Zombie[0] += 10 + GameServer()->NumPlayers();
-	}
-}
-
-int CGameController::GetZombieReihenfolge(int wavedrittel) // Was hei�t Riehenfolge auf englisch ...
-{
-	// sehr unsch�n, man m�sste die Zombies neu sortieren was ein haufen arbeit ist
-	if (!wavedrittel)
-		return 0;
-	else if (wavedrittel == 1)
-		return 2;
-	else if (wavedrittel == 2)
-		return 3;
-	else if (wavedrittel == 3)
-		return 4;
-	else if (wavedrittel == 4)
-		return 6;
-	else if (wavedrittel == 5)
-		return 5;
-	else if (wavedrittel == 6)
-		return 7;
-	else if (wavedrittel == 7)
-		return 8;
-	else if (wavedrittel == 8)
-		return 9;
-	else if (wavedrittel == 9)
-		return 10;
-	else if (wavedrittel == 10)
-		return 11;
-	else if (wavedrittel == 11)
-		return 1;
-	else // shouldnt be needed
-		return 0;
-}
-
-void CGameController::CheckZomb()
-{
-	for (int j = 0; j < (int)(sizeof(m_Zombie) / sizeof(m_Zombie[0])); j++)
-	{
-		if (!m_Zombie[j])
-			continue;
-
-		for (int i = ZOMBIE_START; i < 64; i++) //...
-		{
-			if (m_Zombie[j] <= 0)
-				break;
-
-			CPlayer *pP = GameServer()->m_apPlayers[i];
-			if (!pP)
-				continue;
-
-			if (!pP->m_BotSleep)
-				continue;
-
-			GameServer()->WakeBotUp(i);
-			m_Zombie[j]--;
-		}
-	}
 }

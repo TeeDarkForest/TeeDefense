@@ -878,7 +878,6 @@ void CCharacter::Die(int Killer, int Weapon)
     // we got to wait 0.5 secs before respawning
     m_pPlayer->m_RespawnTick = Server()->Tick() + Server()->TickSpeed() / 2;
     int ModeSpecial = GameServer()->m_pController->OnCharacterDeath(this, GameServer()->m_apPlayers[Killer], Weapon);
-    GameServer()->m_pBotEngine->OnCharacterDeath(m_pPlayer->GetCID(), Killer, Weapon);
 
     char aBuf[256];
     if (Killer >= 0)
@@ -918,8 +917,6 @@ void CCharacter::Die(int Killer, int Weapon)
 #endif
 
     m_InVehicle = false;
-    if (GetPlayer()->IsBot())
-        GameServer()->OnZombieKill(GetCID());
 }
 
 bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
@@ -1027,46 +1024,6 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 void CCharacter::Snap(int SnappingClient)
 {
     int Id = m_pPlayer->GetCID();
-
-    // I dont think there is someone still using Vanilla Client...
-
-    /*if(!GetPlayer()->IsBot())
-    if(SnappingClient <= ZOMBIE_START && SnappingClient != Id)
-    {
-        dbg_msg("QQ","WW");
-
-        int MaxClient = ZOMBIE_START;
-        int MinRange1;
-        int MaxRange1;
-        int MinRange2;
-        int MaxRange2;
-        int RealID = SnappingClient+1;
-        if(RealID+16>=MaxClient)
-        {
-            MinRange1 = RealID-16;
-            MaxRange1 = MaxClient;
-            MinRange2 = 0;
-            MaxRange2 = 0+(16 - (MaxClient-RealID));
-        }
-        else if(RealID-16<0)
-        {
-            MinRange1 = 0;
-            MaxRange1 = RealID+16;
-            MinRange2 = MaxClient-(32-(MinRange1+MinRange2));
-            MaxRange2 = MaxClient;
-        }
-        else
-        {
-            MinRange1 = RealID-16;
-            MaxRange1 = MinRange2 = RealID;
-            MinRange2 = RealID+16;
-        }
-
-        if(!((Id > MinRange1 && Id < MaxRange1) || (Id > MinRange2 && Id < MaxRange2)))
-            return;
-        else
-            dbg_msg("Character","sawdw");
-    }*/
 
     if (SnappingClient > -1 && !Server()->Translate(Id, SnappingClient))
         return;

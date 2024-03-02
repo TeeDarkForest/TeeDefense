@@ -151,20 +151,8 @@ public:
 
 	virtual void PostReset();
 
-	// Zomb2
-	int m_Zombie[13]; // not sure about the amount of zombies
-	int m_ZombLeft;
-
-	void StartWave();
-	int RandZomb();
-	void DoZombMessage(int Which);
-	void DoLifeMessage(int Life);
-	void HandleTop();
-	void SetWaveAlg(int modulus, int wavedrittel);
-	int GetZombieReihenfolge(int wavedrittel);
-	void CheckZomb();
-
 	int m_CKsID;
+	vec2 m_TowerPos;
 };
 
 #endif

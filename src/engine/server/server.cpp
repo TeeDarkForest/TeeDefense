@@ -1438,7 +1438,7 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 	// For legacy 64p, send 24 players per packet.
 	// For extended, send as much players as possible.
 
-	for (int i = 0; i < MAX_CLIENTS; i++)
+	for (int i = 0; i < MAX_PLAYERS; i++)
 	{
 		if (m_aClients[i].m_State != CClient::STATE_EMPTY)
 		{

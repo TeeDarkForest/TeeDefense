@@ -61,7 +61,7 @@ void CGameContext::InitItems()
                100,            // Proba
                -1,             // Speed
                Resource);
-    CreateItem("Golden",       // Name
+    CreateItem("Gold",       // Name
                ITEM_GOLDEN,    // ID
                ITYPE_MATERIAL, // ItemType
                0,              // Damage

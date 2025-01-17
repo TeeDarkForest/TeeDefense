@@ -9,6 +9,7 @@
 
 #include "system.h"
 
+#include "color.h"
 
 #ifdef CONF_PLATFORM_LINUX
 #include <netinet/in.h>
@@ -67,14 +68,17 @@ IOHANDLE io_stderr() { return (IOHANDLE)stderr; }
 
 static DBG_LOGGER loggers[16];
 static int num_loggers = 0;
+static int id_logger_file = 0;
 
 static NETSTATS network_stats = {0};
 static MEMSTATS memory_stats = {0};
 
 static NETSOCKET_INTERNAL invalid_socket = {NETTYPE_INVALID, -1, -1, -1};
 
-void dbg_logger(DBG_LOGGER logger)
+void dbg_logger(DBG_LOGGER logger, bool file)
 {
+	if (file)
+		id_logger_file = num_loggers;
 	loggers[num_loggers++] = logger;
 }
 
@@ -107,27 +111,51 @@ void dbg_break()
 }
 
 void dbg_msg(const char *sys, const char *fmt, ...)
-{
-	va_list args;
-	char str[1024*4];
-	char *msg;
-	int i, len;
+	{
+		va_list args;
+		char str[1024 * 4];
+		char *msg;
+		int i, len;
 
-	str_format(str, sizeof(str), "[%08x][%s]: ", (int)time(0), sys);
-	len = strlen(str);
-	msg = (char *)str + len;
+		time_t nowtime;
+		time(&nowtime);
+		tm *pTime = localtime(&nowtime);
 
-	va_start(args, fmt);
+		str_format(str, sizeof(str), COLOR_RESET COLOR_BLACK_BRIGHT "%d-%d-%d %d:%d:%d" COLOR_WHITE_BRIGHT " | " COLOR_CYAN "[%s]: " COLOR_RESET, 1900 + pTime->tm_year, pTime->tm_mon, pTime->tm_mday, pTime->tm_hour, pTime->tm_min, pTime->tm_sec, sys);
+		len = strlen(str);
+		msg = (char *)str + len;
+
+		va_start(args, fmt);
 #if defined(CONF_FAMILY_WINDOWS)
-	_vsnprintf(msg, sizeof(str)-len, fmt, args);
+		_vsnprintf(msg, sizeof(str) - len, fmt, args);
 #else
-	vsnprintf(msg, sizeof(str)-len, fmt, args);
+	vsnprintf(msg, sizeof(str) - len, fmt, args);
 #endif
-	va_end(args);
+		va_end(args);
 
-	for(i = 0; i < num_loggers; i++)
-		loggers[i](str);
-}
+		for (i = 0; i < num_loggers; i++)
+			if (!id_logger_file)
+				loggers[i](str);
+			else if (id_logger_file != i)
+				loggers[i](str);
+
+		if (id_logger_file)
+		{
+			str_format(str, sizeof(str), "%d-%d-%d %d:%d:%d | [%s]: ", 1900 + pTime->tm_year, pTime->tm_mon, pTime->tm_mday, pTime->tm_hour, pTime->tm_min, pTime->tm_sec, sys);
+			len = strlen(str);
+			msg = (char *)str + len;
+
+			va_start(args, fmt);
+#if defined(CONF_FAMILY_WINDOWS)
+			_vsnprintf(msg, sizeof(str) - len, fmt, args);
+#else
+		vsnprintf(msg, sizeof(str) - len, fmt, args);
+#endif
+			va_end(args);
+
+			loggers[id_logger_file](str);
+		}
+	}
 
 
 static IOHANDLE logfile = 0;
@@ -144,7 +172,7 @@ void dbg_logger_file(const char *filename)
 {
 	logfile = io_open(filename, IOFLAG_WRITE);
 	if(logfile)
-		dbg_logger(logger_file);
+		dbg_logger(logger_file, true);
 	else
 		dbg_msg("dbg/logger", "failed to open '%s' for logging", filename);
 

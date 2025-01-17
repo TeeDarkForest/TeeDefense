@@ -730,6 +730,7 @@ void CGameContext::OnClientConnected(int ClientID)
 	SetClientLanguage(ClientID, "zh-cn");
 	SendChatTarget(ClientID, _("Use command '/language en' to change language English"));
 	SendChatTarget(ClientID, _("上面那消息是给外国人看的，咱中国人不用管！awa"));
+	SendChatTarget(ClientID, _("服务器官方QQ交流群：1007351135"));
 	// send motd
 	CNetMsg_Sv_Motd Msg;
 	Msg.m_pMessage = g_Config.m_SvMotd;
@@ -2245,9 +2246,10 @@ void CGameContext::SendCantMakeItemChat(int To, int *Resource)
 	CPlayer *p = m_apPlayers[To];
 	const char *Lang = p->GetLanguage();
 	Buffre.clear();
-	Server()->Localization()->Format_L(Buffre, Lang, _("You need at least "), NULL);
+	Server()->Localization()->Format_L(Buffre, Lang, _("You need at least"), NULL);
 
 	Buffer.append(Buffre.buffer());
+	Buffer.append(" "); // Add Space
 	for (int i = 0; i < NUM_ITEM; i++)
 	{
 		if (Resource[i] > 0)
@@ -2285,8 +2287,9 @@ void CGameContext::SendMakeItemFailedChat(int To, int *Resource)
 	CPlayer *p = m_apPlayers[To];
 	const char *Lang = p->GetLanguage();
 	Buffre.clear();
-	Server()->Localization()->Format_L(Buffre, Lang, _("You lost "), NULL);
+	Server()->Localization()->Format_L(Buffre, Lang, _("You lost"), NULL);
 	Buffer.append(Buffre.buffer());
+	Buffer.append(" "); // add space
 	for (int i = 0; i < NUM_ITEM; i++)
 	{
 		if (Resource[i] > 0)
@@ -2429,7 +2432,8 @@ void CGameContext::InitVotes(int ClientID)
 	char Lang[16];
 	str_copy(Lang, m_apPlayers[ClientID]->GetLanguage(), sizeof(Lang));
 	AddVote_VL(ClientID, "ccv_null", _("Unlock full stuff please join Server official QQ Group"));
-	AddVote_VL(ClientID, "ccv_null", _("QQ Group ID:895105949"));
+	// AddVote_VL(ClientID, "ccv_null", _("QQ Group ID:895105949")); // 这个被封了
+	AddVote_VL(ClientID, "ccv_null", _("QQ Group ID:1007351135"));
 
 	AddVote_VL(ClientID, "ccv_null", _("==================="));
 	AddVote_VL(ClientID, "skip_warmup", _("Skip Warmup"));

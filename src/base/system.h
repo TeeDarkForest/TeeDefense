@@ -1354,7 +1354,7 @@ void swap_endian(void *data, unsigned elem_size, unsigned num);
 
 
 typedef void (*DBG_LOGGER)(const char *line);
-void dbg_logger(DBG_LOGGER logger);
+void dbg_logger(DBG_LOGGER logger, bool file = false);
 
 void dbg_logger_stdout();
 void dbg_logger_debugger();

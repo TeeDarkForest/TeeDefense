@@ -36,6 +36,7 @@ static void register_thread(void *user)
                 str_format(aBuf, sizeof(aBuf), "INSERT INTO tw_Accounts(Username, Password) VALUES ('%s', '%s');", Data->m_AccData.m_aUsername, Data->m_AccData.m_aPassword);
                 Data->m_pGameServer->DB()->Execute(aBuf);
                 Data->m_pGameServer->SendChatTarget(ClientID, _("Account was created successfully."));
+                Data->m_pGameServer->SendChatTarget(ClientID, _("Now use: /login {str:un} {str:pw}"), "un", Data->m_AccData.m_aUsername, "pw", Data->m_AccData.m_aPassword);
             }
         }
         catch (sql::SQLException &e)

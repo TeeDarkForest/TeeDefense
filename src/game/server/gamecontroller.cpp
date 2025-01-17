@@ -392,22 +392,20 @@ int CGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 		if (rando <= 50)
 		{
 			pKiller->m_Items[ITEM_LOG]++;
-			GameServer()->SendChatTarget(pKiller->GetCID(), _("You got 1 Log from the Zombie"));
+			GameServer()->SendBroadcast_VL(pKiller->GetCID(), _("You got 1 Log from the Zombie"));
 		}
 		else if (rando >= 51 && rando <= 75)
 		{
-
 			pKiller->m_Items[ITEM_COPPER]++;
-			GameServer()->SendChatTarget(pKiller->GetCID(), _("You got 1 Copper from the Zombie"));
+			GameServer()->SendBroadcast_VL(pKiller->GetCID(), _("You got 1 Copper from the Zombie"));
 		}
 		else if (rando <= 99)
 		{
 			pKiller->m_Items[ITEM_GOLDEN]++;
-			GameServer()->SendChatTarget(pKiller->GetCID(), _("You picked up a Gold"));
+			GameServer()->SendBroadcast_VL(pKiller->GetCID(), _("You picked up a Gold"));
 		}
 
 		pKiller->m_Items[ITEM_ZOMBIEHEART]++;
-		GameServer()->SendChatTarget(pKiller->GetCID(), _("You picked up Zombie's Heart"));
 		pKiller->m_Score++;
 		DoZombMessage(m_ZombLeft--);
 		GameServer()->TW()->Account()->SaveAccountData(pKiller->GetCID(), CGameContext::TABLE_ITEM, pKiller->m_AccData);

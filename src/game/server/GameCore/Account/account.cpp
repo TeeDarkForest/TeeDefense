@@ -13,9 +13,7 @@ static void register_thread(void *user)
 {
     FaBao *Data = (FaBao *)user;
     int ClientID = Data->m_ClientID;
-    dbg_msg("test", "reg wait lock");
     lock_wait(Data->m_pGameServer->DB()->SQL_Lock);
-    dbg_msg("test", "reg none lock");
     char aBuf[512];
     str_format(aBuf, sizeof(aBuf), "SELECT * from tw_Accounts WHERE Username = '%s';", Data->m_AccData.m_aUsername);
     sql::ResultSet *Result;

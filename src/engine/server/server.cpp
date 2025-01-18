@@ -2048,6 +2048,8 @@ int CServer::Run()
 		mem_free(m_pCurrentMapData);
 
 	m_pRegister->OnShutdown();
+
+	dbg_msg("Server", "Server shutdown.");
 	return 0;
 }
 

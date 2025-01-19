@@ -49,13 +49,13 @@ static void register_thread(void *user)
 
 bool CAccount::Register(int ClientID, const char *Username, const char *Password)
 {
-    FaBao *data = new FaBao();
-    data->m_pGameServer = GameServer();
-    data->m_ClientID = ClientID;
-    str_copy(data->m_AccData.m_aUsername, Username, sizeof data->m_AccData.m_aUsername);
-    str_copy(data->m_AccData.m_aPassword, Password, sizeof data->m_AccData.m_aPassword);
-    data->m_Type = TYPE::REG;
-    m_pPool->m_pFaBao.add(data);
+    FaBao data;
+    data.m_pGameServer = GameServer();
+    data.m_ClientID = ClientID;
+    str_copy(data.m_AccData.m_aUsername, Username, sizeof data.m_AccData.m_aUsername);
+    str_copy(data.m_AccData.m_aPassword, Password, sizeof data.m_AccData.m_aPassword);
+    data.m_Type = TYPE::REG;
+    m_pPool->m_pFaBao.add(&data);
     return true;
 }
 
@@ -123,14 +123,14 @@ static void login_thread(void *user)
 }
 bool CAccount::Login(int ClientID, const char *Username, const char *Password)
 {
-    FaBao *data = new FaBao();
-    data->m_pGameServer = GameServer();
-    data->m_ClientID = ClientID;
-    str_copy(data->m_AccData.m_aUsername, Username, sizeof data->m_AccData.m_aUsername);
-    str_copy(data->m_AccData.m_aPassword, Password, sizeof data->m_AccData.m_aPassword);
-    data->m_Type = TYPE::LOG;
+    FaBao data;
+    data.m_pGameServer = GameServer();
+    data.m_ClientID = ClientID;
+    str_copy(data.m_AccData.m_aUsername, Username, sizeof data.m_AccData.m_aUsername);
+    str_copy(data.m_AccData.m_aPassword, Password, sizeof data.m_AccData.m_aPassword);
+    data.m_Type = TYPE::LOG;
 
-    m_pPool->m_pFaBao.add(data);
+    m_pPool->m_pFaBao.add(&data);
     return true;
 }
 
@@ -211,19 +211,19 @@ static void sync_accdata_thread(void *user)
 
 void CAccount::SyncAccountData(int ClientID, int Table, CPlayer::SAccData AccData)
 {
-    FaBao *data = new FaBao();
-    data->m_pGameServer = GameServer();
-    data->m_ClientID = ClientID;
-    data->m_Table = Table;
-    data->m_AccData = AccData;
+    FaBao data;
+    data.m_pGameServer = GameServer();
+    data.m_ClientID = ClientID;
+    data.m_Table = Table;
+    data.m_AccData = AccData;
     for (int i = 0; i < NUM_ITYPE; i++)
-        data->m_Holding[i] = GameServer()->GetPlayer(ClientID)->m_Holding[i];
+        data.m_Holding[i] = GameServer()->GetPlayer(ClientID)->m_Holding[i];
     for (int i = 0; i < NUM_ITEM; i++)
-        data->m_Items[i] = GameServer()->GetPlayer(ClientID)->m_Items[i];
-    str_copy(data->m_Language, GameServer()->GetPlayer(ClientID)->GetLanguage(), sizeof(data->m_Language));
-    data->m_Type = TYPE::SYNC;
+        data.m_Items[i] = GameServer()->GetPlayer(ClientID)->m_Items[i];
+    str_copy(data.m_Language, GameServer()->GetPlayer(ClientID)->GetLanguage(), sizeof(data.m_Language));
+    data.m_Type = TYPE::SYNC;
 
-    m_pPool->m_pFaBao.add(data);
+    m_pPool->m_pFaBao.add(&data);
 }
 
 static void save_accdata_thread(void *user)
@@ -304,19 +304,19 @@ static void save_accdata_thread(void *user)
 
 void CAccount::SaveAccountData(int ClientID, int Table, CPlayer::SAccData AccData)
 {
-    FaBao *data = new FaBao();
-    data->m_pGameServer = GameServer();
-    data->m_ClientID = ClientID;
-    data->m_Table = Table;
-    data->m_AccData = AccData;
+    FaBao data;
+    data.m_pGameServer = GameServer();
+    data.m_ClientID = ClientID;
+    data.m_Table = Table;
+    data.m_AccData = AccData;
     for (int i = 0; i < NUM_ITYPE; i++)
-        data->m_Holding[i] = GameServer()->GetPlayer(ClientID)->m_Holding[i];
+        data.m_Holding[i] = GameServer()->GetPlayer(ClientID)->m_Holding[i];
     for (int i = 0; i < NUM_ITEM; i++)
-        data->m_Items[i] = GameServer()->GetPlayer(ClientID)->m_Items[i];
-    str_copy(data->m_Language, GameServer()->GetPlayer(ClientID)->GetLanguage(), sizeof(data->m_Language));
-    data->m_Type = TYPE::SAVE;
+        data.m_Items[i] = GameServer()->GetPlayer(ClientID)->m_Items[i];
+    str_copy(data.m_Language, GameServer()->GetPlayer(ClientID)->GetLanguage(), sizeof(data.m_Language));
+    data.m_Type = TYPE::SAVE;
 
-    m_pPool->m_pFaBao.add(data);
+    m_pPool->m_pFaBao.add(&data);
 }
 
 void CAccount::HandleThread(void *user)
@@ -324,8 +324,10 @@ void CAccount::HandleThread(void *user)
     AccountPool *pPool = (AccountPool *)user;
     while (true)
     {
+        thread_sleep(50);
         if (!pPool->m_pFaBao.size())
             continue;
+
         switch (pPool->m_pFaBao[0]->m_Type)
         {
         case TYPE::REG:
